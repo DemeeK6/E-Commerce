@@ -9,7 +9,7 @@ export function AdminCategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const { t } = useI18n();
 
-  const load = () => api.categories('').then(setCategories).catch(() => setCategories([]));
+  const load = () => { api.categories('').then(setCategories).catch(() => setCategories([])); };
   useEffect(load, []);
 
   const submit = async (event: FormEvent) => {
