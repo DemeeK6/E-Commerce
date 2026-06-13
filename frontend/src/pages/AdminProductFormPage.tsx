@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
@@ -28,6 +28,9 @@ export function AdminProductFormPage() {
   const [form, setForm] = useState<Partial<Product> & { categoryId: number }>(blank);
   const [sizeInput, setSizeInput] = useState('');
   const [colorsText, setColorsText] = useState('Black:#111111');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     api.categories('').then(items => {
@@ -59,6 +62,19 @@ export function AdminProductFormPage() {
 
   const onSizeKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { e.preventDefault(); addSize(sizeInput); }
+  };
+
+  const handleImageFile = async (file: File) => {
+    setUploading(true);
+    setUploadError('');
+    try {
+      const url = await api.uploadImage(file);
+      setForm(f => ({ ...f, images: [{ id: 0, url, altText: f.name ?? '', isPrimary: true, sortOrder: 0 }] }));
+    } catch (err) {
+      setUploadError((err as Error).message);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const submit = async (event: FormEvent) => {
@@ -139,7 +155,34 @@ export function AdminProductFormPage() {
       </div>
 
       <label>{t('colors')}<input value={colorsText} onChange={e => setColorsText(e.target.value)} /></label>
-      <label>{t('primaryImageUrl')}<input value={form.images?.[0]?.url ?? ''} onChange={e => setForm({ ...form, images: [{ id: 0, url: e.target.value, altText: form.name ?? '', isPrimary: true, sortOrder: 0 }] })} /></label>
+
+      <div className="form-field">
+        <span className="field-label">{t('primaryImageUrl')}</span>
+        <div className="image-upload-area" onClick={() => fileInputRef.current?.click()}>
+          {form.images?.[0]?.url ? (
+            <img src={form.images[0].url} alt="preview" className="image-preview" />
+          ) : (
+            <div className="image-placeholder">
+              <span>Click to upload image</span>
+              <span style={{ fontSize: '.8rem', color: 'var(--muted)' }}>JPG, PNG, WebP · max 5 MB</span>
+            </div>
+          )}
+          {uploading && <div className="image-uploading">Uploading…</div>}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          style={{ display: 'none' }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }}
+        />
+        {uploadError && <p className="form-error">{uploadError}</p>}
+        {form.images?.[0]?.url && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setForm(f => ({ ...f, images: [] }))}>
+            Remove image
+          </button>
+        )}
+      </div>
       <label className="check-line"><input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /> {t('active')}</label>
       <button className="btn btn-dark" type="submit">{t('saveProduct')}</button>
     </form>

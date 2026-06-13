@@ -67,6 +67,22 @@ export const api = {
     request<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password }) }),
   resetPassword: (email: string) => request<{ message: string }>('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ email }) }),
   me: () => request<AuthResponse['user']>('/api/auth/me'),
+  uploadImage: async (file: File): Promise<string> => {
+    const token = localStorage.getItem('auth_token');
+    const body = new FormData();
+    body.append('file', file);
+    const response = await fetch('/api/uploads/image', {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message ?? 'Upload failed');
+    }
+    const data = await response.json() as { url: string };
+    return data.url;
+  },
   placeOrder: () =>
     request<Order>('/api/orders', { method: 'POST', body: '{}' }),
   orders: () => request<Order[]>('/api/orders'),
