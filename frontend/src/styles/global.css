@@ -943,3 +943,10 @@ textarea {
 .image-placeholder { display: flex; flex-direction: column; align-items: center; gap: .5rem; color: var(--muted); padding: 2rem; }
 .image-preview { width: 100%; max-height: 260px; object-fit: contain; display: block; }
 .image-uploading { position: absolute; inset: 0; background: rgba(255,255,255,.75); display: flex; align-items: center; justify-content: center; font-weight: 500; }
+
+/* Bulk discount mode */
+.admin-heading-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.discount-input { padding: .45rem .7rem; border: 1px solid var(--line); border-radius: 6px; font-size: .9rem; width: 110px; }
+.select-all-label { display: flex; align-items: center; gap: .4rem; font-size: .875rem; cursor: pointer; white-space: nowrap; }
+.row-checkbox { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+.admin-row-selected { background: #f5f3ee; outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 6px; }

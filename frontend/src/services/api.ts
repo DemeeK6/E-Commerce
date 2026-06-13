@@ -51,6 +51,8 @@ export const api = {
       : request<Product>('/api/products', { method: 'POST', body: JSON.stringify(payload) });
   },
   deleteProduct: (id: number) => request<void>(`/api/products/${id}`, { method: 'DELETE' }),
+  bulkDiscount: (productIds: number[], percentage: number) =>
+    request<{ updated: number }>('/api/products/bulk-discount', { method: 'POST', body: JSON.stringify({ productIds, percentage }) }),
   categories: (gender?: GenderTarget | '') => request<Category[]>(gender === '' ? '/api/categories' : `/api/categories?gender=${gender ?? 0}`),
   saveCategory: (category: Partial<Category>) =>
     category.id

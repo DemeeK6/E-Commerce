@@ -87,6 +87,29 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     }
 
     [Authorize(Roles = "Admin")]
+    [HttpPost("bulk-discount")]
+    public async Task<ActionResult> BulkDiscount(BulkDiscountRequest request)
+    {
+        if (request.Percentage < 0 || request.Percentage > 100)
+            return BadRequest(new { message = "Percentage must be between 0 and 100." });
+
+        var products = await db.Products
+            .Where(p => request.ProductIds.Contains(p.Id))
+            .ToListAsync();
+
+        foreach (var product in products)
+        {
+            product.DiscountPrice = request.Percentage == 0
+                ? null
+                : Math.Round(product.Price * (1 - request.Percentage / 100m), 2);
+            product.UpdatedAtUtc = DateTime.UtcNow;
+        }
+
+        await db.SaveChangesAsync();
+        return Ok(new { updated = products.Count });
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
     public async Task<ActionResult> Delete(int id)
     {
