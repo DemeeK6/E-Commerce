@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { useI18n } from '../context/I18nContext';
@@ -29,7 +29,9 @@ export function ProductsPage() {
           <p className="eyebrow">{t('menCollection')}</p>
           <h1>{t('products')}</h1>
         </div>
-        <div className="catalog-filters">
+      </div>
+      <div className="catalog-layout">
+        <aside className="catalog-sidebar">
           <label className="search-label">
             <Search size={16} />
             <input
@@ -40,19 +42,35 @@ export function ProductsPage() {
               className="search-input"
             />
           </label>
-          <label className="filter">
-            <SlidersHorizontal size={18} />
-            <select value={categoryId} onChange={event => setCategoryId(event.target.value)}>
-              <option value="">{t('allCategories')}</option>
-              {categories.map(category => (
-                <option key={category.id} value={category.id}>{category.name}</option>
-              ))}
-            </select>
-          </label>
+          <p className="sidebar-title">{t('categories')}</p>
+          <ul className="category-list">
+            <li>
+              <button
+                type="button"
+                className={categoryId === '' ? 'category-link active' : 'category-link'}
+                aria-pressed={categoryId === ''}
+                onClick={() => setCategoryId('')}
+              >
+                {t('allCategories')}
+              </button>
+            </li>
+            {categories.map(category => (
+              <li key={category.id}>
+                <button
+                  type="button"
+                  className={categoryId === String(category.id) ? 'category-link active' : 'category-link'}
+                  aria-pressed={categoryId === String(category.id)}
+                  onClick={() => setCategoryId(String(category.id))}
+                >
+                  {category.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
+        <div className="product-grid">
+          {products.map(product => <ProductCard key={product.id} product={product} />)}
         </div>
-      </div>
-      <div className="product-grid">
-        {products.map(product => <ProductCard key={product.id} product={product} />)}
       </div>
     </section>
   );
