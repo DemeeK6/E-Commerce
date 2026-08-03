@@ -1229,3 +1229,23 @@ textarea {
   background: #fff;
   cursor: pointer;
 }
+
+/* ---------- size chart / footer mobile overflow fix ----------
+   Without an explicit minmax(0, ...) track, a CSS grid's single implicit
+   column sizes to the max-content of its widest row (here, the measurement
+   table's min-width: 520px), forcing the whole page to scroll horizontally
+   on narrow viewports instead of letting .size-chart-table-wrap's own
+   overflow-x: auto handle it. */
+.size-chart {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 720px) {
+  .size-chart-figure {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .site-footer div:last-child {
+    flex-wrap: wrap;
+  }
+}
