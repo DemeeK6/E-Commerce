@@ -12,6 +12,7 @@ export function SizeGuideModal({ onClose }: { onClose: () => void }) {
   closeRef.current = onClose;
   const cardRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const downOnBackdrop = useRef(false);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -58,7 +59,11 @@ export function SizeGuideModal({ onClose }: { onClose: () => void }) {
   }, []);
 
   return (
-    <div className="modal-backdrop" onClick={() => closeRef.current()}>
+    <div
+      className="modal-backdrop"
+      onMouseDown={event => { downOnBackdrop.current = event.target === event.currentTarget; }}
+      onClick={event => { if (downOnBackdrop.current && event.target === event.currentTarget) closeRef.current(); }}
+    >
       <div
         className="modal-card"
         role="dialog"

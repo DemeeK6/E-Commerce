@@ -85,10 +85,10 @@ export function SizeChart() {
             <thead>
               <tr>
                 <th>{t('asianSize')}</th>
-                <th>{t('shoulder')} CM</th>
-                <th>{t('bust')} CM</th>
-                <th>{t('sleeve')} CM</th>
-                <th>{t('length')} CM</th>
+                <th>{t('shoulder')} {t('cm')}</th>
+                <th>{t('bust')} {t('cm')}</th>
+                <th>{t('sleeve')} {t('cm')}</th>
+                <th>{t('length')} {t('cm')}</th>
               </tr>
             </thead>
             <tbody>

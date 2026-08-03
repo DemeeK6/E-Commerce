@@ -1036,8 +1036,14 @@ textarea {
 .admin-row-selected { background: #f5f3ee; outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 6px; }
 
 /* ---------- size chart ---------- */
+/* Without an explicit minmax(0, ...) track, a CSS grid's single implicit
+   column sizes to the max-content of its widest row (here, the measurement
+   table's min-width: 520px), forcing the whole page to scroll horizontally
+   on narrow viewports instead of letting .size-chart-table-wrap's own
+   overflow-x: auto handle it. */
 .size-chart {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 26px;
 }
 
@@ -1141,12 +1147,6 @@ textarea {
   color: var(--muted);
 }
 
-@media (max-width: 720px) {
-  .size-chart-figure {
-    grid-template-columns: 1fr;
-  }
-}
-
 .size-page-heading {
   display: grid;
   gap: 10px;
@@ -1230,16 +1230,7 @@ textarea {
   cursor: pointer;
 }
 
-/* ---------- size chart / footer mobile overflow fix ----------
-   Without an explicit minmax(0, ...) track, a CSS grid's single implicit
-   column sizes to the max-content of its widest row (here, the measurement
-   table's min-width: 520px), forcing the whole page to scroll horizontally
-   on narrow viewports instead of letting .size-chart-table-wrap's own
-   overflow-x: auto handle it. */
-.size-chart {
-  grid-template-columns: minmax(0, 1fr);
-}
-
+/* ---------- size chart figure / footer mobile overflow fix ---------- */
 @media (max-width: 720px) {
   .size-chart-figure {
     grid-template-columns: minmax(0, 1fr);
