@@ -1,4 +1,3 @@
-import { Chrome } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -32,7 +31,6 @@ export function LoginPage() {
         <label>{t('password')}<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required /></label>
         {error && <p className="form-error">{error}</p>}
         <button className="btn btn-dark btn-full" type="submit">{t('login')}</button>
-        <button className="btn btn-outline btn-full" type="button"><Chrome size={18} />{t('loginWithGoogle')}</button>
         <div className="auth-meta">
           <Link to="/reset-password">{t('resetPassword')}</Link>
           <Link to="/register">{t('register')}</Link>

@@ -33,7 +33,7 @@ export function StoreLayout() {
       <header className="site-header">
         <Link className="logo" to="/">
           <img src="/Sofio_Logo.jpg" alt="Sofio Logo" style={{ height: '40px', objectFit: 'contain' }} />
-          Sofio Style
+          SOFIO
         </Link>
         <nav className="desktop-nav">{nav}</nav>
         <div className="header-actions">

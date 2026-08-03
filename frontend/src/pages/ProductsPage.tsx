@@ -26,7 +26,6 @@ export function ProductsPage() {
     <section className="section catalog-page">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">{t('menCollection')}</p>
           <h1>{t('products')}</h1>
         </div>
       </div>
