@@ -97,5 +97,14 @@
   "processing": "Processing",
   "shipped": "Shipped",
   "delivered": "Delivered",
-  "cancelled": "Cancelled"
+  "cancelled": "Cancelled",
+  "sizeGuide": "Size guide",
+  "sizeChartIntro": "All measurements are in centimetres and may vary by 1-2 cm.",
+  "measurement": "Measurement",
+  "asianSize": "Asian size",
+  "shoulder": "Shoulder",
+  "bust": "Bust",
+  "sleeve": "Sleeve",
+  "length": "Length",
+  "close": "Close"
 }
