@@ -1146,3 +1146,16 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+.size-page-heading {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 30px;
+  max-width: 640px;
+}
+
+.size-page-heading h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 1;
+}
