@@ -14,7 +14,7 @@ export function AdminProductsPage() {
   const [saving, setSaving] = useState(false);
   const { t, language } = useI18n();
 
-  const load = () => { api.products(0, true).then(setProducts).catch(() => setProducts([])); };
+  const load = () => { api.products(undefined, true).then(setProducts).catch(() => setProducts([])); };
   useEffect(load, []);
 
   const enterDiscountMode = () => {

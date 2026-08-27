@@ -26,8 +26,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  products: (gender: GenderTarget = 0, includeInactive = false, search?: string) => {
-    const params = new URLSearchParams({ gender: String(gender), includeInactive: String(includeInactive) });
+  products: (gender?: GenderTarget, includeInactive = false, search?: string) => {
+    const params = new URLSearchParams({ includeInactive: String(includeInactive) });
+    if (gender !== undefined) params.set('gender', String(gender));
     if (search) params.set('search', search);
     return request<Product[]>(`/api/products?${params}`);
   },
@@ -39,7 +40,6 @@ export const api = {
       price: product.price,
       discountPrice: product.discountPrice || null,
       categoryId: product.categoryId,
-      genderTarget: product.genderTarget ?? 0,
       sizes: product.sizes ?? [],
       colors: (product.colors ?? []).map((color) => ({ colorId: color.colorId })),
       images: (product.images ?? []).map((image) => ({
@@ -71,7 +71,8 @@ export const api = {
       ? request<Category>(`/api/categories/${category.id}`, { method: 'PUT', body: JSON.stringify(category) })
       : request<Category>('/api/categories', { method: 'POST', body: JSON.stringify(category) }),
   deleteCategory: (id: number) => request<void>(`/api/categories/${id}`, { method: 'DELETE' }),
-  colors: () => request<Color[]>('/api/colors'),
+  colors: (includeDisabled = false) =>
+    request<Color[]>(`/api/colors${includeDisabled ? '?includeDisabled=true' : ''}`),
   saveColor: (color: Partial<Color>) =>
     color.id
       ? request<Color>(`/api/colors/${color.id}`, { method: 'PUT', body: JSON.stringify(color) })

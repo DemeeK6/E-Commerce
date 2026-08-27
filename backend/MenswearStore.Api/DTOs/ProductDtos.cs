@@ -25,7 +25,6 @@ public record UpsertProductRequest(
     decimal Price,
     decimal? DiscountPrice,
     int CategoryId,
-    GenderTarget GenderTarget,
     string[] Sizes,
     ProductColorInput[] Colors,
     ProductImageInput[] Images,

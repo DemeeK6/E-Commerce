@@ -4,6 +4,7 @@ using MenswearStore.Api.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace MenswearStore.Api.Controllers;
 
@@ -12,10 +13,10 @@ namespace MenswearStore.Api.Controllers;
 public class ColorsController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<ColorDto>>> Get()
+    public async Task<ActionResult<IReadOnlyList<ColorDto>>> Get(bool includeDisabled = false)
     {
         var query = db.Colors.AsQueryable();
-        if (!User.IsInRole("Admin"))
+        if (!User.IsInRole("Admin") || !includeDisabled)
         {
             query = query.Where(color => color.IsEnabled);
         }
@@ -77,6 +78,8 @@ public class ColorsController(ApplicationDbContext db) : ControllerBase
         return NoContent();
     }
 
+    private static readonly Regex HexCodePattern = new(@"^#[0-9a-fA-F]{6}$", RegexOptions.Compiled);
+
     private async Task<string?> ValidateNameAsync(UpsertColorRequest request, int? id)
     {
         var name = request.NameEn.Trim();
@@ -90,6 +93,11 @@ public class ColorsController(ApplicationDbContext db) : ControllerBase
         if (duplicate)
         {
             return $"A colour named \"{name}\" already exists.";
+        }
+
+        if (!HexCodePattern.IsMatch(request.HexCode.Trim()))
+        {
+            return $"HexCode \"{request.HexCode}\" is not a valid colour (expected format #RRGGBB).";
         }
 
         return null;

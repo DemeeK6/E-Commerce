@@ -13,7 +13,7 @@ export function AdminColorsPage() {
   const [error, setError] = useState('');
   const { t } = useI18n();
 
-  const load = () => { api.colors().then(setColors).catch(() => setColors([])); };
+  const load = () => { api.colors(true).then(setColors).catch(() => setColors([])); };
   useEffect(load, []);
 
   const resetForm = () => {

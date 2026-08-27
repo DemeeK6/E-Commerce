@@ -36,7 +36,15 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
         var category = new Category();
         Apply(category, request);
         db.Categories.Add(category);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { message = $"A category with slug \"{category.Slug}\" already exists." });
+        }
+
         return CreatedAtAction(nameof(Get), new { id = category.Id }, category.ToDto());
     }
 
@@ -51,7 +59,15 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
         }
 
         Apply(category, request);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { message = $"A category with slug \"{category.Slug}\" already exists." });
+        }
+
         return category.ToDto();
     }
 

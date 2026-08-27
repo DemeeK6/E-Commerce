@@ -7,6 +7,7 @@ import type { Category, Color, Product, ProductColor, ProductImage } from '../ty
 import { localizedName } from '../utils/format';
 
 const COMMON_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
+const GENDER_LABEL_KEYS = { 0: 'men', 1: 'women', 2: 'kids' } as const;
 
 const blank = {
   name: '',
@@ -180,7 +181,11 @@ export function AdminProductFormPage() {
       <div className="two-fields">
         <label>{t('category')}
           <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: Number(e.target.value) })}>
-            {categories.map(c => <option key={c.id} value={c.id}>{localizedName(c, language)}</option>)}
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>
+                {localizedName(c, language)} · {t(GENDER_LABEL_KEYS[c.genderTarget])}
+              </option>
+            ))}
           </select>
         </label>
         <label>{t('stock')}<input type="number" value={form.stockQuantity} onChange={e => setForm({ ...form, stockQuantity: Number(e.target.value) })} /></label>

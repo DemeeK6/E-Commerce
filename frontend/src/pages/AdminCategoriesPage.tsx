@@ -9,6 +9,11 @@ const GENDER_OPTIONS: { value: GenderTarget; labelKey: 'men' | 'women' | 'kids' 
   { value: 2, labelKey: 'kids' },
 ];
 
+// Mirrors the seeder's convention (DataSeeder.GetOrSeedCategoriesAsync): Men
+// keeps the bare slug, Women/Kids get a gender prefix so e.g. "Shirts" under
+// each gender doesn't collide on the UNIQUE Categories.Slug index.
+const GENDER_SLUG_PREFIX: Record<GenderTarget, string> = { 0: '', 1: 'women-', 2: 'kids-' };
+
 export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [nameEn, setNameEn] = useState('');
@@ -50,7 +55,7 @@ export function AdminCategoriesPage() {
           nameEn,
           nameKa,
           nameRu,
-          slug: nameEn.toLowerCase().replaceAll(' ', '-'),
+          slug: `${GENDER_SLUG_PREFIX[genderTarget]}${nameEn.toLowerCase().replaceAll(' ', '-')}`,
           genderTarget,
           isEnabled: true,
           displayOrder: categories.filter(c => c.genderTarget === genderTarget).length + 1,

@@ -13,12 +13,17 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(
-        GenderTarget gender = GenderTarget.Men,
+        GenderTarget? gender = null,
         int? categoryId = null,
         bool includeInactive = false,
         string? search = null)
     {
-        var query = ProductQuery().Where(product => product.GenderTarget == gender);
+        var query = ProductQuery();
+
+        if (gender.HasValue)
+        {
+            query = query.Where(product => product.GenderTarget == gender);
+        }
 
         if (!User.IsInRole("Admin") || !includeInactive)
         {
@@ -64,8 +69,14 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             return BadRequest(new { message = colorError });
         }
 
+        var category = await db.Categories.FindAsync(request.CategoryId);
+        if (category is null)
+        {
+            return BadRequest(new { message = $"Unknown CategoryId: {request.CategoryId}." });
+        }
+
         var product = new Product();
-        Apply(product, request);
+        Apply(product, request, category);
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
@@ -83,6 +94,12 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             return BadRequest(new { message = colorError });
         }
 
+        var category = await db.Categories.FindAsync(request.CategoryId);
+        if (category is null)
+        {
+            return BadRequest(new { message = $"Unknown CategoryId: {request.CategoryId}." });
+        }
+
         var product = await ProductQuery().FirstOrDefaultAsync(product => product.Id == id);
         if (product is null)
         {
@@ -92,7 +109,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         db.ProductImages.RemoveRange(product.Images);
         db.ProductSizes.RemoveRange(product.Sizes);
         db.ProductColors.RemoveRange(product.Colors);
-        Apply(product, request);
+        Apply(product, request, category);
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return product.ToDto();
@@ -144,14 +161,14 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .Include(product => product.Sizes)
             .Include(product => product.Colors).ThenInclude(color => color.Color);
 
-    private static void Apply(Product product, UpsertProductRequest request)
+    private static void Apply(Product product, UpsertProductRequest request, Category category)
     {
         product.Name = request.Name.Trim();
         product.Description = request.Description.Trim();
         product.Price = request.Price;
         product.DiscountPrice = request.DiscountPrice;
-        product.CategoryId = request.CategoryId;
-        product.GenderTarget = request.GenderTarget;
+        product.CategoryId = category.Id;
+        product.GenderTarget = category.GenderTarget;
         product.StockQuantity = request.StockQuantity;
         product.IsActive = request.IsActive;
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))

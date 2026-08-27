@@ -44,16 +44,15 @@ export function ProductDetailsPage() {
     return images;
   }, [product, selectedColorId]);
 
-  // Reset the active image whenever the derived set could have changed.
-  useEffect(() => {
-    setActiveImageIndex(0);
-  }, [product, selectedColorId]);
-
   if (!product) {
     return <section className="section">{t('loadingProduct')}</section>;
   }
 
-  const activeImage = galleryImages[activeImageIndex] ?? galleryImages[0];
+  // Clamp on read instead of resetting in a passive effect: an effect runs
+  // after paint, so on the render where the colour changed but the reset
+  // hadn't fired yet, the large image could briefly show a stale frame.
+  const activeIndex = Math.min(activeImageIndex, Math.max(0, galleryImages.length - 1));
+  const activeImage = galleryImages[activeIndex] ?? galleryImages[0];
   const selectedProductColor = product.colors.find(item => item.colorId === selectedColorId);
   const cartColorLabel = selectedProductColor ? localizedName(selectedProductColor, language) : 'Black';
 
@@ -73,7 +72,7 @@ export function ProductDetailsPage() {
               <button
                 type="button"
                 key={image.id}
-                className={`gallery-thumb ${index === activeImageIndex ? 'gallery-thumb-active' : ''}`}
+                className={`gallery-thumb ${index === activeIndex ? 'gallery-thumb-active' : ''}`}
                 onClick={() => setActiveImageIndex(index)}
               >
                 <img src={image.url} alt={image.altText || product.name} />
