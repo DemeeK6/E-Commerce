@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { Product } from '../types';
-import { money } from '../utils/format';
+import { localizedName, money } from '../utils/format';
 
 export function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,7 +12,7 @@ export function AdminProductsPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [percentage, setPercentage] = useState('');
   const [saving, setSaving] = useState(false);
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const load = () => { api.products(0, true).then(setProducts).catch(() => setProducts([])); };
   useEffect(load, []);
@@ -121,7 +121,7 @@ export function AdminProductsPage() {
             <div>
               <strong>{product.name}</strong>
               <span>
-                {product.category?.name} ·{' '}
+                {product.category ? localizedName(product.category, language) : ''} ·{' '}
                 {product.discountPrice != null ? (
                   <><s style={{ color: 'var(--muted)' }}>{money(product.price)}</s> {money(product.discountPrice)}</>
                 ) : money(product.price)}
