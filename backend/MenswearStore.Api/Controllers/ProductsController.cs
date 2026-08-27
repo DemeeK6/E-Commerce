@@ -169,7 +169,6 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         product.DiscountPrice = request.DiscountPrice;
         product.CategoryId = category.Id;
         product.GenderTarget = category.GenderTarget;
-        product.StockQuantity = request.StockQuantity;
         product.IsActive = request.IsActive;
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))
             .Select(size => new ProductSize { Name = size.Trim() }).ToList();

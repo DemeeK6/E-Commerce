@@ -13,7 +13,6 @@ public record ProductDto(
     IReadOnlyList<string> Sizes,
     IReadOnlyList<ProductColorDto> Colors,
     IReadOnlyList<ProductImageDto> Images,
-    int StockQuantity,
     bool IsActive);
 
 public record ProductImageDto(int Id, string Url, string AltText, bool IsPrimary, int SortOrder, int? ColorId);
@@ -28,7 +27,6 @@ public record UpsertProductRequest(
     string[] Sizes,
     ProductColorInput[] Colors,
     ProductImageInput[] Images,
-    int StockQuantity,
     bool IsActive);
 
 public record ProductColorInput(int ColorId);

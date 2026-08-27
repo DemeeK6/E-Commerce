@@ -27,7 +27,6 @@ public static class MappingExtensions
                 pc.Color?.HexCode ?? "#111111")).ToArray(),
             product.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.SortOrder)
                 .Select(image => new ProductImageDto(image.Id, image.Url, image.AltText, image.IsPrimary, image.SortOrder, image.ColorId)).ToArray(),
-            product.StockQuantity,
             product.IsActive);
 
     public static CartDto ToDto(this Cart cart)

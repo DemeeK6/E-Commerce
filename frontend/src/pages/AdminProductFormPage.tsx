@@ -19,7 +19,6 @@ const blank = {
   sizes: ['S', 'M', 'L', 'XL'],
   colors: [] as ProductColor[],
   images: [] as ProductImage[],
-  stockQuantity: 0,
   isActive: true,
 };
 
@@ -178,18 +177,15 @@ export function AdminProductFormPage() {
         <label>{t('discountPrice')}<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
       </div>
 
-      <div className="two-fields">
-        <label>{t('category')}
-          <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: Number(e.target.value) })}>
-            {categories.map(c => (
-              <option key={c.id} value={c.id}>
-                {localizedName(c, language)} · {t(GENDER_LABEL_KEYS[c.genderTarget])}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>{t('stock')}<input type="number" value={form.stockQuantity} onChange={e => setForm({ ...form, stockQuantity: Number(e.target.value) })} /></label>
-      </div>
+      <label>{t('category')}
+        <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: Number(e.target.value) })}>
+          {categories.map(c => (
+            <option key={c.id} value={c.id}>
+              {localizedName(c, language)} · {t(GENDER_LABEL_KEYS[c.genderTarget])}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="form-field">
         <span className="field-label">{t('sizes')}</span>

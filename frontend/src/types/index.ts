@@ -50,7 +50,6 @@ export interface Product {
   sizes: string[];
   colors: ProductColor[];
   images: ProductImage[];
-  stockQuantity: number;
   isActive: boolean;
 }
 

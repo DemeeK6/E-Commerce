@@ -65,7 +65,6 @@
   "description": "Описание",
   "discountPrice": "Цена со скидкой",
   "category": "Категория",
-  "stock": "Запас",
   "sizes": "Размеры",
   "colors": "Цвета",
   "primaryImageUrl": "URL основного изображения",

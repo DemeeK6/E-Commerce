@@ -65,7 +65,6 @@
   "description": "Description",
   "discountPrice": "Discount price",
   "category": "Category",
-  "stock": "Stock",
   "sizes": "Sizes",
   "colors": "Colors",
   "primaryImageUrl": "Primary image URL",

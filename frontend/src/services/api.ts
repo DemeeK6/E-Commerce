@@ -49,7 +49,6 @@ export const api = {
         sortOrder: image.sortOrder,
         colorId: image.colorId,
       })),
-      stockQuantity: product.stockQuantity ?? 0,
       isActive: product.isActive ?? true,
     };
     return product.id
