@@ -2,11 +2,23 @@ export type GenderTarget = 0 | 1 | 2;
 
 export interface Category {
   id: number;
-  name: string;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
   slug: string;
   genderTarget: GenderTarget;
   isEnabled: boolean;
   displayOrder: number;
+}
+
+export interface Color {
+  id: number;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
+  hexCode: string;
+  displayOrder: number;
+  isEnabled: boolean;
 }
 
 export interface ProductImage {
@@ -15,11 +27,15 @@ export interface ProductImage {
   altText: string;
   isPrimary: boolean;
   sortOrder: number;
+  colorId: number | null;
 }
 
 export interface ProductColor {
   id: number;
-  name: string;
+  colorId: number;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
   hexCode: string;
 }
 

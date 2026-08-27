@@ -103,5 +103,22 @@
   "sleeve": "Sleeve",
   "length": "Length",
   "cm": "cm",
-  "close": "Close"
+  "close": "Close",
+  "men": "Men",
+  "women": "Women",
+  "kids": "Kids",
+  "back": "Back",
+  "nameEn": "English name",
+  "nameKa": "Georgian name",
+  "nameRu": "Russian name",
+  "genderTarget": "Gender target",
+  "colorList": "Color list",
+  "addColor": "Add color",
+  "hexCode": "Hex code",
+  "newColorPlaceholder": "New color",
+  "assignColor": "Assign color",
+  "noColor": "No color",
+  "addImage": "Add image",
+  "removeImage": "Remove image",
+  "newOrders": "New orders"
 }

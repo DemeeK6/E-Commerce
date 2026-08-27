@@ -1,4 +1,4 @@
-import type { AppSetting, AuthResponse, Category, GenderTarget, Order, Product } from '../types';
+import type { AppSetting, AuthResponse, Category, Color, GenderTarget, Order, Product } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -41,8 +41,14 @@ export const api = {
       categoryId: product.categoryId,
       genderTarget: product.genderTarget ?? 0,
       sizes: product.sizes ?? [],
-      colors: product.colors ?? [],
-      images: product.images ?? [],
+      colors: (product.colors ?? []).map((color) => ({ colorId: color.colorId })),
+      images: (product.images ?? []).map((image) => ({
+        url: image.url,
+        altText: image.altText,
+        isPrimary: image.isPrimary,
+        sortOrder: image.sortOrder,
+        colorId: image.colorId,
+      })),
       stockQuantity: product.stockQuantity ?? 0,
       isActive: product.isActive ?? true,
     };
@@ -59,6 +65,12 @@ export const api = {
       ? request<Category>(`/api/categories/${category.id}`, { method: 'PUT', body: JSON.stringify(category) })
       : request<Category>('/api/categories', { method: 'POST', body: JSON.stringify(category) }),
   deleteCategory: (id: number) => request<void>(`/api/categories/${id}`, { method: 'DELETE' }),
+  colors: () => request<Color[]>('/api/colors'),
+  saveColor: (color: Partial<Color>) =>
+    color.id
+      ? request<Color>(`/api/colors/${color.id}`, { method: 'PUT', body: JSON.stringify(color) })
+      : request<Color>('/api/colors', { method: 'POST', body: JSON.stringify(color) }),
+  deleteColor: (id: number) => request<void>(`/api/colors/${id}`, { method: 'DELETE' }),
   settings: () => request<AppSetting[]>('/api/settings'),
   updateSetting: (key: string, isEnabled: boolean) =>
     request<AppSetting>(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ isEnabled }) }),
