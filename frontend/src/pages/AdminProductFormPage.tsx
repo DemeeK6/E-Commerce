@@ -37,7 +37,7 @@ export function AdminProductFormPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.categories('').then(items => {
+    api.categories('', true).then(items => {
       setCategories(items);
       setForm(current => ({ ...current, categoryId: current.categoryId || items[0]?.id || 0 }));
     });

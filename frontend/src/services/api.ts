@@ -59,7 +59,13 @@ export const api = {
   deleteProduct: (id: number) => request<void>(`/api/products/${id}`, { method: 'DELETE' }),
   bulkDiscount: (productIds: number[], percentage: number) =>
     request<{ updated: number }>('/api/products/bulk-discount', { method: 'POST', body: JSON.stringify({ productIds, percentage }) }),
-  categories: (gender?: GenderTarget | '') => request<Category[]>(gender === '' ? '/api/categories' : `/api/categories?gender=${gender ?? 0}`),
+  categories: (gender?: GenderTarget | '', includeDisabled = false) => {
+    const params = new URLSearchParams();
+    if (gender !== '') params.set('gender', String(gender ?? 0));
+    if (includeDisabled) params.set('includeDisabled', 'true');
+    const qs = params.toString();
+    return request<Category[]>(`/api/categories${qs ? `?${qs}` : ''}`);
+  },
   saveCategory: (category: Partial<Category>) =>
     category.id
       ? request<Category>(`/api/categories/${category.id}`, { method: 'PUT', body: JSON.stringify(category) })

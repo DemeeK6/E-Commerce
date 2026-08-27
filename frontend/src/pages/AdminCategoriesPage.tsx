@@ -25,7 +25,7 @@ export function AdminCategoriesPage() {
   // silently returns only Men categories. Fetch each gender explicitly and
   // merge so the admin can see and manage every category, not just Men.
   const load = () => {
-    Promise.all(GENDER_OPTIONS.map(option => api.categories(option.value)))
+    Promise.all(GENDER_OPTIONS.map(option => api.categories(option.value, true)))
       .then(results => setCategories(results.flat()))
       .catch(() => setCategories([]));
   };

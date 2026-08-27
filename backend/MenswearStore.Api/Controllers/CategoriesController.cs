@@ -12,7 +12,7 @@ namespace MenswearStore.Api.Controllers;
 public class CategoriesController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = null)
+    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = null, bool includeDisabled = false)
     {
         var query = db.Categories.AsQueryable();
         if (gender.HasValue)
@@ -20,7 +20,7 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
             query = query.Where(category => category.GenderTarget == gender);
         }
 
-        if (!User.IsInRole("Admin"))
+        if (!User.IsInRole("Admin") || !includeDisabled)
         {
             query = query.Where(category => category.IsEnabled);
         }
