@@ -83,8 +83,8 @@ export const api = {
   dashboard: () => request<Record<string, number>>('/api/admin/dashboard'),
   login: (email: string, password: string) =>
     request<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  register: (firstName: string, lastName: string, email: string, password: string) =>
-    request<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password }) }),
+  register: (firstName: string, lastName: string, email: string, password: string, phone: string) =>
+    request<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ firstName, lastName, email, password, phone }) }),
   resetPassword: (email: string) => request<{ message: string }>('/api/auth/reset-password', { method: 'POST', body: JSON.stringify({ email }) }),
   me: () => request<AuthResponse['user']>('/api/auth/me'),
   uploadImage: async (file: File): Promise<string> => {

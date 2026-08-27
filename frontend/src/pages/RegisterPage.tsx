@@ -11,13 +11,14 @@ export function RegisterPage() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setError('');
     try {
-      await register(firstName, lastName, email, password);
+      await register(firstName, lastName, email, password, phone);
       navigate('/profile');
     } catch (exception) {
       setError((exception as Error).message);
@@ -34,6 +35,7 @@ export function RegisterPage() {
           <label>{t('lastName')}<input value={lastName} onChange={(event) => setLastName(event.target.value)} required /></label>
         </div>
         <label>{t('email')}<input value={email} onChange={(event) => setEmail(event.target.value)} type="email" required /></label>
+        <label>{t('phone')}<input value={phone} onChange={(event) => setPhone(event.target.value)} type="tel" autoComplete="tel" required /></label>
         <label>{t('password')}<input value={password} onChange={(event) => setPassword(event.target.value)} type="password" required /></label>
         {error && <p className="form-error">{error}</p>}
         <button className="btn btn-dark btn-full" type="submit">{t('register')}</button>

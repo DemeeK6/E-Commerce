@@ -23,12 +23,20 @@ public class AuthController(
             return BadRequest(new { message = "Email and password are required." });
         }
 
+        if (string.IsNullOrWhiteSpace(request.Phone))
+        {
+            return BadRequest(new { message = "Phone number is required." });
+        }
+
         var user = new ApplicationUser
         {
             UserName = request.Email,
             Email = request.Email,
             FirstName = request.FirstName,
-            LastName = request.LastName
+            LastName = request.LastName,
+            // Stored as typed. Any format is accepted and nothing is verified - a deliberate
+            // choice, so international and local numbers both work.
+            PhoneNumber = request.Phone.Trim()
         };
 
         var result = await userManager.CreateAsync(user, request.Password);
@@ -88,5 +96,5 @@ public class AuthController(
         new(await tokenService.CreateTokenAsync(user), await UserDto(user));
 
     private async Task<UserDto> UserDto(ApplicationUser user) =>
-        new(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, (await userManager.GetRolesAsync(user)).ToArray());
+        new(user.Id, user.Email ?? string.Empty, user.FirstName, user.LastName, user.PhoneNumber ?? string.Empty, (await userManager.GetRolesAsync(user)).ToArray());
 }
