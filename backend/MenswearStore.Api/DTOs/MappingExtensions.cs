@@ -5,7 +5,11 @@ namespace MenswearStore.Api.DTOs;
 public static class MappingExtensions
 {
     public static CategoryDto ToDto(this Category category) =>
-        new(category.Id, category.NameEn, category.Slug, category.GenderTarget, category.IsEnabled, category.DisplayOrder);
+        new(category.Id, category.NameEn, category.NameKa, category.NameRu, category.Slug,
+            category.GenderTarget, category.IsEnabled, category.DisplayOrder);
+
+    public static ColorDto ToDto(this Color color) =>
+        new(color.Id, color.NameEn, color.NameKa, color.NameRu, color.HexCode, color.DisplayOrder, color.IsEnabled);
 
     public static ProductDto ToDto(this Product product) =>
         new(
@@ -17,9 +21,12 @@ public static class MappingExtensions
             product.Category?.ToDto(),
             product.GenderTarget,
             product.Sizes.OrderBy(size => size.Id).Select(size => size.Name).ToArray(),
-            product.Colors.OrderBy(color => color.Id).Select(color => new ProductColorDto(color.Id, color.Color?.NameEn ?? string.Empty, color.Color?.HexCode ?? "#111111")).ToArray(),
+            product.Colors.OrderBy(pc => pc.Id).Select(pc => new ProductColorDto(
+                pc.Id, pc.ColorId,
+                pc.Color?.NameEn ?? "", pc.Color?.NameKa ?? "", pc.Color?.NameRu ?? "",
+                pc.Color?.HexCode ?? "#111111")).ToArray(),
             product.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.SortOrder)
-                .Select(image => new ProductImageDto(image.Id, image.Url, image.AltText, image.IsPrimary, image.SortOrder)).ToArray(),
+                .Select(image => new ProductImageDto(image.Id, image.Url, image.AltText, image.IsPrimary, image.SortOrder, image.ColorId)).ToArray(),
             product.StockQuantity,
             product.IsActive);
 

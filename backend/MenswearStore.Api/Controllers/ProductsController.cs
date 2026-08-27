@@ -58,8 +58,14 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ProductDto>> Create(UpsertProductRequest request)
     {
+        var colorError = await ValidateColorIdsAsync(request);
+        if (colorError is not null)
+        {
+            return BadRequest(new { message = colorError });
+        }
+
         var product = new Product();
-        await ApplyAsync(product, request);
+        Apply(product, request);
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
@@ -71,6 +77,12 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ProductDto>> Update(int id, UpsertProductRequest request)
     {
+        var colorError = await ValidateColorIdsAsync(request);
+        if (colorError is not null)
+        {
+            return BadRequest(new { message = colorError });
+        }
+
         var product = await ProductQuery().FirstOrDefaultAsync(product => product.Id == id);
         if (product is null)
         {
@@ -80,7 +92,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         db.ProductImages.RemoveRange(product.Images);
         db.ProductSizes.RemoveRange(product.Sizes);
         db.ProductColors.RemoveRange(product.Colors);
-        await ApplyAsync(product, request);
+        Apply(product, request);
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return product.ToDto();
@@ -132,7 +144,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .Include(product => product.Sizes)
             .Include(product => product.Colors).ThenInclude(color => color.Color);
 
-    private async Task ApplyAsync(Product product, UpsertProductRequest request)
+    private static void Apply(Product product, UpsertProductRequest request)
     {
         product.Name = request.Name.Trim();
         product.Description = request.Description.Trim();
@@ -145,22 +157,43 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))
             .Select(size => new ProductSize { Name = size.Trim() }).ToList();
 
-        var colors = new List<ProductColor>();
-        foreach (var colorInput in request.Colors)
-        {
-            var name = colorInput.Name.Trim();
-            var color = await db.Colors.FirstOrDefaultAsync(existing => existing.NameEn == name)
-                ?? new Color { NameEn = name, HexCode = colorInput.HexCode };
-            colors.Add(new ProductColor { Color = color });
-        }
-        product.Colors = colors;
+        product.Colors = request.Colors
+            .Select(colorInput => new ProductColor { ColorId = colorInput.ColorId })
+            .ToList();
 
         product.Images = request.Images.Select(image => new ProductImage
         {
             Url = image.Url.Trim(),
             AltText = image.AltText.Trim(),
             IsPrimary = image.IsPrimary,
-            SortOrder = image.SortOrder
+            SortOrder = image.SortOrder,
+            ColorId = image.ColorId
         }).ToList();
+    }
+
+    private async Task<string?> ValidateColorIdsAsync(UpsertProductRequest request)
+    {
+        var requestedIds = request.Colors.Select(color => color.ColorId)
+            .Concat(request.Images.Where(image => image.ColorId.HasValue).Select(image => image.ColorId!.Value))
+            .Distinct()
+            .ToArray();
+
+        if (requestedIds.Length == 0)
+        {
+            return null;
+        }
+
+        var existingIds = await db.Colors
+            .Where(color => requestedIds.Contains(color.Id))
+            .Select(color => color.Id)
+            .ToListAsync();
+
+        var missing = requestedIds.Except(existingIds).ToArray();
+        if (missing.Length > 0)
+        {
+            return $"Unknown ColorId(s): {string.Join(", ", missing)}.";
+        }
+
+        return null;
     }
 }

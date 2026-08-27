@@ -16,8 +16,8 @@ public record ProductDto(
     int StockQuantity,
     bool IsActive);
 
-public record ProductImageDto(int Id, string Url, string AltText, bool IsPrimary, int SortOrder);
-public record ProductColorDto(int Id, string Name, string HexCode);
+public record ProductImageDto(int Id, string Url, string AltText, bool IsPrimary, int SortOrder, int? ColorId);
+public record ProductColorDto(int Id, int ColorId, string NameEn, string NameKa, string NameRu, string HexCode);
 
 public record UpsertProductRequest(
     string Name,
@@ -32,6 +32,6 @@ public record UpsertProductRequest(
     int StockQuantity,
     bool IsActive);
 
-public record ProductColorInput(string Name, string HexCode);
-public record ProductImageInput(string Url, string AltText, bool IsPrimary, int SortOrder);
+public record ProductColorInput(int ColorId);
+public record ProductImageInput(string Url, string AltText, bool IsPrimary, int SortOrder, int? ColorId);
 public record BulkDiscountRequest(int[] ProductIds, decimal Percentage);
