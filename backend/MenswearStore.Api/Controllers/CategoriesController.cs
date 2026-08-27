@@ -12,7 +12,7 @@ namespace MenswearStore.Api.Controllers;
 public class CategoriesController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = GenderTarget.Men)
+    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = null)
     {
         var query = db.Categories.AsQueryable();
         if (gender.HasValue)
