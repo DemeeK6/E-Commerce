@@ -11,7 +11,7 @@ export function HomePage() {
   const { t } = useI18n();
 
   useEffect(() => {
-    api.products(0).then(items => setProducts(items.slice(0, 4))).catch(() => setProducts([]));
+    api.products(0).then(items => setProducts(items.slice(0, 8))).catch(() => setProducts([]));
   }, []);
 
   return (
