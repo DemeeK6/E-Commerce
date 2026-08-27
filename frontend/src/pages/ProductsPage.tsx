@@ -3,24 +3,42 @@ import { useEffect, useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-import type { Category, Product } from '../types';
+import type { Category, GenderTarget, Product } from '../types';
+import { localizedName } from '../utils/format';
+
+const GENDER_LABEL_KEYS = { 0: 'men', 1: 'women', 2: 'kids' } as const;
 
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [gender, setGender] = useState<GenderTarget | null>(0);
   const [categoryId, setCategoryId] = useState('');
   const [search, setSearch] = useState('');
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   useEffect(() => {
-    api.categories(0).then(setCategories).catch(() => setCategories([]));
-  }, []);
+    if (gender === null) {
+      setCategories([]);
+      return;
+    }
+    api.categories(gender).then(setCategories).catch(() => setCategories([]));
+  }, [gender]);
 
   useEffect(() => {
-    api.products(0, false, search || undefined)
+    api.products(gender ?? 0, false, search || undefined)
       .then(items => setProducts(categoryId ? items.filter(item => item.category?.id === Number(categoryId)) : items))
       .catch(() => setProducts([]));
-  }, [categoryId, search]);
+  }, [gender, categoryId, search]);
+
+  const selectGender = (next: GenderTarget) => {
+    setGender(next);
+    setCategoryId('');
+  };
+
+  const backToGenders = () => {
+    setGender(null);
+    setCategoryId('');
+  };
 
   return (
     <section className="section catalog-page">
@@ -41,31 +59,55 @@ export function ProductsPage() {
               className="search-input"
             />
           </label>
-          <p className="sidebar-title">{t('categories')}</p>
-          <ul className="category-list">
-            <li>
-              <button
-                type="button"
-                className={categoryId === '' ? 'category-link active' : 'category-link'}
-                aria-pressed={categoryId === ''}
-                onClick={() => setCategoryId('')}
-              >
-                {t('allCategories')}
+          {gender === null ? (
+            <>
+              <p className="sidebar-title">{t('categories')}</p>
+              <ul className="category-list">
+                {([0, 1, 2] as GenderTarget[]).map(genderOption => (
+                  <li key={genderOption}>
+                    <button
+                      type="button"
+                      className="category-link"
+                      onClick={() => selectGender(genderOption)}
+                    >
+                      {t(GENDER_LABEL_KEYS[genderOption])}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <>
+              <button type="button" className="back-link" onClick={backToGenders}>
+                ← {t('back')}
               </button>
-            </li>
-            {categories.map(category => (
-              <li key={category.id}>
-                <button
-                  type="button"
-                  className={categoryId === String(category.id) ? 'category-link active' : 'category-link'}
-                  aria-pressed={categoryId === String(category.id)}
-                  onClick={() => setCategoryId(String(category.id))}
-                >
-                  {category.name}
-                </button>
-              </li>
-            ))}
-          </ul>
+              <p className="sidebar-title">{t(GENDER_LABEL_KEYS[gender])}</p>
+              <ul className="category-list">
+                <li>
+                  <button
+                    type="button"
+                    className={categoryId === '' ? 'category-link active' : 'category-link'}
+                    aria-pressed={categoryId === ''}
+                    onClick={() => setCategoryId('')}
+                  >
+                    {t('allCategories')}
+                  </button>
+                </li>
+                {categories.map(category => (
+                  <li key={category.id}>
+                    <button
+                      type="button"
+                      className={categoryId === String(category.id) ? 'category-link active' : 'category-link'}
+                      aria-pressed={categoryId === String(category.id)}
+                      onClick={() => setCategoryId(String(category.id))}
+                    >
+                      {localizedName(category, language)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </aside>
         <div className="product-grid">
           {products.map(product => <ProductCard key={product.id} product={product} />)}
