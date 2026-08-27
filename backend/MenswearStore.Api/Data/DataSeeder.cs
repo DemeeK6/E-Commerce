@@ -63,34 +63,25 @@ public class DataSeeder(
 
     private async Task SeedCatalogAsync()
     {
-        if (await db.Categories.AnyAsync())
+        var categoriesBySlug = await GetOrSeedCategoriesAsync();
+        var colorsByName = await GetOrSeedColorsAsync();
+        BackfillColorTranslations(colorsByName.Values);
+        await db.SaveChangesAsync();
+
+        if (await db.Products.AnyAsync())
         {
             return;
         }
 
-        var shirts = new Category { NameEn = "Shirts", NameKa = "პერანგები", NameRu = "Рубашки", Slug = "shirts", GenderTarget = GenderTarget.Men, DisplayOrder = 1 };
-        var jackets = new Category { NameEn = "Jackets", NameKa = "ქურთუკები", NameRu = "Куртки", Slug = "jackets", GenderTarget = GenderTarget.Men, DisplayOrder = 2 };
-        var trousers = new Category { NameEn = "Trousers", NameKa = "შარვლები", NameRu = "Брюки", Slug = "trousers", GenderTarget = GenderTarget.Men, DisplayOrder = 3 };
+        var shirts = categoriesBySlug["shirts"];
+        var jackets = categoriesBySlug["jackets"];
+        var trousers = categoriesBySlug["trousers"];
 
-        var womenShirts = new Category { NameEn = "Shirts", NameKa = "პერანგები", NameRu = "Рубашки", Slug = "women-shirts", GenderTarget = GenderTarget.Women, DisplayOrder = 1 };
-        var womenJackets = new Category { NameEn = "Jackets", NameKa = "ქურთუკები", NameRu = "Куртки", Slug = "women-jackets", GenderTarget = GenderTarget.Women, DisplayOrder = 2 };
-        var womenTrousers = new Category { NameEn = "Trousers", NameKa = "შარვლები", NameRu = "Брюки", Slug = "women-trousers", GenderTarget = GenderTarget.Women, DisplayOrder = 3 };
-
-        var kidsShirts = new Category { NameEn = "Shirts", NameKa = "პერანგები", NameRu = "Рубашки", Slug = "kids-shirts", GenderTarget = GenderTarget.Kids, DisplayOrder = 1 };
-        var kidsJackets = new Category { NameEn = "Jackets", NameKa = "ქურთუკები", NameRu = "Куртки", Slug = "kids-jackets", GenderTarget = GenderTarget.Kids, DisplayOrder = 2 };
-        var kidsTrousers = new Category { NameEn = "Trousers", NameKa = "შარვლები", NameRu = "Брюки", Slug = "kids-trousers", GenderTarget = GenderTarget.Kids, DisplayOrder = 3 };
-
-        db.Categories.AddRange(
-            shirts, jackets, trousers,
-            womenShirts, womenJackets, womenTrousers,
-            kidsShirts, kidsJackets, kidsTrousers);
-
-        var black = new Color { NameEn = "Black", NameKa = "შავი", NameRu = "Чёрный", HexCode = "#111111", DisplayOrder = 1 };
-        var white = new Color { NameEn = "White", NameKa = "თეთრი", NameRu = "Белый", HexCode = "#ffffff", DisplayOrder = 2 };
-        var navy = new Color { NameEn = "Navy", NameKa = "მუქი ლურჯი", NameRu = "Тёмно-синий", HexCode = "#1a2b4c", DisplayOrder = 3 };
-        var beige = new Color { NameEn = "Beige", NameKa = "კრემისფერი", NameRu = "Бежевый", HexCode = "#d9c7a8", DisplayOrder = 4 };
-        var grey = new Color { NameEn = "Grey", NameKa = "ნაცრისფერი", NameRu = "Серый", HexCode = "#8a8a8a", DisplayOrder = 5 };
-        db.Colors.AddRange(black, white, navy, beige, grey);
+        var black = colorsByName["Black"];
+        var white = colorsByName["White"];
+        var navy = colorsByName["Navy"];
+        var beige = colorsByName["Beige"];
+        var grey = colorsByName["Grey"];
 
         db.Products.AddRange(
             Product(
@@ -135,6 +126,119 @@ public class DataSeeder(
                 new[] { beige, grey }));
 
         await db.SaveChangesAsync();
+    }
+
+    private async Task<Dictionary<string, Category>> GetOrSeedCategoriesAsync()
+    {
+        var bySlug = (await db.Categories.ToListAsync()).ToDictionary(category => category.Slug, StringComparer.Ordinal);
+
+        var desired = new (string NameEn, string NameKa, string NameRu, string Slug, GenderTarget GenderTarget, int DisplayOrder)[]
+        {
+            ("Shirts", "პერანგები", "Рубашки", "shirts", GenderTarget.Men, 1),
+            ("Jackets", "ქურთუკები", "Куртки", "jackets", GenderTarget.Men, 2),
+            ("Trousers", "შარვლები", "Брюки", "trousers", GenderTarget.Men, 3),
+
+            ("Shirts", "პერანგები", "Рубашки", "women-shirts", GenderTarget.Women, 1),
+            ("Jackets", "ქურთუკები", "Куртки", "women-jackets", GenderTarget.Women, 2),
+            ("Trousers", "შარვლები", "Брюки", "women-trousers", GenderTarget.Women, 3),
+
+            ("Shirts", "პერანგები", "Рубашки", "kids-shirts", GenderTarget.Kids, 1),
+            ("Jackets", "ქურთუკები", "Куртки", "kids-jackets", GenderTarget.Kids, 2),
+            ("Trousers", "შარვლები", "Брюки", "kids-trousers", GenderTarget.Kids, 3),
+        };
+
+        foreach (var (nameEn, nameKa, nameRu, slug, genderTarget, displayOrder) in desired)
+        {
+            if (bySlug.ContainsKey(slug))
+            {
+                continue;
+            }
+
+            var category = new Category
+            {
+                NameEn = nameEn,
+                NameKa = nameKa,
+                NameRu = nameRu,
+                Slug = slug,
+                GenderTarget = genderTarget,
+                DisplayOrder = displayOrder
+            };
+
+            db.Categories.Add(category);
+            bySlug[slug] = category;
+        }
+
+        return bySlug;
+    }
+
+    private async Task<Dictionary<string, Color>> GetOrSeedColorsAsync()
+    {
+        var byName = (await db.Colors.ToListAsync()).ToDictionary(color => color.NameEn, StringComparer.Ordinal);
+
+        var desired = new (string NameEn, string NameKa, string NameRu, string HexCode, int DisplayOrder)[]
+        {
+            ("Black", "შავი", "Чёрный", "#111111", 1),
+            ("White", "თეთრი", "Белый", "#ffffff", 2),
+            ("Navy", "მუქი ლურჯი", "Тёмно-синий", "#1a2b4c", 3),
+            ("Beige", "კრემისფერი", "Бежевый", "#d9c7a8", 4),
+            ("Grey", "ნაცრისფერი", "Серый", "#8a8a8a", 5),
+        };
+
+        foreach (var (nameEn, nameKa, nameRu, hexCode, displayOrder) in desired)
+        {
+            if (byName.ContainsKey(nameEn))
+            {
+                continue;
+            }
+
+            var color = new Color
+            {
+                NameEn = nameEn,
+                NameKa = nameKa,
+                NameRu = nameRu,
+                HexCode = hexCode,
+                DisplayOrder = displayOrder
+            };
+
+            db.Colors.Add(color);
+            byName[nameEn] = color;
+        }
+
+        return byName;
+    }
+
+    private static readonly Dictionary<string, (string NameKa, string NameRu)> KnownColorTranslations =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["White"] = ("თეთრი", "Белый"),
+            ["Sky"] = ("ცისფერი", "Голубой"),
+            ["Olive"] = ("ზეთისხილისფერი", "Оливковый"),
+            ["Black"] = ("შავი", "Чёрный"),
+            ["Charcoal"] = ("ნახშირისფერი", "Угольный"),
+            ["Navy"] = ("მუქი ლურჯი", "Тёмно-синий"),
+            ["Sand"] = ("ქვიშისფერი", "Песочный"),
+            ["Forest"] = ("მუქი მწვანე", "Тёмно-зелёный"),
+        };
+
+    private static void BackfillColorTranslations(IEnumerable<Color> colors)
+    {
+        foreach (var color in colors)
+        {
+            if (!KnownColorTranslations.TryGetValue(color.NameEn, out var translation))
+            {
+                continue;
+            }
+
+            if (string.IsNullOrEmpty(color.NameKa))
+            {
+                color.NameKa = translation.NameKa;
+            }
+
+            if (string.IsNullOrEmpty(color.NameRu))
+            {
+                color.NameRu = translation.NameRu;
+            }
+        }
     }
 
     private static Product Product(
