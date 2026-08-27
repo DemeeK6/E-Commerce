@@ -28,6 +28,17 @@ export function AdminOrdersPage() {
     }
   };
 
+  // Cash and bank transfers settle after the order is placed, so the shop owner confirms
+  // payment by hand. A card gateway's webhook would drive this same transition.
+  const markPaid = async (id: number) => {
+    try {
+      const updated = await api.updatePaymentStatus(id, 1);
+      setOrders(prev => prev.map(o => o.id === id ? updated : o));
+    } catch {
+      // payment update failed silently
+    }
+  };
+
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
@@ -43,13 +54,33 @@ export function AdminOrdersPage() {
           {orders.map(order => (
             <article className="admin-row admin-order-row" key={order.id}>
               <div className="admin-order-info">
-                <strong>{t('orderId')}{order.id}</strong>
-                <span>{order.userEmail}</span>
+                <strong>
+                  {t('orderId')}{order.id}
+                  <span className={order.isGuest ? 'order-tag order-tag-guest' : 'order-tag'}>
+                    {order.isGuest ? t('guest') : t('customer')}
+                  </span>
+                </strong>
+                <span>{order.customerFirstName} {order.customerLastName}</span>
+                <span>{order.customerPhone}</span>
+                <span>{order.customerEmail || order.userEmail}</span>
+                <span className="admin-order-address">{order.shippingAddress}</span>
                 <span>{new Date(order.createdAtUtc).toLocaleDateString()}</span>
                 <span>{order.items.length} {t('orderItems')}</span>
                 <strong>{money(order.total)}</strong>
               </div>
               <div className="admin-order-status">
+                <span className="order-payment">
+                  {order.paymentMethod === 0 ? t('payCash') : t('payBankTransfer')}
+                  {' · '}
+                  <strong className={order.paymentStatus === 1 ? 'payment-paid' : 'payment-unpaid'}>
+                    {order.paymentStatus === 1 ? t('paid') : t('unpaid')}
+                  </strong>
+                </span>
+                {order.paymentStatus !== 1 && (
+                  <button className="btn btn-outline btn-sm" onClick={() => markPaid(order.id)}>
+                    {t('markPaid')}
+                  </button>
+                )}
                 <span className={`order-status status-${order.status.toLowerCase()}`}>
                   {t(order.status.toLowerCase() as never)}
                 </span>

@@ -120,5 +120,17 @@
   "noColor": "No color",
   "addImage": "Add image",
   "removeImage": "Remove image",
-  "newOrders": "New orders"
+  "newOrders": "New orders",
+  "shippingAddress": "Delivery address",
+  "paymentMethod": "Payment method",
+  "payCash": "Cash on delivery",
+  "payBankTransfer": "Bank transfer",
+  "bankDetailsPlaceholder": "Bank details will be sent to you after the order is placed.",
+  "guestCheckoutNote": "You can order without an account. We only need your delivery details.",
+  "paymentStatus": "Payment",
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "markPaid": "Mark as paid",
+  "guest": "Guest",
+  "customer": "Customer"
 }

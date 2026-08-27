@@ -1,4 +1,4 @@
-import type { AppSetting, AuthResponse, Category, Color, GenderTarget, Order, Product } from '../types';
+import type { AppSetting, AuthResponse, Category, Color, GenderTarget, Order, PaymentStatus, PlaceOrderPayload, Product } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -103,10 +103,12 @@ export const api = {
     const data = await response.json() as { url: string };
     return data.url;
   },
-  placeOrder: () =>
-    request<Order>('/api/orders', { method: 'POST', body: '{}' }),
+  placeOrder: (payload: PlaceOrderPayload) =>
+    request<Order>('/api/orders', { method: 'POST', body: JSON.stringify(payload) }),
   orders: () => request<Order[]>('/api/orders'),
   adminOrders: () => request<Order[]>('/api/admin/orders'),
   updateOrderStatus: (id: number, status: string) =>
     request<Order>(`/api/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  updatePaymentStatus: (id: number, paymentStatus: PaymentStatus, paymentReference?: string) =>
+    request<Order>(`/api/orders/${id}/payment`, { method: 'PUT', body: JSON.stringify({ paymentStatus, paymentReference }) }),
 };

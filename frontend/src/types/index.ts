@@ -97,11 +97,32 @@ export interface OrderItem {
   color: string;
 }
 
+export type PaymentMethod = 0 | 1;   // 0 = Cash, 1 = BankTransfer
+export type PaymentStatus = 0 | 1 | 2 | 3;  // 0 = Pending, 1 = Paid, 2 = Failed, 3 = Refunded
+
 export interface Order {
   id: number;
   userEmail: string;
+  isGuest: boolean;
+  customerFirstName: string;
+  customerLastName: string;
+  customerPhone: string;
+  customerEmail: string;
+  shippingAddress: string;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
   status: OrderStatus;
   total: number;
   createdAtUtc: string;
   items: OrderItem[];
+}
+
+export interface PlaceOrderPayload {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  email: string;
+  paymentMethod: PaymentMethod;
+  items: { productId: number; quantity: number; size: string; color: string }[];
 }
