@@ -17,6 +17,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminProductFormPage } from './pages/AdminProductFormPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
+import { AdminColorsPage } from './pages/AdminColorsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
 
@@ -42,6 +43,7 @@ export function App() {
         <Route path="products/new" element={<AdminProductFormPage />} />
         <Route path="products/:id" element={<AdminProductFormPage />} />
         <Route path="categories" element={<AdminCategoriesPage />} />
+        <Route path="colors" element={<AdminColorsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>

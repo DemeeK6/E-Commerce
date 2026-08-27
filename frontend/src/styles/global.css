@@ -1264,3 +1264,52 @@ textarea {
 .back-link:hover {
   color: var(--ink);
 }
+
+/* ---------- admin colors ---------- */
+.color-input {
+  width: 46px;
+  height: 42px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  flex: none;
+}
+
+.admin-row .swatch {
+  align-items: center;
+}
+
+.admin-row .swatch i {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+}
+
+.admin-row .swatch div {
+  display: grid;
+  gap: 4px;
+}
+
+/* Text-only admin rows (categories, colors) have no leading thumbnail image,
+   unlike the products row this grid was designed for. Without this override,
+   the image-oriented 5-column .admin-row grid (64px … 42px 42px) squeezes
+   their only two children — content and actions — into its first two
+   tracks, cramming all the name/slug/gender text into a 64px-wide column. */
+.admin-row-text {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* `.admin-row div { display: grid; gap: 5px }` is a descendant selector
+   (specificity 0,1,1) that beats `.admin-row-actions`'s own `display: flex`
+   (specificity 0,1,0), stacking the status/edit/delete buttons in a column
+   instead of a row. Re-assert flex with matching specificity. */
+.admin-row .admin-row-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
