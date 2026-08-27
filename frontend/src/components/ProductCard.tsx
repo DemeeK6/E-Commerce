@@ -10,7 +10,7 @@ export function ProductCard({ product }: { product: Product }) {
   const { t, language } = useI18n();
   const image = product.images[0]?.url || 'https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=900&q=80';
   const size = product.sizes[0] || 'M';
-  const color = product.colors[0]?.name || 'Black';
+  const color = product.colors[0] ? localizedName(product.colors[0], language) : 'Black';
 
   return (
     <article className="product-card">

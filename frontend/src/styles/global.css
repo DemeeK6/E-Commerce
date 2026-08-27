@@ -1358,3 +1358,41 @@ textarea {
 .image-color-label { display: grid; gap: 4px; font-size: .75rem; color: var(--muted); font-weight: 500; }
 .image-thumb-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .image-upload-add { min-height: auto; height: 100%; }
+
+/* ---------- product detail gallery ---------- */
+.gallery {
+  aspect-ratio: unset;
+  background: none;
+  display: grid;
+  gap: 12px;
+}
+.gallery-main {
+  aspect-ratio: 4 / 5;
+  background: #e9e4d9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gallery-empty {
+  width: 100%;
+  height: 100%;
+}
+.gallery-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.gallery-thumb {
+  width: 72px;
+  height: 90px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #e9e4d9;
+  flex: none;
+}
+.gallery-thumb-active {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
