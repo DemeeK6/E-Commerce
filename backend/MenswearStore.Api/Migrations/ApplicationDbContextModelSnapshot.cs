@@ -196,7 +196,15 @@ namespace MenswearStore.Api.Migrations
                     b.Property<bool>("IsEnabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameKa")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameRu")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -210,6 +218,39 @@ namespace MenswearStore.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("MenswearStore.Api.Entities.Color", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("HexCode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameKa")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NameRu")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Colors");
                 });
 
             modelBuilder.Entity("MenswearStore.Api.Entities.Order", b =>
@@ -333,18 +374,15 @@ namespace MenswearStore.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("HexCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ColorId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ColorId");
 
                     b.HasIndex("ProductId");
 
@@ -361,6 +399,9 @@ namespace MenswearStore.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ColorId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("INTEGER");
 
@@ -375,6 +416,8 @@ namespace MenswearStore.Api.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ColorId");
 
                     b.HasIndex("ProductId");
 
@@ -600,22 +643,37 @@ namespace MenswearStore.Api.Migrations
 
             modelBuilder.Entity("MenswearStore.Api.Entities.ProductColor", b =>
                 {
+                    b.HasOne("MenswearStore.Api.Entities.Color", "Color")
+                        .WithMany("ProductColors")
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MenswearStore.Api.Entities.Product", "Product")
                         .WithMany("Colors")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Color");
+
                     b.Navigation("Product");
                 });
 
             modelBuilder.Entity("MenswearStore.Api.Entities.ProductImage", b =>
                 {
+                    b.HasOne("MenswearStore.Api.Entities.Color", "Color")
+                        .WithMany("Images")
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("MenswearStore.Api.Entities.Product", "Product")
                         .WithMany("Images")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Color");
 
                     b.Navigation("Product");
                 });
@@ -697,6 +755,13 @@ namespace MenswearStore.Api.Migrations
             modelBuilder.Entity("MenswearStore.Api.Entities.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("MenswearStore.Api.Entities.Color", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("ProductColors");
                 });
 
             modelBuilder.Entity("MenswearStore.Api.Entities.Order", b =>

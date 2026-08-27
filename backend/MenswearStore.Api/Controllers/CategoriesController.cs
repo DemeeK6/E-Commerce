@@ -72,7 +72,7 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
 
     private static void Apply(Category category, UpsertCategoryRequest request)
     {
-        category.Name = request.Name.Trim();
+        category.NameEn = request.Name.Trim();
         category.Slug = request.Slug.Trim().ToLowerInvariant();
         category.GenderTarget = request.GenderTarget;
         category.IsEnabled = request.IsEnabled;

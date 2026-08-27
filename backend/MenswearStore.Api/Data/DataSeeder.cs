@@ -68,10 +68,20 @@ public class DataSeeder(
             return;
         }
 
-        var shirts = new Category { Name = "Shirts", Slug = "shirts", GenderTarget = GenderTarget.Men, DisplayOrder = 1 };
-        var jackets = new Category { Name = "Jackets", Slug = "jackets", GenderTarget = GenderTarget.Men, DisplayOrder = 2 };
-        var trousers = new Category { Name = "Trousers", Slug = "trousers", GenderTarget = GenderTarget.Men, DisplayOrder = 3 };
+        var shirts = new Category { NameEn = "Shirts", Slug = "shirts", GenderTarget = GenderTarget.Men, DisplayOrder = 1 };
+        var jackets = new Category { NameEn = "Jackets", Slug = "jackets", GenderTarget = GenderTarget.Men, DisplayOrder = 2 };
+        var trousers = new Category { NameEn = "Trousers", Slug = "trousers", GenderTarget = GenderTarget.Men, DisplayOrder = 3 };
         db.Categories.AddRange(shirts, jackets, trousers);
+
+        var white = new Color { NameEn = "White", HexCode = "#f6f4ee" };
+        var sky = new Color { NameEn = "Sky", HexCode = "#9fc5df" };
+        var olive = new Color { NameEn = "Olive", HexCode = "#6f7355" };
+        var black = new Color { NameEn = "Black", HexCode = "#111111" };
+        var charcoal = new Color { NameEn = "Charcoal", HexCode = "#363636" };
+        var navy = new Color { NameEn = "Navy", HexCode = "#1f2a44" };
+        var sand = new Color { NameEn = "Sand", HexCode = "#c8b99d" };
+        var forest = new Color { NameEn = "Forest", HexCode = "#314536" };
+        db.Colors.AddRange(white, sky, olive, black, charcoal, navy, sand, forest);
 
         db.Products.AddRange(
             Product(
@@ -83,7 +93,7 @@ public class DataSeeder(
                 42,
                 "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L", "XL" },
-                new[] { ("White", "#f6f4ee"), ("Sky", "#9fc5df") }),
+                new[] { white, sky }),
             Product(
                 "Tailored Overshirt",
                 "Layer-ready overshirt with a relaxed fit and subtle utility pockets.",
@@ -93,7 +103,7 @@ public class DataSeeder(
                 18,
                 "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=80",
                 new[] { "M", "L", "XL" },
-                new[] { ("Olive", "#6f7355"), ("Black", "#111111") }),
+                new[] { olive, black }),
             Product(
                 "Tapered Wool Trousers",
                 "Minimal tapered trousers for workdays, dinners, and easy weekend polish.",
@@ -103,7 +113,7 @@ public class DataSeeder(
                 31,
                 "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L", "XL" },
-                new[] { ("Charcoal", "#363636"), ("Navy", "#1f2a44") }),
+                new[] { charcoal, navy }),
             Product(
                 "Merino Knit Polo",
                 "Soft knit polo with a refined drape and understated ribbed hem.",
@@ -113,7 +123,7 @@ public class DataSeeder(
                 24,
                 "https://images.unsplash.com/photo-1588359348347-9bc6cbbb689e?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L" },
-                new[] { ("Sand", "#c8b99d"), ("Forest", "#314536") }));
+                new[] { sand, forest }));
 
         await db.SaveChangesAsync();
     }
@@ -127,7 +137,7 @@ public class DataSeeder(
         int stock,
         string imageUrl,
         string[] sizes,
-        (string Name, string Hex)[] colors)
+        Color[] colors)
     {
         return new Product
         {
@@ -143,7 +153,7 @@ public class DataSeeder(
                 new() { Url = imageUrl, AltText = name, IsPrimary = true }
             },
             Sizes = sizes.Select(size => new ProductSize { Name = size }).ToList(),
-            Colors = colors.Select(color => new ProductColor { Name = color.Name, HexCode = color.Hex }).ToList()
+            Colors = colors.Select(color => new ProductColor { Color = color }).ToList()
         };
     }
 

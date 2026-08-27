@@ -5,7 +5,7 @@ namespace MenswearStore.Api.DTOs;
 public static class MappingExtensions
 {
     public static CategoryDto ToDto(this Category category) =>
-        new(category.Id, category.Name, category.Slug, category.GenderTarget, category.IsEnabled, category.DisplayOrder);
+        new(category.Id, category.NameEn, category.Slug, category.GenderTarget, category.IsEnabled, category.DisplayOrder);
 
     public static ProductDto ToDto(this Product product) =>
         new(
@@ -17,7 +17,7 @@ public static class MappingExtensions
             product.Category?.ToDto(),
             product.GenderTarget,
             product.Sizes.OrderBy(size => size.Id).Select(size => size.Name).ToArray(),
-            product.Colors.OrderBy(color => color.Id).Select(color => new ProductColorDto(color.Id, color.Name, color.HexCode)).ToArray(),
+            product.Colors.OrderBy(color => color.Id).Select(color => new ProductColorDto(color.Id, color.Color?.NameEn ?? string.Empty, color.Color?.HexCode ?? "#111111")).ToArray(),
             product.Images.OrderByDescending(image => image.IsPrimary).ThenBy(image => image.SortOrder)
                 .Select(image => new ProductImageDto(image.Id, image.Url, image.AltText, image.IsPrimary, image.SortOrder)).ToArray(),
             product.StockQuantity,

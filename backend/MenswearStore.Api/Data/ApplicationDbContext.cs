@@ -12,6 +12,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
     public DbSet<ProductColor> ProductColors => Set<ProductColor>();
+    public DbSet<Color> Colors => Set<Color>();
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
@@ -49,5 +50,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<OrderItem>()
             .Property(item => item.UnitPrice)
             .HasPrecision(10, 2);
+
+        builder.Entity<ProductImage>()
+            .HasOne(image => image.Color)
+            .WithMany(color => color.Images)
+            .HasForeignKey(image => image.ColorId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

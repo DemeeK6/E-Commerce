@@ -59,7 +59,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     public async Task<ActionResult<ProductDto>> Create(UpsertProductRequest request)
     {
         var product = new Product();
-        Apply(product, request);
+        await ApplyAsync(product, request);
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
@@ -80,7 +80,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         db.ProductImages.RemoveRange(product.Images);
         db.ProductSizes.RemoveRange(product.Sizes);
         db.ProductColors.RemoveRange(product.Colors);
-        Apply(product, request);
+        await ApplyAsync(product, request);
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return product.ToDto();
@@ -130,9 +130,9 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .Include(product => product.Category)
             .Include(product => product.Images)
             .Include(product => product.Sizes)
-            .Include(product => product.Colors);
+            .Include(product => product.Colors).ThenInclude(color => color.Color);
 
-    private static void Apply(Product product, UpsertProductRequest request)
+    private async Task ApplyAsync(Product product, UpsertProductRequest request)
     {
         product.Name = request.Name.Trim();
         product.Description = request.Description.Trim();
@@ -144,7 +144,17 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         product.IsActive = request.IsActive;
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))
             .Select(size => new ProductSize { Name = size.Trim() }).ToList();
-        product.Colors = request.Colors.Select(color => new ProductColor { Name = color.Name.Trim(), HexCode = color.HexCode }).ToList();
+
+        var colors = new List<ProductColor>();
+        foreach (var colorInput in request.Colors)
+        {
+            var name = colorInput.Name.Trim();
+            var color = await db.Colors.FirstOrDefaultAsync(existing => existing.NameEn == name)
+                ?? new Color { NameEn = name, HexCode = colorInput.HexCode };
+            colors.Add(new ProductColor { Color = color });
+        }
+        product.Colors = colors;
+
         product.Images = request.Images.Select(image => new ProductImage
         {
             Url = image.Url.Trim(),
