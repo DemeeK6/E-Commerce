@@ -5,7 +5,7 @@ Initial full-stack e-commerce application for a men-focused clothing store, prep
 ## Stack
 
 - Backend: .NET 10, ASP.NET Core Web API, ASP.NET Core Identity, JWT auth
-- Database: SQLite with Entity Framework Core migrations
+- Database: PostgreSQL 17 with Entity Framework Core migrations
 - Frontend: React, TypeScript, React Router, Vite
 - Authorization: Admin and Customer roles
 - UI: responsive fashion storefront, admin dashboard, auth screens, cart, checkout placeholder
@@ -25,12 +25,29 @@ frontend
 - Admin: `admin@menswear.local` / `Admin123!`
 - Customer: `customer@menswear.local` / `Customer123!`
 
+## Run the Database
+
+PostgreSQL runs in Docker. From the repository root:
+
+```powershell
+docker compose up -d
+```
+
+It listens on `localhost:5433`, not the default 5432, to avoid clashing with a
+directly installed PostgreSQL. Data lives in the `menswear-pgdata` volume and
+survives restarts and `docker compose down`.
+
+To wipe the database and let the seeder rebuild it from scratch:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
+
 ## Run Backend
 
 ```powershell
 dotnet restore backend/MenswearStore.Api/MenswearStore.Api.csproj
-dotnet tool restore
-dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj
 dotnet run --project backend/MenswearStore.Api/MenswearStore.Api.csproj
 ```
 
@@ -69,7 +86,7 @@ Vite proxies `/api` to `https://localhost:7060`.
 - JWT authentication against ASP.NET Core Identity
 - Role-based admin protection
 - Admin dashboard, products, product create/edit, categories, feature toggles
-- SQLite entities for users, roles, products, categories, images, cart, orders, settings
+- PostgreSQL entities for users, roles, products, categories, images, cart, orders, settings
 - Georgian, Russian, and English i18n files
 
 ## Feature Toggles
@@ -99,12 +116,12 @@ dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/Me
 2. Publish the backend with `dotnet publish -c Release`.
 3. Run the API behind Nginx as a `systemd` service.
 4. Set production configuration with environment variables:
-   - `ConnectionStrings__DefaultConnection=Data Source=/var/www/menswear/menswear.db`
+   - `ConnectionStrings__DefaultConnection=Host=<db-host>;Port=5432;Database=menswear;Username=<user>;Password=<password>`
    - `Jwt__Key=<long-random-secret>`
    - `Jwt__Issuer=MenswearStore.Api`
    - `Jwt__Audience=MenswearStore.Client`
 5. Use HTTPS through Certbot/Let’s Encrypt.
-6. Keep SQLite backups simple at first: stop the app or use SQLite online backup, then copy the `.db` file to object storage or another server.
+6. Back up with `pg_dump` on a schedule, and copy the dump to object storage or another server.
 
 ## Next Steps
 
