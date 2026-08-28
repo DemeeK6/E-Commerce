@@ -17,7 +17,7 @@ export function AdminLayout() {
       <aside className="admin-sidebar">
         <NavLink className="logo" to="/">
           <img src="/Sofio_Logo.jpg" alt="Sofio Logo" style={{ height: '40px', objectFit: 'contain' }} />
-          Sofio Style
+          SOFIO
         </NavLink>
         <nav>
           <NavLink to="/admin" end><LayoutDashboard size={18} />{t('dashboard')}</NavLink>
