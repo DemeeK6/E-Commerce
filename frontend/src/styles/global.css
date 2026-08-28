@@ -275,6 +275,14 @@ textarea {
   padding: clamp(44px, 7vw, 86px) 0;
 }
 
+/* Every admin page heading gets the same breathing room. The spacing used to
+   live only on `.admin-heading.row`, which needs both classes, so the six pages
+   using a plain `.admin-heading` had their heading flush against the content
+   below it. Only the Products page carries `.row`. */
+.admin-heading {
+  margin-bottom: 28px;
+}
+
 .section-heading,
 .admin-heading.row {
   display: flex;
