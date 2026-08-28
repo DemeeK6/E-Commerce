@@ -134,5 +134,9 @@
   "guest": "Гость",
   "customer": "Покупатель",
   "previousImage": "Предыдущее фото",
-  "nextImage": "Следующее фото"
+  "nextImage": "Следующее фото",
+  "activeProducts": "Активные товары",
+  "pendingOrders": "Заказы в ожидании",
+  "togglesEnabled": "Включённые функции",
+  "carts": "Открытые корзины"
 }

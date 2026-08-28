@@ -1589,3 +1589,21 @@ textarea {
     right: 8px;
   }
 }
+
+/* Dashboard stats that lead somewhere read as cards, not links: no underline,
+   inherited colour, and a hover lift so it is clear they are clickable. */
+.stat-card-link {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.stat-card-link:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.stat-card-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

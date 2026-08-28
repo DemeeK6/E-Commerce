@@ -134,5 +134,9 @@
   "guest": "სტუმარი",
   "customer": "მომხმარებელი",
   "previousImage": "წინა სურათი",
-  "nextImage": "შემდეგი სურათი"
+  "nextImage": "შემდეგი სურათი",
+  "activeProducts": "აქტიური პროდუქტები",
+  "pendingOrders": "მოლოდინში მყოფი შეკვეთები",
+  "togglesEnabled": "ჩართული ფუნქციები",
+  "carts": "ღია კალათები"
 }

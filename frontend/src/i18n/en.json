@@ -134,5 +134,9 @@
   "guest": "Guest",
   "customer": "Customer",
   "previousImage": "Previous image",
-  "nextImage": "Next image"
+  "nextImage": "Next image",
+  "activeProducts": "Active products",
+  "pendingOrders": "Pending orders",
+  "togglesEnabled": "Features enabled",
+  "carts": "Open carts"
 }
