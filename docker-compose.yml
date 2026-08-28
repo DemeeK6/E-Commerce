@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:17
+    container_name: menswear-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: menswear
+      POSTGRES_USER: menswear
+      POSTGRES_PASSWORD: menswear_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - menswear-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U menswear -d menswear"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  menswear-pgdata: {}
