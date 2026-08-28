@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Minus, Plus, Ruler, ShoppingBag } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
@@ -24,25 +24,39 @@ export function ProductDetailsPage() {
     api.product(id).then(item => {
       setProduct(item);
       setSize(item.sizes[0] || 'M');
-      setSelectedColorId(item.colors[0]?.colorId ?? null);
+      // Open on the primary image and select the colour it belongs to, so the
+      // swatch matches the photo the customer first sees.
+      const firstIndex = Math.max(0, item.images.findIndex(image => image.isPrimary));
+      setActiveImageIndex(firstIndex);
+      setSelectedColorId(item.images[firstIndex]?.colorId ?? item.colors[0]?.colorId ?? null);
     });
   }, [id]);
 
-  // The visible image set is derived from the selected colour, not stored:
-  // 1) images tagged with the selected colour, if any exist
-  // 2) otherwise every image with no colour assigned
-  // 3) otherwise every image on the product
-  const galleryImages: ProductImage[] = useMemo(() => {
-    if (!product) return [];
-    const images = product.images;
-    if (selectedColorId != null) {
-      const matching = images.filter(image => image.colorId === selectedColorId);
-      if (matching.length > 0) return matching;
-    }
-    const unassigned = images.filter(image => image.colorId === null);
-    if (unassigned.length > 0) return unassigned;
-    return images;
-  }, [product, selectedColorId]);
+  // The gallery always holds every image on the product rather than only the
+  // selected colour's. Filtering by colour made the arrows useless in the common
+  // case of one photo per colour: the set was always a single image, so there was
+  // never anything to page through. Instead the two stay in sync - picking a
+  // colour jumps to that colour's first photo, and paging onto a photo that
+  // belongs to a colour selects it.
+  const galleryImages: ProductImage[] = product?.images ?? [];
+
+  // Selecting a colour moves the gallery to that colour's first photo. A colour
+  // with no photo of its own leaves the image where it is - it is still selected
+  // for the cart.
+  const selectColor = (colorId: number) => {
+    setSelectedColorId(colorId);
+    const index = galleryImages.findIndex(image => image.colorId === colorId);
+    if (index >= 0) setActiveImageIndex(index);
+  };
+
+  // Paging with the arrows or thumbnails follows the image: landing on a photo
+  // tagged with a colour selects that colour, so the swatch and the picture never
+  // disagree. Untagged photos leave the colour choice alone.
+  const showImage = (index: number) => {
+    setActiveImageIndex(index);
+    const colorId = galleryImages[index]?.colorId;
+    if (colorId != null) setSelectedColorId(colorId);
+  };
 
   if (!product) {
     return <section className="section">{t('loadingProduct')}</section>;
@@ -71,7 +85,7 @@ export function ProductDetailsPage() {
                 type="button"
                 className="gallery-arrow gallery-arrow-prev"
                 aria-label={t('previousImage')}
-                onClick={() => setActiveImageIndex((activeIndex - 1 + galleryImages.length) % galleryImages.length)}
+                onClick={() => showImage((activeIndex - 1 + galleryImages.length) % galleryImages.length)}
               >
                 <ChevronLeft size={22} />
               </button>
@@ -79,7 +93,7 @@ export function ProductDetailsPage() {
                 type="button"
                 className="gallery-arrow gallery-arrow-next"
                 aria-label={t('nextImage')}
-                onClick={() => setActiveImageIndex((activeIndex + 1) % galleryImages.length)}
+                onClick={() => showImage((activeIndex + 1) % galleryImages.length)}
               >
                 <ChevronRight size={22} />
               </button>
@@ -94,7 +108,7 @@ export function ProductDetailsPage() {
                 type="button"
                 key={image.id}
                 className={`gallery-thumb ${index === activeIndex ? 'gallery-thumb-active' : ''}`}
-                onClick={() => setActiveImageIndex(index)}
+                onClick={() => showImage(index)}
               >
                 <img src={image.url} alt={image.altText || product.name} />
               </button>
@@ -121,7 +135,7 @@ export function ProductDetailsPage() {
         {product.colors.length > 0 && (
         <div className="option-group">
           <span>{t('color')}</span>
-          <div>{product.colors.map(item => <button className={selectedColorId === item.colorId ? 'selected swatch' : 'swatch'} key={item.id} onClick={() => setSelectedColorId(item.colorId)}><i style={{ background: item.hexCode }} />{localizedName(item, language)}</button>)}</div>
+          <div>{product.colors.map(item => <button className={selectedColorId === item.colorId ? 'selected swatch' : 'swatch'} key={item.id} onClick={() => selectColor(item.colorId)}><i style={{ background: item.hexCode }} />{localizedName(item, language)}</button>)}</div>
         </div>
         )}
         <div className="quantity-control">
