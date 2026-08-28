@@ -54,10 +54,38 @@ The current database holds almost nothing worth preserving:
 so an empty database rebuilds itself. **Decision: start clean and let the seeder
 run.** The test rows (`Satesto`, `sdasfsdcsc`, `kurtka`) are discarded.
 
-One visible consequence: colours are recreated with the values currently in
-`DataSeeder`, so White becomes `#ffffff` rather than the `#f6f4ee` in the old
-database, and Sky / Olive / Charcoal / Sand / Forest are not recreated. This is
-accepted.
+### The seeder's colour list is stale and is fixed first
+
+Starting clean naively would have downgraded the palette, so the colour list in
+`DataSeeder.GetOrSeedColorsAsync` is corrected before the migration runs.
+
+The evidence: `DataSeeder.KnownColorTranslations` carries hand-written Georgian
+and Russian names for exactly eight colours — White, Sky, Olive, Black,
+Charcoal, Navy, Sand, Forest. That is precisely the set the products are linked
+to. But `GetOrSeedColorsAsync` only creates five: Black, White, Navy, Beige,
+Grey. Someone translated a palette the seeder never builds, so on a fresh
+database five of those eight translation entries are dead code —
+`BackfillColorTranslations` only repairs colours that already exist.
+
+So the seeder is the stale part, not the database. The list becomes the eight
+colours actually in use, with the hex codes currently in the shop:
+
+| Colour   | Hex       | Used by    |
+|----------|-----------|------------|
+| White    | `#f6f4ee` | 2 products |
+| Sky      | `#9fc5df` | 1 product  |
+| Olive    | `#6f7355` | 1 product  |
+| Black    | `#111111` | 2 products |
+| Charcoal | `#363636` | 1 product  |
+| Navy     | `#1f2a44` | 1 product  |
+| Sand     | `#c8b99d` | 1 product  |
+| Forest   | `#314536` | 1 product  |
+
+Beige (`#d9c7a8`) and Grey (`#8a8a8a`) are attached to no products in the current
+shop, but the seeder's own four demo products reference them, so both are kept.
+Final list: ten colours.
+
+The shop therefore looks the same after the migration as before it.
 
 ## Scope
 
@@ -71,6 +99,7 @@ Changed files:
 - `backend/MenswearStore.Api/Program.cs` — one line, `UseSqlite` to `UseNpgsql`
 - `backend/MenswearStore.Api/appsettings.json` — connection string
 - `backend/MenswearStore.Api/appsettings.Development.json` — connection string
+- `backend/MenswearStore.Api/Data/DataSeeder.cs` — correct the stale colour list
 - `README.md` — how to start the database
 
 Deleted and regenerated:
@@ -141,11 +170,13 @@ The same applies to `ColorsController.cs:92`.
 1. `docker compose up -d`; confirm the container reports healthy.
 2. Run the API; confirm `MigrateAsync()` and `SeedAsync()` build the schema on an
    empty database with no errors.
-3. Query PostgreSQL directly and confirm 9 categories, 5 colours, 4 products,
+3. Query PostgreSQL directly and confirm 9 categories, 10 colours, 4 products,
    2 users, 7 settings — and that `Products.Price` has type `numeric`, not text.
-4. Start the frontend, load the shop, log in as admin, and place a test order so
+4. Confirm every colour has a non-empty `NameKa` and `NameRu`, so no colour
+   renders untranslated in the Georgian or Russian storefront.
+5. Start the frontend, load the shop, log in as admin, and place a test order so
    a real write path runs end to end.
-5. Screenshot the working shop.
+6. Screenshot the working shop.
 
 ## Rollback
 
