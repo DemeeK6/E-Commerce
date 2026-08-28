@@ -177,11 +177,16 @@ public class DataSeeder(
 
         var desired = new (string NameEn, string NameKa, string NameRu, string HexCode, int DisplayOrder)[]
         {
-            ("Black", "შავი", "Чёрный", "#111111", 1),
-            ("White", "თეთრი", "Белый", "#ffffff", 2),
-            ("Navy", "მუქი ლურჯი", "Тёмно-синий", "#1a2b4c", 3),
-            ("Beige", "კრემისფერი", "Бежевый", "#d9c7a8", 4),
-            ("Grey", "ნაცრისფერი", "Серый", "#8a8a8a", 5),
+            ("White", "თეთრი", "Белый", "#f6f4ee", 1),
+            ("Sky", "ცისფერი", "Голубой", "#9fc5df", 2),
+            ("Olive", "ზეთისხილისფერი", "Оливковый", "#6f7355", 3),
+            ("Black", "შავი", "Чёрный", "#111111", 4),
+            ("Charcoal", "ნახშირისფერი", "Угольный", "#363636", 5),
+            ("Navy", "მუქი ლურჯი", "Тёмно-синий", "#1f2a44", 6),
+            ("Sand", "ქვიშისფერი", "Песочный", "#c8b99d", 7),
+            ("Forest", "მუქი მწვანე", "Тёмно-зелёный", "#314536", 8),
+            ("Beige", "კრემისფერი", "Бежевый", "#d9c7a8", 9),
+            ("Grey", "ნაცრისფერი", "Серый", "#8a8a8a", 10),
         };
 
         foreach (var (nameEn, nameKa, nameRu, hexCode, displayOrder) in desired)
