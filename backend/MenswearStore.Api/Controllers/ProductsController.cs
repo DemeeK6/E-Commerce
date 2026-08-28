@@ -173,8 +173,17 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))
             .Select(size => new ProductSize { Name = size.Trim() }).ToList();
 
-        product.Colors = request.Colors
-            .Select(colorInput => new ProductColor { ColorId = colorInput.ColorId })
+        // A colour attached to an image is, by definition, a colour this product comes in.
+        // Union the two so the shop owner cannot tag a photo "Black" yet leave Black
+        // unselectable on the storefront - the product form offers them as separate
+        // controls, and keeping them in step by hand is a trap.
+        var colorIds = request.Colors.Select(colorInput => colorInput.ColorId)
+            .Concat(request.Images.Where(image => image.ColorId.HasValue).Select(image => image.ColorId!.Value))
+            .Distinct()
+            .ToArray();
+
+        product.Colors = colorIds
+            .Select(colorId => new ProductColor { ColorId = colorId })
             .ToList();
 
         product.Images = request.Images.Select(image => new ProductImage

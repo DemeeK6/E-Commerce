@@ -132,5 +132,7 @@
   "unpaid": "Unpaid",
   "markPaid": "Mark as paid",
   "guest": "Guest",
-  "customer": "Customer"
+  "customer": "Customer",
+  "previousImage": "Previous image",
+  "nextImage": "Next image"
 }

@@ -1,4 +1,4 @@
-import { Minus, Plus, Ruler, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Minus, Plus, Ruler, ShoppingBag } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -65,6 +65,27 @@ export function ProductDetailsPage() {
           ) : (
             <div className="gallery-empty" />
           )}
+          {galleryImages.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="gallery-arrow gallery-arrow-prev"
+                aria-label={t('previousImage')}
+                onClick={() => setActiveImageIndex((activeIndex - 1 + galleryImages.length) % galleryImages.length)}
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <button
+                type="button"
+                className="gallery-arrow gallery-arrow-next"
+                aria-label={t('nextImage')}
+                onClick={() => setActiveImageIndex((activeIndex + 1) % galleryImages.length)}
+              >
+                <ChevronRight size={22} />
+              </button>
+              <span className="gallery-counter">{activeIndex + 1} / {galleryImages.length}</span>
+            </>
+          )}
         </div>
         {galleryImages.length > 1 && (
           <div className="gallery-thumbs">
@@ -97,10 +118,12 @@ export function ProductDetailsPage() {
             {t('sizeGuide')}
           </button>
         </div>
+        {product.colors.length > 0 && (
         <div className="option-group">
           <span>{t('color')}</span>
           <div>{product.colors.map(item => <button className={selectedColorId === item.colorId ? 'selected swatch' : 'swatch'} key={item.id} onClick={() => setSelectedColorId(item.colorId)}><i style={{ background: item.hexCode }} />{localizedName(item, language)}</button>)}</div>
         </div>
+        )}
         <div className="quantity-control">
           <button onClick={() => setQuantity(Math.max(1, quantity - 1))}><Minus size={16} /></button>
           <span>{quantity}</span>
