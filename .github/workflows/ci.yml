@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Build
+        run: dotnet build backend/MenswearStore.Api/MenswearStore.Api.csproj --configuration Release
+      - name: Check for un-scaffolded model changes
+        run: dotnet tool run dotnet-ef migrations has-pending-model-changes --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj

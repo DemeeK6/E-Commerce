@@ -536,11 +536,16 @@ namespace MenswearStore.Api.Migrations
                 name: "IX_ProductSizes_ProductId",
                 table: "ProductSizes",
                 column: "ProductId");
+
+            migrationBuilder.Sql(
+                "CREATE UNIQUE INDEX \"IX_Colors_NameEn_Lower\" ON \"Colors\" (lower(\"NameEn\"));");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_Colors_NameEn_Lower\";");
+
             migrationBuilder.DropTable(
                 name: "AppSettings");
 

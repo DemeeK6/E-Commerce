@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using MenswearStore.Api.Entities;
 
 namespace MenswearStore.Api.DTOs;
@@ -21,8 +22,8 @@ public record ProductColorDto(int Id, int ColorId, string NameEn, string NameKa,
 public record UpsertProductRequest(
     string Name,
     string Description,
-    decimal Price,
-    decimal? DiscountPrice,
+    [property: Range(0, 99999999.99)] decimal Price,
+    [property: Range(0, 99999999.99)] decimal? DiscountPrice,
     int CategoryId,
     string[] Sizes,
     ProductColorInput[] Colors,

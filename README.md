@@ -48,7 +48,7 @@ docker compose up -d
 
 ```powershell
 dotnet restore backend/MenswearStore.Api/MenswearStore.Api.csproj
-dotnet run --project backend/MenswearStore.Api/MenswearStore.Api.csproj
+dotnet run --project backend/MenswearStore.Api/MenswearStore.Api.csproj --launch-profile https
 ```
 
 The API runs from the launch profile at:
@@ -106,6 +106,7 @@ Admins can edit these from `/admin/settings`.
 ## Add a Migration
 
 ```powershell
+dotnet tool restore
 dotnet tool run dotnet-ef migrations add MigrationName --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj --output-dir Migrations
 dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj
 ```

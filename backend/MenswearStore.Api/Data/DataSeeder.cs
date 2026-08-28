@@ -77,11 +77,14 @@ public class DataSeeder(
         var jackets = categoriesBySlug["jackets"];
         var trousers = categoriesBySlug["trousers"];
 
-        var black = colorsByName["Black"];
         var white = colorsByName["White"];
+        var sky = colorsByName["Sky"];
+        var olive = colorsByName["Olive"];
+        var black = colorsByName["Black"];
+        var charcoal = colorsByName["Charcoal"];
         var navy = colorsByName["Navy"];
-        var beige = colorsByName["Beige"];
-        var grey = colorsByName["Grey"];
+        var sand = colorsByName["Sand"];
+        var forest = colorsByName["Forest"];
 
         db.Products.AddRange(
             Product(
@@ -93,17 +96,17 @@ public class DataSeeder(
                 42,
                 "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L", "XL" },
-                new[] { white, grey }),
+                new[] { white, sky }),
             Product(
                 "Tailored Overshirt",
                 "Layer-ready overshirt with a relaxed fit and subtle utility pockets.",
                 118,
-                null,
+                106.20m,
                 jackets,
                 18,
                 "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?auto=format&fit=crop&w=900&q=80",
                 new[] { "M", "L", "XL" },
-                new[] { grey, black }),
+                new[] { olive, black }),
             Product(
                 "Tapered Wool Trousers",
                 "Minimal tapered trousers for workdays, dinners, and easy weekend polish.",
@@ -113,7 +116,7 @@ public class DataSeeder(
                 31,
                 "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L", "XL" },
-                new[] { navy, black }),
+                new[] { charcoal, navy }),
             Product(
                 "Merino Knit Polo",
                 "Soft knit polo with a refined drape and understated ribbed hem.",
@@ -123,7 +126,7 @@ public class DataSeeder(
                 24,
                 "https://images.unsplash.com/photo-1588359348347-9bc6cbbb689e?auto=format&fit=crop&w=900&q=80",
                 new[] { "S", "M", "L" },
-                new[] { beige, grey }));
+                new[] { sand, forest }));
 
         await db.SaveChangesAsync();
     }
@@ -223,6 +226,8 @@ public class DataSeeder(
             ["Navy"] = ("მუქი ლურჯი", "Тёмно-синий"),
             ["Sand"] = ("ქვიშისფერი", "Песочный"),
             ["Forest"] = ("მუქი მწვანე", "Тёмно-зелёный"),
+            ["Beige"] = ("კრემისფერი", "Бежевый"),
+            ["Grey"] = ("ნაცრისფერი", "Серый"),
         };
 
     private static void BackfillColorTranslations(IEnumerable<Color> colors)
