@@ -1,15 +1,24 @@
 import { Menu, ShoppingBag, UserRound, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
+import { ShopContact } from '../components/ShopContact';
+import { api } from '../services/api';
+import type { AppSetting } from '../types';
 
 export function StoreLayout() {
   const [open, setOpen] = useState(false);
   const { user, isAdmin, logout } = useAuth();
   const { count } = useCart();
   const { language, setLanguage, t } = useI18n();
+  // Loaded once in the layout so the footer shows the same details on every page.
+  const [settings, setSettings] = useState<AppSetting[]>([]);
+
+  useEffect(() => {
+    api.settings().then(setSettings).catch(() => setSettings([]));
+  }, []);
 
   const nav = (
     <>
@@ -68,9 +77,10 @@ export function StoreLayout() {
       </main>
       <footer className="site-footer">
         <div>
-          <strong>Sofio Style</strong>
+          <strong>SOFIO</strong>
           <p>{t('footerTagline')}</p>
         </div>
+        <ShopContact settings={settings} />
         <div>
           <Link to="/products">{t('products')}</Link>
           <Link to="/sizes">{t('sizes')}</Link>

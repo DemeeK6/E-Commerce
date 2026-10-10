@@ -1,5 +1,6 @@
 using MenswearStore.Api.Data;
 using MenswearStore.Api.DTOs;
+using MenswearStore.Api.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,17 @@ public class SettingsController(ApplicationDbContext db) : ControllerBase
             return NotFound();
         }
 
-        setting.IsEnabled = request.IsEnabled;
+        // A text setting carries its content in Value; writing IsEnabled onto it would
+        // silently flip a flag the admin screen never shows for that kind.
+        if (setting.Kind == SettingKind.Text)
+        {
+            setting.Value = request.Value?.Trim() ?? string.Empty;
+        }
+        else
+        {
+            setting.IsEnabled = request.IsEnabled;
+        }
+
         setting.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return setting.ToDto();

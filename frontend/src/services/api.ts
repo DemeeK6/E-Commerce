@@ -84,6 +84,8 @@ export const api = {
   settings: () => request<AppSetting[]>('/api/settings'),
   updateSetting: (key: string, isEnabled: boolean) =>
     request<AppSetting>(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ isEnabled }) }),
+  updateSettingValue: (key: string, value: string) =>
+    request<AppSetting>(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ isEnabled: true, value }) }),
   dashboard: () => request<Record<string, number>>('/api/admin/dashboard'),
   login: (email: string, password: string) =>
     request<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),

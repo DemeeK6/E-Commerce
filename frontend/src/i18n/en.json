@@ -161,5 +161,8 @@
   "transferReferenceHint": "Without it we cannot match your payment to your order.",
   "transferConfirmNote": "Once we receive the payment we will confirm your order and email you.",
   "transferQuestions": "Questions?",
-  "awaitingPayment": "Awaiting payment"
+  "awaitingPayment": "Awaiting payment",
+  "contactUs": "Contact us",
+  "contactDetails": "Contact details",
+  "contactDetailsIntro": "Shown in the website footer. Leave a field empty to hide it."
 }

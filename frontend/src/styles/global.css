@@ -1754,3 +1754,96 @@ textarea {
   background: var(--accent);
   color: #fff;
 }
+
+/* ---------- shop contact (footer) ---------- */
+.shop-contact {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.shop-contact-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.shop-contact-line a {
+  color: #343330;
+  font-weight: 650;
+}
+
+.shop-contact-line a:hover {
+  color: var(--accent);
+}
+
+.shop-contact-apps {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+/* Brand colours so the two messaging apps are recognisable at a glance - the
+   whole point of putting them next to the number. */
+.contact-app {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.contact-app-whatsapp {
+  background: #25d366;
+}
+
+.contact-app-viber {
+  background: #7360f2;
+}
+
+.contact-app:hover {
+  filter: brightness(1.08);
+}
+
+/* ---------- admin contact settings ---------- */
+.admin-subheading {
+  margin: 34px 0 10px;
+  font-size: 1.1rem;
+  font-weight: 850;
+}
+
+.admin-subheading:first-of-type {
+  margin-top: 0;
+}
+
+.contact-settings {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.contact-setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.contact-setting-row label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .contact-setting-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -161,5 +161,8 @@
   "transferReferenceHint": "Без этого мы не сможем связать оплату с вашим заказом.",
   "transferConfirmNote": "После получения оплаты мы подтвердим заказ и отправим вам письмо.",
   "transferQuestions": "Есть вопросы?",
-  "awaitingPayment": "Ожидает оплаты"
+  "awaitingPayment": "Ожидает оплаты",
+  "contactUs": "Свяжитесь с нами",
+  "contactDetails": "Контактные данные",
+  "contactDetailsIntro": "Отображается в нижней части сайта. Пустое поле не показывается."
 }

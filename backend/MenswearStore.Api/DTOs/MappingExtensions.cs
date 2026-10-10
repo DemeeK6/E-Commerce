@@ -55,7 +55,7 @@ public static class MappingExtensions
             account.Currencies, account.IsEnabled, account.DisplayOrder);
 
     public static AppSettingDto ToDto(this AppSetting setting) =>
-        new(setting.Id, setting.Key, setting.Name, setting.IsEnabled, setting.Value);
+        new(setting.Id, setting.Key, setting.Name, setting.IsEnabled, setting.Value, setting.Kind);
 
     public static OrderDto ToDto(this Order order) =>
         new(

@@ -305,15 +305,25 @@ public class DataSeeder(
         // unsure about a payment can reach the shop.
         var textSettings = new (string Key, string Name, string Value)[]
         {
-            ("shop_phone", "Shop phone number", "+995 593 302 093"),
-            ("shop_email", "Shop email address", string.Empty)
+            ("shop_phone", "Phone number", "+995 593 302 093"),
+            ("shop_email", "Email address", string.Empty),
+            ("shop_address", "Street address", string.Empty),
+            ("shop_map_url", "Map link", string.Empty),
+            ("shop_instagram", "Instagram", string.Empty),
+            // Left blank on purpose: both fall back to the phone number, which is the
+            // usual case. Fill one in only when it differs.
+            ("shop_whatsapp", "WhatsApp number (blank = same as phone)", string.Empty),
+            ("shop_viber", "Viber number (blank = same as phone)", string.Empty)
         };
 
         foreach (var (key, name, value) in textSettings)
         {
             if (!await db.AppSettings.AnyAsync(setting => setting.Key == key))
             {
-                db.AppSettings.Add(new AppSetting { Key = key, Name = name, IsEnabled = true, Value = value });
+                db.AppSettings.Add(new AppSetting
+                {
+                    Key = key, Name = name, IsEnabled = true, Value = value, Kind = SettingKind.Text
+                });
             }
         }
 

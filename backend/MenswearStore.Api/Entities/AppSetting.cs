@@ -7,6 +7,8 @@ public class AppSetting
     public string Name { get; set; } = string.Empty;
     public bool IsEnabled { get; set; }
 
+    public SettingKind Kind { get; set; } = SettingKind.Toggle;
+
     /// <summary>
     /// Free-text value for settings that carry content rather than an on/off state
     /// (the shop phone number, for instance). Empty for plain feature toggles.

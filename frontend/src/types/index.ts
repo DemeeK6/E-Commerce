@@ -73,6 +73,7 @@ export interface AppSetting {
   name: string;
   isEnabled: boolean;
   value: string;
+  kind: 0 | 1;   // 0 = feature toggle, 1 = free text
 }
 
 export interface CartLine {
