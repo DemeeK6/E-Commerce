@@ -593,7 +593,10 @@ textarea {
 
 .two-fields {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, ...) rather than 1fr: a bare 1fr track has an automatic minimum of
+     the item's min-content, and an <input> carries an intrinsic width of about
+     twenty characters, so the pair pushed itself wider than its container. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1449,6 +1452,11 @@ textarea {
    auth card; the empty-cart variant is still a div and stays centred. */
 form.checkout-box {
   display: grid;
+  /* The single column must be stated. Left implicit it is an `auto` track, whose
+     automatic minimum is the widest child's min-content - the inputs and the
+     two-column name row - so the fields rendered wider than the panel and spilled
+     past its right border. minmax(0, 1fr) lets them shrink to the padding box. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   width: min(520px, 100%);
   margin: 0 auto;
@@ -1460,9 +1468,22 @@ form.checkout-box {
 form.checkout-box > label,
 form.checkout-box .two-fields > label {
   display: grid;
+  /* Same reason as the form and the name row: an <input> has an intrinsic width of
+     roughly twenty characters (238px here), which an implicit `auto` track honours
+     even inside a 205px label. Capping the track lets the field shrink to fit. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 7px;
   color: #353430;
   font-weight: 760;
+}
+
+/* The fields themselves must be allowed to go below their intrinsic width. Radios
+   are excluded deliberately: they sit in the flex payment rows and a full-width
+   radio would be absurd. */
+form.checkout-box input:not([type="radio"]),
+form.checkout-box textarea {
+  min-width: 0;
+  width: 100%;
 }
 
 form.checkout-box > h1 {
