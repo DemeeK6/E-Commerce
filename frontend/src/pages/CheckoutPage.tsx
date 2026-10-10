@@ -101,7 +101,7 @@ export function CheckoutPage() {
       <form className="checkout-box" onSubmit={submit}>
         <p className="eyebrow">{t('secureCheckout')}</p>
         <h1>{t('checkout')}</h1>
-        <p>{t('totalDue')}: <strong>{money(total)}</strong></p>
+        <p className="checkout-total">{t('totalDue')}: <strong>{money(total)}</strong></p>
 
         {!user && <p className="checkout-guest-note">{t('guestCheckoutNote')}</p>}
 

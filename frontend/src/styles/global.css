@@ -1442,10 +1442,59 @@ textarea {
 }
 
 /* ---------- guest checkout ---------- */
-.checkout-box form,
-.checkout-page form.checkout-box {
+/* `.checkout-box` is centred and padded, which suited the original "total plus a
+   button" panel. It is now a delivery form, and centring left every label at its
+   own horizontal position with the inputs at different widths. A form reads as a
+   single column, so the form variant is left-aligned and width-capped like the
+   auth card; the empty-cart variant is still a div and stays centred. */
+form.checkout-box {
   display: grid;
   gap: 16px;
+  width: min(520px, 100%);
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* Stacks the caption above its field. The payment and bank pickers are reached by
+   neither selector - their labels are inside a fieldset and must stay flex rows. */
+form.checkout-box > label,
+form.checkout-box .two-fields > label {
+  display: grid;
+  gap: 7px;
+  color: #353430;
+  font-weight: 760;
+}
+
+form.checkout-box > h1 {
+  margin: 0;
+}
+
+/* The amount is the one number on the page that must not be missed. */
+.checkout-total {
+  margin: 0;
+  padding-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.checkout-total strong {
+  font-size: 1.5rem;
+  font-weight: 850;
+  color: var(--ink);
+}
+
+form.checkout-box textarea {
+  resize: vertical;
+}
+
+/* Keeps the submit button clear of the fields above it. */
+form.checkout-box .btn-full {
+  margin-top: 6px;
+}
+
+form.checkout-box > a {
+  justify-self: center;
+  color: var(--muted);
+  font-weight: 650;
 }
 
 .checkout-guest-note {
