@@ -78,7 +78,6 @@ export function StoreLayout() {
       <footer className="site-footer">
         <div>
           <strong>SOFIO</strong>
-          <p>{t('footerTagline')}</p>
         </div>
         <ShopContact settings={settings} />
         <div>
