@@ -83,9 +83,20 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
-// Swap this single registration for a real provider implementation when the shop
-// chooses one; every call site already goes through IOrderNotifier.
-builder.Services.AddScoped<IOrderNotifier, LoggingOrderNotifier>();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
+
+// Real SMTP only when an account and password are both present. Without them the
+// application still starts and logs what it would have sent, so a missing secret
+// never takes the shop offline - it just means nobody is emailed.
+var emailOptions = builder.Configuration.GetSection(EmailOptions.SectionName).Get<EmailOptions>() ?? new EmailOptions();
+if (emailOptions.IsConfigured)
+{
+    builder.Services.AddScoped<IOrderNotifier, SmtpOrderNotifier>();
+}
+else
+{
+    builder.Services.AddScoped<IOrderNotifier, LoggingOrderNotifier>();
+}
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<DataSeeder>();
 

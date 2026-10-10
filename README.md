@@ -62,6 +62,52 @@ OpenAPI JSON is available in development at:
 
 The backend also applies migrations and seeds data on startup.
 
+## Email
+
+Two emails are sent over Gmail SMTP:
+
+- when a customer confirms they have sent a bank transfer, the shop owner is told to
+  check the balance
+- when the shop owner marks that order paid, the customer gets a confirmation
+
+Gmail rejects normal account passwords for SMTP, so this needs a 16-character **App
+Password**, which in turn needs 2-Step Verification on the account:
+
+1. Enable 2-Step Verification at <https://myaccount.google.com/security>
+2. Create an App Password at <https://myaccount.google.com/apppasswords>
+
+Put the address in `appsettings.Development.json`:
+
+```json
+"Email": {
+  "Host": "smtp.gmail.com",
+  "Port": 587,
+  "FromAddress": "yourshop@gmail.com",
+  "FromName": "SOFIO",
+  "AdminAddress": ""
+}
+```
+
+`AdminAddress` is where order notifications go; leave it blank to use `FromAddress`.
+
+The password must **not** go in that file - it is committed. Store it locally instead:
+
+```powershell
+cd backend/MenswearStore.Api
+dotnet user-secrets init
+dotnet user-secrets set "Email:AppPassword" "your-16-char-app-password"
+```
+
+In production, supply it as the environment variable `Email__AppPassword`.
+
+Until both `FromAddress` and the password are set, the application starts normally and
+logs what it would have sent instead of sending it. A mail server that is down or
+misconfigured is logged and never fails an order.
+
+Gmail allows roughly 500 messages a day, and mail from a gmail.com address reaches
+customer inboxes less reliably than a dedicated transactional service. Both are fine to
+start with; neither is permanent.
+
 ## Run Frontend
 
 Install Node.js 22 LTS or newer, then:
