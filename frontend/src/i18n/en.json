@@ -170,5 +170,11 @@
   "infoPageIntro": "Sections shown on the public Info page. English is required; Georgian and Russian fall back to it when blank.",
   "textEn": "Text (English)",
   "textKa": "Text (Georgian)",
-  "textRu": "Text (Russian)"
+  "textRu": "Text (Russian)",
+  "iHavePaid": "I have paid",
+  "cancelOrder": "Cancel order",
+  "transferDecideNote": "Tell us once you have sent the transfer, or cancel this order.",
+  "orderCancelled": "Order cancelled.",
+  "customerSaysPaid": "Customer says paid",
+  "awaitingConfirmation": "Not confirmed"
 }

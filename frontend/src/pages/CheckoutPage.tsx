@@ -31,6 +31,8 @@ export function CheckoutPage() {
   // cart is already cleared at this point, so the modal is the customer's only
   // copy of where to send the money.
   const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
+  const [deciding, setDeciding] = useState(false);
+  const [decisionError, setDecisionError] = useState('');
 
   useEffect(() => {
     api.bankAccounts().then(setBankAccounts).catch(() => setBankAccounts([]));
@@ -83,6 +85,30 @@ export function CheckoutPage() {
   // Placing the order clears the cart, so without the placedOrder guard this early
   // return fires first and the customer is shown "your cart is empty" instead of the
   // account to pay into - the one screen they cannot afford to miss.
+  // The order already exists - it had to, so the customer has a number to quote in
+  // the transfer description. These two calls are what decide whether it becomes a
+  // real order the shop owner should chase, or a cancelled one she can ignore.
+  const decide = async (choice: 'confirm' | 'cancel') => {
+    if (!placedOrder) return;
+    setDeciding(true);
+    setDecisionError('');
+    try {
+      if (choice === 'confirm') {
+        await api.confirmTransfer(placedOrder.id, placedOrder.publicToken);
+      } else {
+        await api.cancelOrder(placedOrder.id, placedOrder.publicToken);
+      }
+      setPlacedOrder(null);
+      navigate(choice === 'confirm' && user ? '/orders' : '/');
+    } catch (err) {
+      // Leaving the modal open is deliberate: the customer must not be dropped on a
+      // blank page unsure whether their order stands.
+      setDecisionError((err as Error).message);
+    } finally {
+      setDeciding(false);
+    }
+  };
+
   if (lines.length === 0 && !placedOrder) {
     return (
       <section className="section checkout-page">
@@ -161,7 +187,10 @@ export function CheckoutPage() {
           orderId={placedOrder.id}
           total={placedOrder.total}
           shopPhone={shopPhone}
-          onClose={() => { setPlacedOrder(null); navigate(user ? '/orders' : '/'); }}
+          busy={deciding}
+          error={decisionError}
+          onConfirm={() => decide('confirm')}
+          onCancel={() => decide('cancel')}
         />
       )}
     </section>

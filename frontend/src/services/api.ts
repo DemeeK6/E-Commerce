@@ -116,6 +116,10 @@ export const api = {
   placeOrder: (payload: PlaceOrderPayload) =>
     request<Order>('/api/orders', { method: 'POST', body: JSON.stringify(payload) }),
   orders: () => request<Order[]>('/api/orders'),
+  confirmTransfer: (id: number, publicToken: string) =>
+    request<Order>(`/api/orders/${id}/confirm-transfer`, { method: 'POST', body: JSON.stringify({ publicToken }) }),
+  cancelOrder: (id: number, publicToken: string) =>
+    request<Order>(`/api/orders/${id}/cancel`, { method: 'POST', body: JSON.stringify({ publicToken }) }),
   adminOrders: () => request<Order[]>('/api/admin/orders'),
   updateOrderStatus: (id: number, status: string) =>
     request<Order>(`/api/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),

@@ -1981,3 +1981,21 @@ form.checkout-box > a {
   resize: vertical;
   line-height: 1.6;
 }
+
+/* The two outcomes of the transfer screen. There is no third, so they are given
+   equal prominence rather than one being a quiet dismissal. */
+.transfer-decide-note {
+  margin: 18px 0 10px;
+  font-weight: 800;
+}
+
+.transfer-actions {
+  display: grid;
+  gap: 10px;
+}
+
+/* An order the customer never confirmed is noise, not work: muted, not accented. */
+.order-tag-unconfirmed {
+  background: #ece9df;
+  color: var(--muted);
+}

@@ -379,6 +379,9 @@ namespace MenswearStore.Api.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("CustomerConfirmedPaymentAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("CustomerEmail")
                         .IsRequired()
                         .HasColumnType("text");
@@ -404,6 +407,9 @@ namespace MenswearStore.Api.Migrations
 
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("PublicToken")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ShippingAddress")
                         .IsRequired()

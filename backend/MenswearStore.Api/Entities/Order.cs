@@ -28,6 +28,20 @@ public class Order
     /// </summary>
     public TransferBank? TransferBank { get; set; }
 
+    /// <summary>
+    /// Set when the customer says they have sent the transfer. Distinct from
+    /// PaymentStatus, which only the shop owner sets once she sees the money.
+    /// Null means the customer never came back from the instructions screen.
+    /// </summary>
+    public DateTime? CustomerConfirmedPaymentAtUtc { get; set; }
+
+    /// <summary>
+    /// Capability token handed to whoever placed the order. Confirming or cancelling
+    /// is open to guests - they have no account - so without this, anyone could cancel
+    /// a stranger's order by guessing its id.
+    /// </summary>
+    public Guid PublicToken { get; set; } = Guid.NewGuid();
+
     public decimal Total { get; set; }
     public string Status { get; set; } = "Pending";
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;

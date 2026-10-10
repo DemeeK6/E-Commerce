@@ -78,6 +78,8 @@ public static class MappingExtensions
             order.PaymentMethod,
             order.PaymentStatus,
             order.TransferBank,
+            order.CustomerConfirmedPaymentAtUtc,
+            order.PublicToken,
             order.Status,
             order.Total,
             order.CreatedAtUtc,

@@ -95,14 +95,11 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
 
         var created = await LoadOrderAsync(order.Id);
 
-        // Tell the shop owner a transfer is on its way so she knows to watch the balance.
-        // Cash orders need no such warning - payment happens at the door.
-        if (created!.PaymentMethod == PaymentMethod.BankTransfer)
-        {
-            await notifier.OrderAwaitingPaymentAsync(created);
-        }
-
-        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, created.ToDto());
+        // Deliberately no notification here for a transfer. The order exists only so the
+        // customer has a number to quote in the transfer description; they have not paid
+        // yet. The shop owner is told when they confirm, so she is never sent to check a
+        // balance for an order that was abandoned on the instructions screen.
+        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, created!.ToDto());
     }
 
     [Authorize]
@@ -144,6 +141,51 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         if (order is null) return NotFound();
 
         order.Status = request.Status;
+        await db.SaveChangesAsync();
+        return order.ToDto();
+    }
+
+    /// <summary>
+    /// The customer says they have sent the transfer. Anonymous because guests check out
+    /// without an account; the token proves they are the one who placed this order.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("{id:int}/confirm-transfer")]
+    public async Task<ActionResult<OrderDto>> ConfirmTransfer(int id, OrderTokenRequest request)
+    {
+        var order = await LoadOrderAsync(id);
+        if (order is null || order.PublicToken != request.PublicToken) return NotFound();
+
+        if (order.Status == "Cancelled")
+            return BadRequest(new { message = "This order was cancelled." });
+
+        // Idempotent: a double submit must not send the shop owner a second email.
+        if (order.CustomerConfirmedPaymentAtUtc is null)
+        {
+            order.CustomerConfirmedPaymentAtUtc = DateTime.UtcNow;
+            await db.SaveChangesAsync();
+            await notifier.OrderAwaitingPaymentAsync(order);
+        }
+
+        return order.ToDto();
+    }
+
+    /// <summary>
+    /// The customer backed out at the instructions screen. The order is kept as Cancelled
+    /// rather than deleted, so a payment that arrives anyway still has something to match.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("{id:int}/cancel")]
+    public async Task<ActionResult<OrderDto>> CancelByCustomer(int id, OrderTokenRequest request)
+    {
+        var order = await LoadOrderAsync(id);
+        if (order is null || order.PublicToken != request.PublicToken) return NotFound();
+
+        // Once money has actually arrived, only the shop owner may unwind the order.
+        if (order.PaymentStatus == PaymentStatus.Paid)
+            return BadRequest(new { message = "This order is already paid. Please contact the shop." });
+
+        order.Status = "Cancelled";
         await db.SaveChangesAsync();
         return order.ToDto();
     }

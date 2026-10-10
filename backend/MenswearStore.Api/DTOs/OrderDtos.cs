@@ -24,6 +24,8 @@ public record OrderDto(
     PaymentMethod PaymentMethod,
     PaymentStatus PaymentStatus,
     TransferBank? TransferBank,
+    DateTime? CustomerConfirmedPaymentAtUtc,
+    Guid PublicToken,
     string Status,
     decimal Total,
     DateTime CreatedAtUtc,
@@ -49,3 +51,6 @@ public record CreateOrderRequest(
 public record UpdateOrderStatusRequest([Required] string Status);
 
 public record UpdatePaymentStatusRequest([Required] PaymentStatus PaymentStatus, string? PaymentReference);
+
+/// <summary>Proves the caller is the one who placed the order.</summary>
+public record OrderTokenRequest([Required] Guid PublicToken);

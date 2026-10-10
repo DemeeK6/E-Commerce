@@ -114,6 +114,8 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   transferBank: TransferBank | null;
+  customerConfirmedPaymentAtUtc: string | null;
+  publicToken: string;
   status: OrderStatus;
   total: number;
   createdAtUtc: string;

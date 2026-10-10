@@ -54,6 +54,7 @@ export function AdminOrdersPage() {
           {orders.map(order => (
             <article
               className={order.paymentMethod === 1 && order.paymentStatus !== 1
+                && order.customerConfirmedPaymentAtUtc && order.status !== 'Cancelled'
                 ? 'admin-row admin-order-row order-awaiting'
                 : 'admin-row admin-order-row'}
               key={order.id}
@@ -61,8 +62,12 @@ export function AdminOrdersPage() {
               <div className="admin-order-info">
                 <strong>
                   {t('orderId')}{order.id}
-                  {order.paymentMethod === 1 && order.paymentStatus !== 1 && (
-                    <span className="order-tag order-tag-awaiting">{t('awaitingPayment')}</span>
+                  {/* Three distinct states, so an abandoned order is never mistaken for
+                      one waiting on her to check the balance. */}
+                  {order.paymentMethod === 1 && order.paymentStatus !== 1 && order.status !== 'Cancelled' && (
+                    order.customerConfirmedPaymentAtUtc
+                      ? <span className="order-tag order-tag-awaiting">{t('customerSaysPaid')}</span>
+                      : <span className="order-tag order-tag-unconfirmed">{t('awaitingConfirmation')}</span>
                   )}
                   <span className={order.isGuest ? 'order-tag order-tag-guest' : 'order-tag'}>
                     {order.isGuest ? t('guest') : t('customer')}

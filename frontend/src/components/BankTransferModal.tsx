@@ -16,24 +16,30 @@ export function BankTransferModal({
   orderId,
   total,
   shopPhone,
-  onClose,
+  onConfirm,
+  onCancel,
+  busy,
+  error,
 }: {
   account: BankAccount;
   orderId: number;
   total: number;
   shopPhone: string;
-  onClose: () => void;
+  onConfirm: () => void;
+  onCancel: () => void;
+  busy: boolean;
+  error: string;
 }) {
   const { t } = useI18n();
   const [copied, setCopied] = useState<'iban' | 'reference' | null>(null);
-  const closeRef = useRef(onClose);
-  closeRef.current = onClose;
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeRef.current();
+      // Escape deliberately does nothing. Dismissing without choosing would leave the
+      // order neither confirmed nor cancelled, which is the state this screen exists
+      // to eliminate.
       if (event.key !== 'Tab') return;
       const card = cardRef.current;
       if (!card) return;
@@ -75,16 +81,12 @@ export function BankTransferModal({
   };
 
   const reference = `#${orderId}`;
-  const downOnBackdrop = useRef(false);
 
   return (
-    <div
-      className="modal-backdrop"
-      onMouseDown={event => { downOnBackdrop.current = event.target === event.currentTarget; }}
-      onClick={event => { if (downOnBackdrop.current && event.target === event.currentTarget) closeRef.current(); }}
-    >
+    // No backdrop dismissal, for the same reason Escape does nothing.
+    <div className="modal-backdrop">
       <div className="modal-card transfer-card" role="dialog" aria-modal="true" aria-label={t('payBankTransfer')} ref={cardRef}>
-        <button className="modal-close" ref={closeButtonRef} onClick={() => closeRef.current()} aria-label={t('close')}>
+        <button className="modal-close" ref={closeButtonRef} onClick={onCancel} disabled={busy} aria-label={t('cancelOrder')} title={t('cancelOrder')}>
           <X size={18} />
         </button>
 
@@ -133,7 +135,17 @@ export function BankTransferModal({
         <p className="transfer-confirm-note">{t('transferConfirmNote')}</p>
         {shopPhone && <p className="transfer-contact">{t('transferQuestions')} <a href={`tel:${shopPhone.replace(/\s/g, '')}`}>{shopPhone}</a></p>}
 
-        <button className="btn btn-dark btn-full" onClick={() => closeRef.current()}>{t('close')}</button>
+        {error && <p className="form-error">{error}</p>}
+
+        <p className="transfer-decide-note">{t('transferDecideNote')}</p>
+        <div className="transfer-actions">
+          <button className="btn btn-dark btn-full" onClick={onConfirm} disabled={busy}>
+            {busy ? '...' : t('iHavePaid')}
+          </button>
+          <button className="btn btn-outline btn-full" onClick={onCancel} disabled={busy}>
+            {t('cancelOrder')}
+          </button>
+        </div>
       </div>
     </div>
   );
