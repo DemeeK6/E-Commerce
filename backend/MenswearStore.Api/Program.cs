@@ -36,7 +36,12 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "DataProtectionKeys")));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        // A product pulls Images, Colors and Sizes together. In one query those
+        // collections multiply out into a cartesian product; splitting keeps each
+        // collection to its own query. EF warns on every startup without this.
+        npgsql => npgsql.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
@@ -87,8 +92,10 @@ builder.Services.AddScoped<DataSeeder>();
 var app = builder.Build();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
-app.UseStaticFiles();
 
+// No app.UseStaticFiles() without options here: this project has no wwwroot, so the
+// default call served nothing and logged "The WebRootPath was not found" on every
+// start. The only static content is the uploads directory, mapped explicitly below.
 // UploadsController writes to WebRootPath ?? ContentRootPath + "/uploads". There is no wwwroot
 // in this project, so uploads land under the content root, which UseStaticFiles() does not serve.
 // Serve that directory explicitly so uploaded product images resolve instead of 404ing.
