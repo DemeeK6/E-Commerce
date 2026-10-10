@@ -50,8 +50,12 @@ public static class MappingExtensions
         return new CartDto(cart.Id, items, subtotal, subtotal);
     }
 
+    public static BankAccountDto ToDto(this BankAccount account) =>
+        new(account.Id, account.Bank, account.AccountHolder, account.Iban,
+            account.Currencies, account.IsEnabled, account.DisplayOrder);
+
     public static AppSettingDto ToDto(this AppSetting setting) =>
-        new(setting.Id, setting.Key, setting.Name, setting.IsEnabled);
+        new(setting.Id, setting.Key, setting.Name, setting.IsEnabled, setting.Value);
 
     public static OrderDto ToDto(this Order order) =>
         new(
@@ -67,6 +71,7 @@ public static class MappingExtensions
             order.ShippingAddress,
             order.PaymentMethod,
             order.PaymentStatus,
+            order.TransferBank,
             order.Status,
             order.Total,
             order.CreatedAtUtc,

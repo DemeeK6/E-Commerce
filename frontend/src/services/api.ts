@@ -1,4 +1,4 @@
-import type { AppSetting, AuthResponse, Category, Color, GenderTarget, Order, PaymentStatus, PlaceOrderPayload, Product } from '../types';
+import type { AppSetting, AuthResponse, BankAccount, Category, Color, GenderTarget, Order, PaymentStatus, PlaceOrderPayload, Product } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -77,6 +77,10 @@ export const api = {
       ? request<Color>(`/api/colors/${color.id}`, { method: 'PUT', body: JSON.stringify(color) })
       : request<Color>('/api/colors', { method: 'POST', body: JSON.stringify(color) }),
   deleteColor: (id: number) => request<void>(`/api/colors/${id}`, { method: 'DELETE' }),
+  bankAccounts: (includeDisabled = false) =>
+    request<BankAccount[]>(`/api/bankaccounts${includeDisabled ? '?includeDisabled=true' : ''}`),
+  saveBankAccount: (account: BankAccount) =>
+    request<BankAccount>(`/api/bankaccounts/${account.id}`, { method: 'PUT', body: JSON.stringify(account) }),
   settings: () => request<AppSetting[]>('/api/settings'),
   updateSetting: (key: string, isEnabled: boolean) =>
     request<AppSetting>(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ isEnabled }) }),

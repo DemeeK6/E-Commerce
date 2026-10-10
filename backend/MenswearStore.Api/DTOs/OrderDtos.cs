@@ -23,6 +23,7 @@ public record OrderDto(
     string ShippingAddress,
     PaymentMethod PaymentMethod,
     PaymentStatus PaymentStatus,
+    TransferBank? TransferBank,
     string Status,
     decimal Total,
     DateTime CreatedAtUtc,
@@ -41,6 +42,8 @@ public record CreateOrderRequest(
     [Required] string Address,
     string? Email,
     PaymentMethod PaymentMethod,
+    /// <summary>Required when PaymentMethod is BankTransfer; ignored otherwise.</summary>
+    TransferBank? TransferBank,
     CreateOrderItemRequest[] Items);
 
 public record UpdateOrderStatusRequest([Required] string Status);

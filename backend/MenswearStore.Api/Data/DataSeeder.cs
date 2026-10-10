@@ -301,6 +301,47 @@ public class DataSeeder(
             }
         }
 
+        // Contact details shown on the bank-transfer instructions, so a customer who is
+        // unsure about a payment can reach the shop.
+        var textSettings = new (string Key, string Name, string Value)[]
+        {
+            ("shop_phone", "Shop phone number", "+995 593 302 093"),
+            ("shop_email", "Shop email address", string.Empty)
+        };
+
+        foreach (var (key, name, value) in textSettings)
+        {
+            if (!await db.AppSettings.AnyAsync(setting => setting.Key == key))
+            {
+                db.AppSettings.Add(new AppSetting { Key = key, Name = name, IsEnabled = true, Value = value });
+            }
+        }
+
+        // Placeholder IBANs on purpose: the shop owner replaces them on the Bank accounts
+        // screen. They are deliberately obviously fake so a real transfer cannot be sent
+        // to a wrong-but-plausible account.
+        var bankAccounts = new (TransferBank Bank, string Holder, string Iban, string Currencies, int Order)[]
+        {
+            (TransferBank.Tbc, "REPLACE ME", "GE00TB0000000000000000", "USD, EUR, GEL", 1),
+            (TransferBank.BankOfGeorgia, "REPLACE ME", "GE00BG0000000000000000", "USD, EUR, GEL", 2)
+        };
+
+        foreach (var (bank, holder, iban, currencies, order) in bankAccounts)
+        {
+            if (!await db.BankAccounts.AnyAsync(account => account.Bank == bank))
+            {
+                db.BankAccounts.Add(new BankAccount
+                {
+                    Bank = bank,
+                    AccountHolder = holder,
+                    Iban = iban,
+                    Currencies = currencies,
+                    DisplayOrder = order,
+                    IsEnabled = true
+                });
+            }
+        }
+
         await db.SaveChangesAsync();
     }
 }

@@ -78,6 +78,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod());
 });
 
+// Swap this single registration for a real provider implementation when the shop
+// chooses one; every call site already goes through IOrderNotifier.
+builder.Services.AddScoped<IOrderNotifier, LoggingOrderNotifier>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<DataSeeder>();
 

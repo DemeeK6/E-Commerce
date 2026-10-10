@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MenswearStore.Api.Data;
 using MenswearStore.Api.DTOs;
 using MenswearStore.Api.Entities;
+using MenswearStore.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace MenswearStore.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrdersController(ApplicationDbContext db) : ControllerBase
+public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) : ControllerBase
 {
     private static readonly string[] ValidStatuses =
         ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
@@ -37,6 +38,11 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
 
         if (request.Items.Any(item => item.Quantity <= 0))
             return BadRequest(new { message = "Quantity must be at least 1." });
+
+        // The shop owner confirms transfers by checking a balance, so she has to know
+        // which bank to look in.
+        if (request.PaymentMethod == PaymentMethod.BankTransfer && request.TransferBank is null)
+            return BadRequest(new { message = "Choose the bank you will transfer from." });
 
         var productIds = request.Items.Select(item => item.ProductId).Distinct().ToArray();
         var products = await db.Products
@@ -74,6 +80,8 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
             CustomerEmail = request.Email?.Trim() ?? string.Empty,
             ShippingAddress = request.Address.Trim(),
             PaymentMethod = request.PaymentMethod,
+            // Only meaningful for transfers; a cash order must not carry a stale bank.
+            TransferBank = request.PaymentMethod == PaymentMethod.BankTransfer ? request.TransferBank : null,
             // Cash and bank transfer both settle after the fact; the shop owner marks the order
             // paid. A card gateway would move this to Paid from its webhook instead.
             PaymentStatus = PaymentStatus.Pending,
@@ -86,7 +94,15 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
         await db.SaveChangesAsync();
 
         var created = await LoadOrderAsync(order.Id);
-        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, created!.ToDto());
+
+        // Tell the shop owner a transfer is on its way so she knows to watch the balance.
+        // Cash orders need no such warning - payment happens at the door.
+        if (created!.PaymentMethod == PaymentMethod.BankTransfer)
+        {
+            await notifier.OrderAwaitingPaymentAsync(created);
+        }
+
+        return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, created.ToDto());
     }
 
     [Authorize]
@@ -143,11 +159,21 @@ public class OrdersController(ApplicationDbContext db) : ControllerBase
         var order = await LoadOrderAsync(id);
         if (order is null) return NotFound();
 
+        var wasUnpaid = order.PaymentStatus != PaymentStatus.Paid;
+
         order.PaymentStatus = request.PaymentStatus;
         if (!string.IsNullOrWhiteSpace(request.PaymentReference))
             order.PaymentReference = request.PaymentReference.Trim();
 
         await db.SaveChangesAsync();
+
+        // Only on the transition into Paid, so re-saving a paid order cannot send
+        // the customer a second confirmation.
+        if (wasUnpaid && order.PaymentStatus == PaymentStatus.Paid)
+        {
+            await notifier.PaymentConfirmedAsync(order);
+        }
+
         return order.ToDto();
     }
 

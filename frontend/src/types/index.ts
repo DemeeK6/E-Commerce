@@ -72,6 +72,7 @@ export interface AppSetting {
   key: string;
   name: string;
   isEnabled: boolean;
+  value: string;
 }
 
 export interface CartLine {
@@ -111,10 +112,23 @@ export interface Order {
   shippingAddress: string;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  transferBank: TransferBank | null;
   status: OrderStatus;
   total: number;
   createdAtUtc: string;
   items: OrderItem[];
+}
+
+export type TransferBank = 0 | 1;  // 0 = TBC, 1 = Bank of Georgia
+
+export interface BankAccount {
+  id: number;
+  bank: TransferBank;
+  accountHolder: string;
+  iban: string;
+  currencies: string;
+  isEnabled: boolean;
+  displayOrder: number;
 }
 
 export interface PlaceOrderPayload {
@@ -124,5 +138,6 @@ export interface PlaceOrderPayload {
   address: string;
   email: string;
   paymentMethod: PaymentMethod;
+  transferBank: TransferBank | null;
   items: { productId: number; quantity: number; size: string; color: string }[];
 }

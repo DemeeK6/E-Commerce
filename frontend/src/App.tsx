@@ -19,6 +19,7 @@ import { AdminProductFormPage } from './pages/AdminProductFormPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
 import { AdminColorsPage } from './pages/AdminColorsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { AdminBankAccountsPage } from './pages/AdminBankAccountsPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
 
 export function App() {
@@ -45,6 +46,7 @@ export function App() {
         <Route path="categories" element={<AdminCategoriesPage />} />
         <Route path="colors" element={<AdminColorsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="bank-accounts" element={<AdminBankAccountsPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

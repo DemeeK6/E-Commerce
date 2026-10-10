@@ -52,10 +52,18 @@ export function AdminOrdersPage() {
       ) : (
         <div className="admin-table">
           {orders.map(order => (
-            <article className="admin-row admin-order-row" key={order.id}>
+            <article
+              className={order.paymentMethod === 1 && order.paymentStatus !== 1
+                ? 'admin-row admin-order-row order-awaiting'
+                : 'admin-row admin-order-row'}
+              key={order.id}
+            >
               <div className="admin-order-info">
                 <strong>
                   {t('orderId')}{order.id}
+                  {order.paymentMethod === 1 && order.paymentStatus !== 1 && (
+                    <span className="order-tag order-tag-awaiting">{t('awaitingPayment')}</span>
+                  )}
                   <span className={order.isGuest ? 'order-tag order-tag-guest' : 'order-tag'}>
                     {order.isGuest ? t('guest') : t('customer')}
                   </span>
@@ -70,7 +78,9 @@ export function AdminOrdersPage() {
               </div>
               <div className="admin-order-status">
                 <span className="order-payment">
-                  {order.paymentMethod === 0 ? t('payCash') : t('payBankTransfer')}
+                  {order.paymentMethod === 0
+                    ? t('payCash')
+                    : `${t('payBankTransfer')} (${order.transferBank === 0 ? t('bankTbc') : t('bankBog')})`}
                   {' · '}
                   <strong className={order.paymentStatus === 1 ? 'payment-paid' : 'payment-unpaid'}>
                     {order.paymentStatus === 1 ? t('paid') : t('unpaid')}

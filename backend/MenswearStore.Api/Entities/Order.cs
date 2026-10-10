@@ -22,6 +22,12 @@ public class Order
     /// <summary>Empty today. A payment gateway's transaction id belongs here.</summary>
     public string PaymentReference { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Set only for bank transfers: which bank the customer said they would send from,
+    /// so the shop owner checks the right account when confirming payment.
+    /// </summary>
+    public TransferBank? TransferBank { get; set; }
+
     public decimal Total { get; set; }
     public string Status { get; set; } = "Pending";
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
