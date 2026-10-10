@@ -120,6 +120,19 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface InfoSection {
+  id: number;
+  key: string;
+  titleEn: string;
+  titleKa: string;
+  titleRu: string;
+  bodyEn: string;
+  bodyKa: string;
+  bodyRu: string;
+  isEnabled: boolean;
+  displayOrder: number;
+}
+
 export type TransferBank = 0 | 1;  // 0 = TBC, 1 = Bank of Georgia
 
 export interface BankAccount {

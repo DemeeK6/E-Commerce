@@ -315,6 +315,59 @@ namespace MenswearStore.Api.Migrations
                     b.ToTable("Colors");
                 });
 
+            modelBuilder.Entity("MenswearStore.Api.Entities.InfoSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BodyEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyKa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyRu")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleKa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleRu")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("InfoSections");
+                });
+
             modelBuilder.Entity("MenswearStore.Api.Entities.Order", b =>
                 {
                     b.Property<int>("Id")

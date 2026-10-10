@@ -1847,3 +1847,61 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- info page ---------- */
+.info-sections {
+  display: grid;
+  gap: 26px;
+  max-width: 760px;
+}
+
+.info-section {
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.info-section h2 {
+  margin: 0 0 12px;
+  font-size: 1.3rem;
+}
+
+/* The body is plain text; preserving its line breaks is what turns it into
+   paragraphs without interpreting any markup. */
+.info-section p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.8;
+  color: #4b4a46;
+}
+
+.info-editor-row {
+  align-items: flex-start;
+}
+
+.info-editor-fields {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.info-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.info-editor-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.info-editor-fields textarea {
+  resize: vertical;
+  line-height: 1.6;
+}

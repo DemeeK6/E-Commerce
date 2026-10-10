@@ -54,6 +54,12 @@ public static class MappingExtensions
         new(account.Id, account.Bank, account.AccountHolder, account.Iban,
             account.Currencies, account.IsEnabled, account.DisplayOrder);
 
+    public static InfoSectionDto ToDto(this InfoSection section) =>
+        new(section.Id, section.Key,
+            section.TitleEn, section.TitleKa, section.TitleRu,
+            section.BodyEn, section.BodyKa, section.BodyRu,
+            section.IsEnabled, section.DisplayOrder);
+
     public static AppSettingDto ToDto(this AppSetting setting) =>
         new(setting.Id, setting.Key, setting.Name, setting.IsEnabled, setting.Value, setting.Kind);
 

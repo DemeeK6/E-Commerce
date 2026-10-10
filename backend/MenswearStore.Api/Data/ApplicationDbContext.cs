@@ -19,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<InfoSection> InfoSections => Set<InfoSection>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -35,6 +36,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // One account per bank: the checkout picker shows exactly one option per bank.
         builder.Entity<BankAccount>()
             .HasIndex(account => account.Bank)
+            .IsUnique();
+
+        builder.Entity<InfoSection>()
+            .HasIndex(section => section.Key)
             .IsUnique();
 
         builder.Entity<Product>()

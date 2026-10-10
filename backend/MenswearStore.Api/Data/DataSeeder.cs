@@ -352,6 +352,26 @@ public class DataSeeder(
             }
         }
 
+        // Keyed on Key so re-running never overwrites wording the owner has edited.
+        foreach (var section in InfoSectionSeedData.Sections)
+        {
+            if (!await db.InfoSections.AnyAsync(existing => existing.Key == section.Key))
+            {
+                db.InfoSections.Add(new InfoSection
+                {
+                    Key = section.Key,
+                    DisplayOrder = section.DisplayOrder,
+                    IsEnabled = section.IsEnabled,
+                    TitleEn = section.TitleEn,
+                    TitleKa = section.TitleKa,
+                    TitleRu = section.TitleRu,
+                    BodyEn = section.BodyEn,
+                    BodyKa = section.BodyKa,
+                    BodyRu = section.BodyRu,
+                });
+            }
+        }
+
         await db.SaveChangesAsync();
     }
 }

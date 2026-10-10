@@ -1,4 +1,4 @@
-import { Landmark, LayoutDashboard, Package, Palette, Settings, ShoppingBag, Tags } from 'lucide-react';
+import { FileText, Landmark, LayoutDashboard, Package, Palette, Settings, ShoppingBag, Tags } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
@@ -34,6 +34,7 @@ export function AdminLayout() {
             )}
           </NavLink>
           <NavLink to="/admin/bank-accounts"><Landmark size={18} />{t('bankAccounts')}</NavLink>
+          <NavLink to="/admin/info"><FileText size={18} />{t('infoPage')}</NavLink>
           <NavLink to="/admin/settings"><Settings size={18} />{t('settings')}</NavLink>
         </nav>
       </aside>

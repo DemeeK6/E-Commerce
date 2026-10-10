@@ -25,6 +25,7 @@ export function StoreLayout() {
       <NavLink to="/" onClick={() => setOpen(false)}>{t('home')}</NavLink>
       <NavLink to="/products" onClick={() => setOpen(false)}>{t('products')}</NavLink>
       <NavLink to="/sizes" onClick={() => setOpen(false)}>{t('sizes')}</NavLink>
+      <NavLink to="/info" onClick={() => setOpen(false)}>{t('info')}</NavLink>
       {isAdmin && <NavLink to="/admin" onClick={() => setOpen(false)}>{t('adminPanel')}</NavLink>}
       {user ? (
         <button className="link-button" onClick={() => { logout(); setOpen(false); }}>{t('logout')}</button>
@@ -83,6 +84,7 @@ export function StoreLayout() {
         <div>
           <Link to="/products">{t('products')}</Link>
           <Link to="/sizes">{t('sizes')}</Link>
+          <Link to="/info">{t('info')}</Link>
           <Link to="/cart">{t('cart')}</Link>
           <Link to="/login">{t('login')}</Link>
         </div>

@@ -163,5 +163,12 @@
   "awaitingPayment": "Awaiting payment",
   "contactUs": "Contact us",
   "contactDetails": "Contact details",
-  "contactDetailsIntro": "Shown in the website footer. Leave a field empty to hide it."
+  "contactDetailsIntro": "Shown in the website footer. Leave a field empty to hide it.",
+  "info": "Info",
+  "infoEmpty": "Nothing here yet.",
+  "infoPage": "Info page",
+  "infoPageIntro": "Sections shown on the public Info page. English is required; Georgian and Russian fall back to it when blank.",
+  "textEn": "Text (English)",
+  "textKa": "Text (Georgian)",
+  "textRu": "Text (Russian)"
 }
