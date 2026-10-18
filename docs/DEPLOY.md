@@ -37,7 +37,7 @@ Get-Content $HOME\.ssh\id_ed25519.pub
 2. Make a new project, then click **Add Server**:
    - **Location**: Falkenstein, Nuremberg or Helsinki (all in Europe).
    - **Image**: Ubuntu 24.04.
-   - **Type**: Shared vCPU, **CX22** (2 CPU, 4 GB RAM).
+   - **Type**: **CX23** (Cost-Optimized, 2 CPU, 4 GB RAM), or **CAX11** (Arm64, same size). Both work. Do **not** pick the CPX line, which costs about 4× more for the same RAM since the 2026 price rises.
    - **SSH key**: paste the line you copied in step 2.
    - **Backups**: turn it on (about +20% of the price). Hetzner then keeps a full copy of the server every day. It's cheap insurance.
 3. Click **Create**. Copy the server's **IPv4 address**, for example `203.0.113.10`.
@@ -49,7 +49,9 @@ In your domain registrar's DNS settings, add:
 | Type | Name | Value |
 |---|---|---|
 | A | `@` | your server IP |
-| A | `www` | your server IP |
+| CNAME | `www` | `@` (or your domain) |
+
+If a row with the same Type and Name already exists (for example an old Shopify `www` CNAME), **edit** that row instead of adding a new one. Don't touch the `NS` and `SOA` rows.
 
 It can take from a few minutes up to a few hours to work. Check it from PowerShell:
 
