@@ -1,4 +1,4 @@
-import type { AppSetting, AuthResponse, BankAccount, InfoSection, Category, Color, GenderTarget, Order, PaymentStatus, PlaceOrderPayload, Product } from '../types';
+import type { AppSetting, AuthResponse, BankAccount, HomeHero, InfoSection, Category, Color, GenderTarget, Order, PaymentStatus, PlaceOrderPayload, Product } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -85,6 +85,16 @@ export const api = {
     request<InfoSection[]>(`/api/infosections${includeDisabled ? '?includeDisabled=true' : ''}`),
   saveInfoSection: (section: InfoSection) =>
     request<InfoSection>(`/api/infosections/${section.id}`, { method: 'PUT', body: JSON.stringify(section) }),
+  homeHero: (includeDisabled = false) =>
+    request<HomeHero>(`/api/home-hero${includeDisabled ? '?includeDisabled=true' : ''}`),
+  saveHomeHero: (hero: HomeHero) =>
+    request<HomeHero>('/api/home-hero', {
+      method: 'PUT',
+      body: JSON.stringify({
+        ...hero,
+        slides: hero.slides.map(slide => ({ imageUrl: slide.imageUrl, isEnabled: slide.isEnabled })),
+      }),
+    }),
   settings: () => request<AppSetting[]>('/api/settings'),
   updateSetting: (key: string, isEnabled: boolean) =>
     request<AppSetting>(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ isEnabled }) }),

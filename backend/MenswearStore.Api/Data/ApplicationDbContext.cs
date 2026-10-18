@@ -20,6 +20,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
     public DbSet<InfoSection> InfoSections => Set<InfoSection>();
+    public DbSet<HomeHero> HomeHeroes => Set<HomeHero>();
+    public DbSet<HeroSlide> HeroSlides => Set<HeroSlide>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

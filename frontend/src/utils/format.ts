@@ -39,3 +39,18 @@ export function localizedInfo(
     body: pick(section.bodyKa, section.bodyRu, section.bodyEn),
   };
 }
+
+/**
+ * Picks the shopper's language, then the English override, then the built-in
+ * translation - so the shop owner can change only the English line and every
+ * language still shows something sensible.
+ */
+export function localizedOverride(
+  values: { en: string; ka: string; ru: string },
+  language: 'en' | 'ka' | 'ru',
+  builtIn: string,
+): string {
+  const localized = values[language]?.trim();
+  if (localized) return localized;
+  return values.en?.trim() || builtIn;
+}

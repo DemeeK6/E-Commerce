@@ -60,6 +60,16 @@ public static class MappingExtensions
             section.BodyEn, section.BodyKa, section.BodyRu,
             section.IsEnabled, section.DisplayOrder);
 
+    public static HomeHeroDto ToDto(this HomeHero hero, bool includeDisabled) =>
+        new(hero.EyebrowEn, hero.EyebrowKa, hero.EyebrowRu,
+            hero.TitleEn, hero.TitleKa, hero.TitleRu,
+            hero.SlideIntervalSeconds,
+            hero.Slides
+                .Where(slide => includeDisabled || slide.IsEnabled)
+                .OrderBy(slide => slide.DisplayOrder)
+                .Select(slide => new HeroSlideDto(slide.Id, slide.ImageUrl, slide.IsEnabled, slide.DisplayOrder))
+                .ToArray());
+
     public static AppSettingDto ToDto(this AppSetting setting) =>
         new(setting.Id, setting.Key, setting.Name, setting.IsEnabled, setting.Value, setting.Kind);
 

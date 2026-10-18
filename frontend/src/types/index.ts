@@ -135,6 +135,25 @@ export interface InfoSection {
   displayOrder: number;
 }
 
+export interface HeroSlide {
+  id: number;
+  imageUrl: string;
+  isEnabled: boolean;
+  displayOrder: number;
+}
+
+/** The home page welcome banner. Blank texts fall back to the built-in translations. */
+export interface HomeHero {
+  eyebrowEn: string;
+  eyebrowKa: string;
+  eyebrowRu: string;
+  titleEn: string;
+  titleKa: string;
+  titleRu: string;
+  slideIntervalSeconds: number;
+  slides: HeroSlide[];
+}
+
 export type TransferBank = 0 | 1;  // 0 = TBC, 1 = Bank of Georgia
 
 export interface BankAccount {

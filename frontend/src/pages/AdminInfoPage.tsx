@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { AdminHeroEditor } from '../components/AdminHeroEditor';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { InfoSection } from '../types';
@@ -46,6 +47,9 @@ export function AdminInfoPage() {
         <h1>{t('infoPage')}</h1>
       </div>
 
+      <AdminHeroEditor />
+
+      <h2 className="info-editor-heading">{t('infoSectionsHeading')}</h2>
       <p className="size-chart-note">{t('infoPageIntro')}</p>
       {error && <p className="form-error">{error}</p>}
 

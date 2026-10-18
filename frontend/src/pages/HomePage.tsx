@@ -1,6 +1,7 @@
-import { ArrowRight, ShieldCheck, Truck } from 'lucide-react';
+import { ShieldCheck, Truck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { HomeHeroBanner } from '../components/HomeHeroBanner';
 import { ProductCard } from '../components/ProductCard';
 import { api } from '../services/api';
 import type { Product } from '../types';
@@ -16,16 +17,7 @@ export function HomePage() {
 
   return (
     <>
-      <section className="hero">
-        <div className="hero__content">
-          <p className="eyebrow">{t('heroEyebrow')}</p>
-          <h1>{t('heroTitle')}</h1>
-          <Link className="btn btn-light" to="/products">
-            {t('shopNow')}
-            <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
+      <HomeHeroBanner />
 
       <section className="benefit-strip">
         <div><Truck size={20} /> {t('fastDelivery')}</div>

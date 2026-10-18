@@ -315,6 +315,77 @@ namespace MenswearStore.Api.Migrations
                     b.ToTable("Colors");
                 });
 
+            modelBuilder.Entity("MenswearStore.Api.Entities.HeroSlide", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HomeHeroId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HomeHeroId");
+
+                    b.ToTable("HeroSlides");
+                });
+
+            modelBuilder.Entity("MenswearStore.Api.Entities.HomeHero", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EyebrowEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EyebrowKa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EyebrowRu")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SlideIntervalSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleKa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleRu")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HomeHeroes");
+                });
+
             modelBuilder.Entity("MenswearStore.Api.Entities.InfoSection", b =>
                 {
                     b.Property<int>("Id")
@@ -769,6 +840,17 @@ namespace MenswearStore.Api.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("MenswearStore.Api.Entities.HeroSlide", b =>
+                {
+                    b.HasOne("MenswearStore.Api.Entities.HomeHero", "HomeHero")
+                        .WithMany("Slides")
+                        .HasForeignKey("HomeHeroId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("HomeHero");
+                });
+
             modelBuilder.Entity("MenswearStore.Api.Entities.Order", b =>
                 {
                     b.HasOne("MenswearStore.Api.Entities.ApplicationUser", "User")
@@ -929,6 +1011,11 @@ namespace MenswearStore.Api.Migrations
                     b.Navigation("Images");
 
                     b.Navigation("ProductColors");
+                });
+
+            modelBuilder.Entity("MenswearStore.Api.Entities.HomeHero", b =>
+                {
+                    b.Navigation("Slides");
                 });
 
             modelBuilder.Entity("MenswearStore.Api.Entities.Order", b =>

@@ -345,6 +345,13 @@ public class DataSeeder(
             }
         }
 
+        // Empty on purpose: blank texts and no photos mean the home page keeps its
+        // built-in look until the shop owner changes it on the Info page screen.
+        if (!await db.HomeHeroes.AnyAsync())
+        {
+            db.HomeHeroes.Add(new HomeHero());
+        }
+
         // Placeholder IBANs on purpose: the shop owner replaces them on the Bank accounts
         // screen. They are deliberately obviously fake so a real transfer cannot be sent
         // to a wrong-but-plausible account.
