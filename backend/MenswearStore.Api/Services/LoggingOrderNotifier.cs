@@ -1,37 +1,20 @@
 namespace MenswearStore.Api.Services;
 
-using MenswearStore.Api.Entities;
-using System.Globalization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 /// <summary>
-/// Stand-in until an email provider is chosen. It records exactly what would be sent so
+/// Used when no Gmail account is configured. It records exactly what would be sent so
 /// the flow can be exercised end to end, and so nothing silently does nothing.
 /// </summary>
-public class LoggingOrderNotifier(ILogger<LoggingOrderNotifier> logger) : IOrderNotifier
+public class LoggingOrderNotifier(IOptions<EmailOptions> options, ILogger<LoggingOrderNotifier> logger)
+    : OrderNotifierBase(options.Value)
 {
-    // The server runs under the invariant culture, where ":C" prints the generic
-    // currency sign (¤) rather than "$". The shop prices in dollars, so format
-    // against en-US explicitly - a real email must never show ¤108.00.
-    private static readonly CultureInfo Money = CultureInfo.GetCultureInfo("en-US");
-
-    private static string Format(decimal amount) => amount.ToString("C", Money);
-
-    public Task OrderAwaitingPaymentAsync(Order order, CancellationToken cancellationToken = default)
+    protected override Task DeliverAsync(OrderEmail email, CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "EMAIL (not sent - no provider configured) -> shop owner: order #{OrderId} is awaiting a {Bank} transfer of {Total} from {Customer} ({Phone}).",
-            order.Id, order.TransferBank, Format(order.Total),
-            $"{order.CustomerFirstName} {order.CustomerLastName}", order.CustomerPhone);
-        return Task.CompletedTask;
-    }
-
-    public Task PaymentConfirmedAsync(Order order, CancellationToken cancellationToken = default)
-    {
-        var recipient = string.IsNullOrWhiteSpace(order.CustomerEmail) ? "(no email on the order)" : order.CustomerEmail;
-        logger.LogInformation(
-            "EMAIL (not sent - no provider configured) -> {Recipient}: payment received for order #{OrderId}, total {Total}.",
-            recipient, order.Id, Format(order.Total));
+            "EMAIL would have sent (no email account configured) -> {Recipient}: \"{Subject}\"\n{Body}",
+            string.IsNullOrWhiteSpace(email.To) ? "(shop owner - no address set)" : email.To, email.Subject, email.Body);
         return Task.CompletedTask;
     }
 }

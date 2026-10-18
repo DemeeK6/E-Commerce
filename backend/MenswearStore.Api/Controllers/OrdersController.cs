@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using System.Security.Claims;
 using MenswearStore.Api.Data;
 using MenswearStore.Api.DTOs;
@@ -35,6 +36,11 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         {
             return BadRequest(new { message = "First name, last name, phone and address are required." });
         }
+
+        // Every order email goes here, so a missing or mistyped address means the
+        // customer never hears about their order.
+        if (string.IsNullOrWhiteSpace(request.Email) || !MailAddress.TryCreate(request.Email.Trim(), out _))
+            return BadRequest(new { message = "A valid email address is required." });
 
         if (request.Items.Any(item => item.Quantity <= 0))
             return BadRequest(new { message = "Quantity must be at least 1." });
@@ -79,6 +85,7 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
             CustomerPhone = request.Phone.Trim(),
             CustomerEmail = request.Email?.Trim() ?? string.Empty,
             ShippingAddress = request.Address.Trim(),
+            Language = request.Language is "ka" or "ru" ? request.Language : "en",
             PaymentMethod = request.PaymentMethod,
             // Only meaningful for transfers; a cash order must not carry a stale bank.
             TransferBank = request.PaymentMethod == PaymentMethod.BankTransfer ? request.TransferBank : null,
@@ -95,10 +102,15 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
 
         var created = await LoadOrderAsync(order.Id);
 
-        // Deliberately no notification here for a transfer. The order exists only so the
-        // customer has a number to quote in the transfer description; they have not paid
-        // yet. The shop owner is told when they confirm, so she is never sent to check a
-        // balance for an order that was abandoned on the instructions screen.
+        // A cash order is final now, so the shop owner and the customer hear about it.
+        // A transfer deliberately waits: the order exists only so the customer has a
+        // number to quote in the transfer description. Both emails go out when they
+        // confirm, so nobody is told about an order abandoned on the instructions screen.
+        if (order.PaymentMethod == PaymentMethod.Cash)
+        {
+            await notifier.CashOrderPlacedAsync(created!);
+        }
+
         return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, created!.ToDto());
     }
 
@@ -140,8 +152,17 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         var order = await LoadOrderAsync(id);
         if (order is null) return NotFound();
 
+        var changed = order.Status != request.Status;
         order.Status = request.Status;
         await db.SaveChangesAsync();
+
+        // Only on a real change, so re-saving the same status does not email the customer
+        // twice. The notifier itself ignores statuses the customer need not hear about.
+        if (changed)
+        {
+            await notifier.StatusChangedAsync(order);
+        }
+
         return order.ToDto();
     }
 
@@ -210,8 +231,10 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         await db.SaveChangesAsync();
 
         // Only on the transition into Paid, so re-saving a paid order cannot send
-        // the customer a second confirmation.
-        if (wasUnpaid && order.PaymentStatus == PaymentStatus.Paid)
+        // the customer a second confirmation. Bank transfers only: a cash order is
+        // paid at the door, where "we will be in touch about delivery" makes no sense.
+        if (wasUnpaid && order.PaymentStatus == PaymentStatus.Paid
+            && order.PaymentMethod == PaymentMethod.BankTransfer)
         {
             await notifier.PaymentConfirmedAsync(order);
         }

@@ -13,7 +13,7 @@ export function CheckoutPage() {
   const [error, setError] = useState('');
   const { lines, total, clear } = useCart();
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const navigate = useNavigate();
 
   // Prefilled for signed-in customers, but every field stays editable: the delivery
@@ -60,6 +60,8 @@ export function CheckoutPage() {
         email,
         paymentMethod,
         transferBank: paymentMethod === 1 ? transferBank : null,
+        // The customer's emails are written in the language they are shopping in.
+        language,
         items: lines.map(line => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -136,7 +138,8 @@ export function CheckoutPage() {
           <label>{t('lastName')}<input value={lastName} onChange={e => setLastName(e.target.value)} autoComplete="family-name" required /></label>
         </div>
         <label>{t('phone')}<input value={phone} onChange={e => setPhone(e.target.value)} type="tel" autoComplete="tel" required /></label>
-        <label>{t('email')}<input value={email} onChange={e => setEmail(e.target.value)} type="email" autoComplete="email" /></label>
+        {/* Required: every order email (received, paid, shipped) goes to this address. */}
+        <label>{t('email')}<input value={email} onChange={e => setEmail(e.target.value)} type="email" autoComplete="email" required /></label>
         <label>{t('shippingAddress')}<textarea value={address} onChange={e => setAddress(e.target.value)} rows={3} autoComplete="street-address" required /></label>
 
         <fieldset className="payment-methods">

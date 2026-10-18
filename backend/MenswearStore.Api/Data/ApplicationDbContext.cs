@@ -60,6 +60,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Property(order => order.Total)
             .HasPrecision(10, 2);
 
+        // Orders placed before languages were recorded get English emails.
+        builder.Entity<Order>()
+            .Property(order => order.Language)
+            .HasMaxLength(2)
+            .HasDefaultValue("en");
+
         builder.Entity<OrderItem>()
             .Property(item => item.UnitPrice)
             .HasPrecision(10, 2);

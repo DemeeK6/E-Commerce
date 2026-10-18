@@ -469,6 +469,13 @@ namespace MenswearStore.Api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasDefaultValue("en");
+
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("integer");
 

@@ -42,11 +42,14 @@ public record CreateOrderRequest(
     [Required] string LastName,
     [Required] string Phone,
     [Required] string Address,
+    /// <summary>Required - checked in the controller so the customer gets a readable message.</summary>
     string? Email,
     PaymentMethod PaymentMethod,
     /// <summary>Required when PaymentMethod is BankTransfer; ignored otherwise.</summary>
     TransferBank? TransferBank,
-    CreateOrderItemRequest[] Items);
+    CreateOrderItemRequest[] Items,
+    /// <summary>"en", "ka" or "ru"; anything else is stored as "en".</summary>
+    string? Language = null);
 
 public record UpdateOrderStatusRequest([Required] string Status);
 

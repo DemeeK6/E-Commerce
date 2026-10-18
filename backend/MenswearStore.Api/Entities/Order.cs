@@ -16,6 +16,9 @@ public class Order
     public string CustomerEmail { get; set; } = string.Empty;
     public string ShippingAddress { get; set; } = string.Empty;
 
+    /// <summary>The site language the customer ordered in ("en", "ka" or "ru"); their emails use it.</summary>
+    public string Language { get; set; } = "en";
+
     public PaymentMethod PaymentMethod { get; set; } = PaymentMethod.Cash;
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 

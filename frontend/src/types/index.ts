@@ -175,4 +175,5 @@ export interface PlaceOrderPayload {
   paymentMethod: PaymentMethod;
   transferBank: TransferBank | null;
   items: { productId: number; quantity: number; size: string; color: string }[];
+  language: 'en' | 'ka' | 'ru';
 }

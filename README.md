@@ -66,11 +66,18 @@ The backend also applies migrations and seeds data on startup.
 
 ## Email
 
-Two emails are sent over Gmail SMTP:
+Order emails are sent over Gmail SMTP. Emails to the shop owner are in English;
+emails to the customer are in the language they shopped in (English, Georgian or
+Russian). An email address is required at checkout.
 
-- when a customer confirms they have sent a bank transfer, the shop owner is told to
-  check the balance
-- when the shop owner marks that order paid, the customer gets a confirmation
+- **Cash order placed:** the shop owner gets "New order", the customer "We received
+  your order"
+- **Customer confirms a bank transfer:** the shop owner is told to check the balance,
+  the customer gets "We received your order"
+- **Shop owner marks a bank transfer paid:** the customer gets "Order confirmed"
+- **Shop owner sets Shipped, Delivered or Cancelled:** the customer is told
+
+The texts live in `backend/MenswearStore.Api/Services/OrderEmails.cs`.
 
 Gmail rejects normal account passwords for SMTP, so this needs a 16-character **App
 Password**, which in turn needs 2-Step Verification on the account:
