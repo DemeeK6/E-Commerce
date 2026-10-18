@@ -1,12 +1,12 @@
 import { Menu, ShoppingBag, UserRound, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
 import { ShopContact } from '../components/ShopContact';
 import { api } from '../services/api';
-import type { AppSetting } from '../types';
+import type { AppSetting, GenderTarget } from '../types';
 
 export function StoreLayout() {
   const [open, setOpen] = useState(false);
@@ -15,9 +15,13 @@ export function StoreLayout() {
   const { language, setLanguage, t } = useI18n();
   // Loaded once in the layout so the footer shows the same details on every page.
   const [settings, setSettings] = useState<AppSetting[]>([]);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   useEffect(() => {
-    api.settings().then(setSettings).catch(() => setSettings([]));
+    api.settings()
+      .then(setSettings)
+      .catch(() => setSettings([]))
+      .finally(() => setSettingsLoaded(true));
   }, []);
 
   const nav = (
@@ -74,7 +78,7 @@ export function StoreLayout() {
       </header>
       {open && <nav className="mobile-nav">{nav}</nav>}
       <main>
-        <Outlet />
+        <Outlet context={{ settings, settingsLoaded } satisfies StoreOutletContext} />
       </main>
       <footer className="site-footer">
         <div>
@@ -90,5 +94,28 @@ export function StoreLayout() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/** What StoreLayout hands to the pages inside it (read with useStoreSettings). */
+export interface StoreOutletContext {
+  settings: AppSetting[];
+  settingsLoaded: boolean;
+}
+
+export function useStoreSettings() {
+  return useOutletContext<StoreOutletContext>();
+}
+
+const GENDER_SETTING_KEYS: Record<GenderTarget, string> = { 0: 'enable_men', 1: 'enable_women', 2: 'enable_kids' };
+
+/**
+ * The genders switched on in Admin -> Settings, in Men, Women, Kids order. If the
+ * settings could not be loaded, Men only - the shop's original catalogue.
+ */
+export function enabledGenders(settings: AppSetting[]): GenderTarget[] {
+  if (settings.length === 0) return [0];
+  return ([0, 1, 2] as GenderTarget[]).filter(
+    gender => settings.find(setting => setting.key === GENDER_SETTING_KEYS[gender])?.isEnabled,
   );
 }

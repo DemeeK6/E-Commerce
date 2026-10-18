@@ -6,14 +6,22 @@ import { ProductCard } from '../components/ProductCard';
 import { api } from '../services/api';
 import type { Product } from '../types';
 import { useI18n } from '../context/I18nContext';
+import { enabledGenders, useStoreSettings } from '../layouts/StoreLayout';
 
 export function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const { t } = useI18n();
 
+  const { settings, settingsLoaded } = useStoreSettings();
+
   useEffect(() => {
-    api.products(undefined).then(items => setProducts(items.slice(0, 8))).catch(() => setProducts([]));
-  }, []);
+    if (!settingsLoaded) return;
+    // Featured products only from the genders switched on in Admin -> Settings.
+    const genders = enabledGenders(settings);
+    api.products(undefined)
+      .then(items => setProducts(items.filter(item => genders.includes(item.genderTarget)).slice(0, 8)))
+      .catch(() => setProducts([]));
+  }, [settings, settingsLoaded]);
 
   return (
     <>

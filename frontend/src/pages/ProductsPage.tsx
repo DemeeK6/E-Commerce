@@ -1,7 +1,8 @@
 import { Search } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { useI18n } from '../context/I18nContext';
+import { enabledGenders, useStoreSettings } from '../layouts/StoreLayout';
 import { api } from '../services/api';
 import type { Category, GenderTarget, Product } from '../types';
 import { localizedName } from '../utils/format';
@@ -11,10 +12,20 @@ const GENDER_LABEL_KEYS = { 0: 'men', 1: 'women', 2: 'kids' } as const;
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [gender, setGender] = useState<GenderTarget | null>(0);
+  const [gender, setGender] = useState<GenderTarget | null>(null);
   const [categoryId, setCategoryId] = useState('');
   const [search, setSearch] = useState('');
   const { t, language } = useI18n();
+  const { settings, settingsLoaded } = useStoreSettings();
+  // Only the genders switched on in Admin -> Settings are offered.
+  const genders = useMemo(() => enabledGenders(settings), [settings]);
+  const onlyOneGender = genders.length === 1;
+
+  // Open the first enabled gender once the settings are known, as before (Men).
+  // With a single gender there is nothing to choose, so it simply stays open.
+  useEffect(() => {
+    if (settingsLoaded) setGender(genders[0] ?? null);
+  }, [settingsLoaded, genders]);
 
   useEffect(() => {
     if (gender === null) {
@@ -25,10 +36,13 @@ export function ProductsPage() {
   }, [gender]);
 
   useEffect(() => {
-    api.products(gender ?? 0, false, search || undefined)
+    if (!settingsLoaded) return;
+    // On the gender list, show every enabled gender's products, never a disabled one's.
+    api.products(gender ?? undefined, false, search || undefined)
+      .then(items => items.filter(item => genders.includes(item.genderTarget)))
       .then(items => setProducts(categoryId ? items.filter(item => item.category?.id === Number(categoryId)) : items))
       .catch(() => setProducts([]));
-  }, [gender, categoryId, search]);
+  }, [settingsLoaded, genders, gender, categoryId, search]);
 
   const selectGender = (next: GenderTarget) => {
     setGender(next);
@@ -63,7 +77,7 @@ export function ProductsPage() {
             <>
               <p className="sidebar-title">{t('categories')}</p>
               <ul className="category-list">
-                {([0, 1, 2] as GenderTarget[]).map(genderOption => (
+                {genders.map(genderOption => (
                   <li key={genderOption}>
                     <button
                       type="button"
@@ -78,9 +92,11 @@ export function ProductsPage() {
             </>
           ) : (
             <>
-              <button type="button" className="back-link" onClick={backToGenders}>
-                ← {t('back')}
-              </button>
+              {!onlyOneGender && (
+                <button type="button" className="back-link" onClick={backToGenders}>
+                  ← {t('back')}
+                </button>
+              )}
               <p className="sidebar-title">{t(GENDER_LABEL_KEYS[gender])}</p>
               <ul className="category-list">
                 <li>
