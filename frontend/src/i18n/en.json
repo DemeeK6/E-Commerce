@@ -197,5 +197,8 @@
   "bigTitleKa": "Big title (Georgian)",
   "bigTitleRu": "Big title (Russian)",
   "infoSectionsHeading": "Info page sections",
-  "showSlide": "Show photo"
+  "showSlide": "Show photo",
+  "currency": "Currency",
+  "currencyUnavailable": "Lari prices are unavailable right now",
+  "exchangeRateNote": "Prices in lari at the National Bank of Georgia rate"
 }

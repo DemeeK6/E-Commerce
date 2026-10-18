@@ -5,13 +5,15 @@ import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { Product, ProductImage } from '../types';
-import { localizedName, money } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
+import { localizedName } from '../utils/format';
 import { SizeGuideModal } from '../components/SizeGuideModal';
 
 export function ProductDetailsPage() {
   const { id } = useParams();
   const { add } = useCart();
   const { t, language } = useI18n();
+  const { price } = useCurrency();
   const [product, setProduct] = useState<Product | null>(null);
   const [size, setSize] = useState('');
   const [selectedColorId, setSelectedColorId] = useState<number | null>(null);
@@ -120,8 +122,8 @@ export function ProductDetailsPage() {
         <p className="eyebrow">{(product.category && localizedName(product.category, language)) || t('menswear')}</p>
         <h1>{product.name}</h1>
         <div className="detail-price">
-          <strong>{money(product.discountPrice ?? product.price)}</strong>
-          {product.discountPrice && <span>{money(product.price)}</span>}
+          <strong>{price(product.discountPrice ?? product.price)}</strong>
+          {product.discountPrice && <span>{price(product.price)}</span>}
         </div>
         <p>{product.description}</p>
         <div className="option-group">

@@ -2,7 +2,8 @@ import { Check, Copy, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 import type { BankAccount } from '../types';
-import { money } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
+import type { Order } from '../types';
 
 const BANK_LABEL = { 0: 'bankTbc', 1: 'bankBog' } as const;
 
@@ -14,7 +15,7 @@ const BANK_LABEL = { 0: 'bankTbc', 1: 'bankBog' } as const;
 export function BankTransferModal({
   account,
   orderNumber,
-  total,
+  order,
   shopPhone,
   onConfirm,
   onCancel,
@@ -23,7 +24,8 @@ export function BankTransferModal({
 }: {
   account: BankAccount;
   orderNumber: string;
-  total: number;
+  /** The amount to transfer is the one fixed on the order, in the customer's currency. */
+  order: Order;
   shopPhone: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -31,6 +33,7 @@ export function BankTransferModal({
   error: string;
 }) {
   const { t } = useI18n();
+  const { orderPrice } = useCurrency();
   const [copied, setCopied] = useState<'iban' | 'reference' | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -112,7 +115,7 @@ export function BankTransferModal({
             <span className="transfer-step-number">2</span>
             <div>
               <p className="transfer-step-label">{t('transferAmount')}</p>
-              <p className="transfer-amount">{money(total)}</p>
+              <p className="transfer-amount">{orderPrice(order, order.total)}</p>
               <p className="transfer-hint">{t('transferBankName')}: {t(BANK_LABEL[account.bank])}</p>
             </div>
           </li>

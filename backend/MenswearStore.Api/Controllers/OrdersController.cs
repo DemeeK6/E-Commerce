@@ -14,7 +14,7 @@ namespace MenswearStore.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) : ControllerBase
+public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier, ExchangeRateService rates) : ControllerBase
 {
     private static readonly string[] ValidStatuses =
         ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
@@ -78,6 +78,17 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        // Lari orders are priced at today's National Bank rate, fixed on the order. If
+        // the rate is unavailable the order falls back to dollars, which is what the
+        // shop showed the customer in that case.
+        var currency = "USD";
+        var exchangeRate = 1m;
+        if (request.Currency == "GEL" && await rates.GetUsdToGelAsync() is { } gel)
+        {
+            currency = "GEL";
+            exchangeRate = gel.UsdToGel;
+        }
+
         var order = new Order
         {
             OrderNumber = await OrderNumberGenerator.NextAsync(db),
@@ -96,6 +107,8 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
             PaymentStatus = PaymentStatus.Pending,
             Status = "Pending",
             Total = items.Sum(item => item.UnitPrice * item.Quantity),
+            Currency = currency,
+            ExchangeRate = exchangeRate,
             Items = items,
         };
 

@@ -6,7 +6,7 @@ import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { BankAccount, Order, PaymentMethod, TransferBank } from '../types';
 import { BankTransferModal } from '../components/BankTransferModal';
-import { money } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
 
 export function CheckoutPage() {
   const [loading, setLoading] = useState(false);
@@ -14,6 +14,7 @@ export function CheckoutPage() {
   const { lines, total, clear } = useCart();
   const { user } = useAuth();
   const { t, language } = useI18n();
+  const { currency, price, rate } = useCurrency();
   const navigate = useNavigate();
 
   // Prefilled for signed-in customers, but every field stays editable: the delivery
@@ -62,6 +63,8 @@ export function CheckoutPage() {
         transferBank: paymentMethod === 1 ? transferBank : null,
         // The customer's emails are written in the language they are shopping in.
         language,
+        // Only the currency is sent; the server fixes today's rate on the order itself.
+        currency,
         items: lines.map(line => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -129,7 +132,12 @@ export function CheckoutPage() {
       <form className="checkout-box" onSubmit={submit}>
         <p className="eyebrow">{t('secureCheckout')}</p>
         <h1>{t('checkout')}</h1>
-        <p className="checkout-total">{t('totalDue')}: <strong>{money(total)}</strong></p>
+        <p className="checkout-total">{t('totalDue')}: <strong>{price(total)}</strong></p>
+        {currency === 'GEL' && rate && (
+          <p className="size-chart-note">
+            {t('exchangeRateNote')}: 1 USD = {rate.usdToGel} GEL ({new Date(rate.validFrom).toLocaleDateString()})
+          </p>
+        )}
 
         {!user && <p className="checkout-guest-note">{t('guestCheckoutNote')}</p>}
 
@@ -188,7 +196,7 @@ export function CheckoutPage() {
         <BankTransferModal
           account={bankAccounts.find(a => a.bank === placedOrder.transferBank)!}
           orderNumber={placedOrder.orderNumber}
-          total={placedOrder.total}
+          order={placedOrder}
           shopPhone={shopPhone}
           busy={deciding}
           error={decisionError}

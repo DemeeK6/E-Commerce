@@ -93,6 +93,9 @@ public static class MappingExtensions
             order.PublicToken,
             order.Status,
             order.Total,
+            order.Currency,
+            order.ExchangeRate,
+            order.TotalInCurrency,
             order.CreatedAtUtc,
             order.Items.Select(item => new OrderItemDto(
                 item.Id, item.ProductId, item.ProductName,

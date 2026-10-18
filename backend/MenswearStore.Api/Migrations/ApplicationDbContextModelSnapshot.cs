@@ -450,6 +450,13 @@ namespace MenswearStore.Api.Migrations
                     b.Property<DateTime>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasDefaultValue("USD");
+
                     b.Property<DateTime?>("CustomerConfirmedPaymentAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -468,6 +475,10 @@ namespace MenswearStore.Api.Migrations
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)");
 
                     b.Property<string>("Language")
                         .IsRequired()

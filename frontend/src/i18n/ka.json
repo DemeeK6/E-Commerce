@@ -197,5 +197,8 @@
   "bigTitleKa": "დიდი სათაური (ქართული)",
   "bigTitleRu": "დიდი სათაური (რუსული)",
   "infoSectionsHeading": "ინფო გვერდის სექციები",
-  "showSlide": "ფოტოს ჩვენება"
+  "showSlide": "ფოტოს ჩვენება",
+  "currency": "ვალუტა",
+  "currencyUnavailable": "ფასები ლარში ახლა მიუწვდომელია",
+  "exchangeRateNote": "ფასები ლარში საქართველოს ეროვნული ბანკის კურსით"
 }

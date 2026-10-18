@@ -69,6 +69,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasIndex(order => order.OrderNumber)
             .IsUnique();
 
+        builder.Entity<Order>()
+            .Property(order => order.Currency)
+            .HasMaxLength(3)
+            .HasDefaultValue("USD");
+
+        // Older orders were all in dollars; the migration fills their rate with 1.
+        builder.Entity<Order>()
+            .Property(order => order.ExchangeRate)
+            .HasPrecision(10, 4);
+
+        builder.Entity<Order>()
+            .Ignore(order => order.TotalInCurrency);
+
         // Orders placed before languages were recorded get English emails.
         builder.Entity<Order>()
             .Property(order => order.Language)

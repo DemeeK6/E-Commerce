@@ -102,6 +102,14 @@ export interface OrderItem {
 export type PaymentMethod = 0 | 1;   // 0 = Cash, 1 = BankTransfer
 export type PaymentStatus = 0 | 1 | 2 | 3;  // 0 = Pending, 1 = Paid, 2 = Failed, 3 = Refunded
 
+export type Currency = 'USD' | 'GEL';
+
+/** How many lari one dollar costs, from the National Bank of Georgia. */
+export interface ExchangeRate {
+  usdToGel: number;
+  validFrom: string;
+}
+
 export interface Order {
   id: number;
   /** What people see, e.g. ON-261018-4827. `id` is internal only. */
@@ -120,6 +128,10 @@ export interface Order {
   publicToken: string;
   status: OrderStatus;
   total: number;
+  /** The customer's currency and the rate fixed at checkout (1 for USD). `total` stays in dollars. */
+  currency: Currency;
+  exchangeRate: number;
+  totalInCurrency: number;
   createdAtUtc: string;
   items: OrderItem[];
 }
@@ -178,4 +190,5 @@ export interface PlaceOrderPayload {
   transferBank: TransferBank | null;
   items: { productId: number; quantity: number; size: string; color: string }[];
   language: 'en' | 'ka' | 'ru';
+  currency: Currency;
 }

@@ -173,8 +173,8 @@ export function AdminProductFormPage() {
       <label>{t('description')}<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={4} /></label>
 
       <div className="two-fields">
-        <label>{t('price')}<input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} required /></label>
-        <label>{t('discountPrice')}<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label>{t('price')} (USD)<input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} required /></label>
+        <label>{t('discountPrice')} (USD)<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
       </div>
 
       <label>{t('category')}

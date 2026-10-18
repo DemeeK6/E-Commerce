@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useOutletContext } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { useI18n } from '../context/I18nContext';
 import { ShopContact } from '../components/ShopContact';
 import { api } from '../services/api';
@@ -13,6 +14,7 @@ export function StoreLayout() {
   const { user, isAdmin, logout } = useAuth();
   const { count } = useCart();
   const { language, setLanguage, t } = useI18n();
+  const { chosen, setCurrency, rate } = useCurrency();
   // Loaded once in the layout so the footer shows the same details on every page.
   const [settings, setSettings] = useState<AppSetting[]>([]);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
@@ -51,6 +53,16 @@ export function StoreLayout() {
         </Link>
         <nav className="desktop-nav">{nav}</nav>
         <div className="header-actions">
+          {/* Lari is offered only once today's rate is known, so no price is ever a guess. */}
+          <select
+            value={rate ? chosen : 'USD'}
+            onChange={event => setCurrency(event.target.value as 'USD' | 'GEL')}
+            aria-label={t('currency')}
+            title={rate ? `1 USD = ${rate.usdToGel} GEL` : t('currencyUnavailable')}
+          >
+            <option value="USD">USD $</option>
+            <option value="GEL" disabled={!rate}>GEL ₾</option>
+          </select>
           <select value={language} onChange={(event) => setLanguage(event.target.value as 'en' | 'ka' | 'ru')} aria-label="Language">
             <option value="en">EN</option>
             <option value="ka">KA</option>

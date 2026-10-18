@@ -29,6 +29,9 @@ public record OrderDto(
     Guid PublicToken,
     string Status,
     decimal Total,
+    string Currency,
+    decimal ExchangeRate,
+    decimal TotalInCurrency,
     DateTime CreatedAtUtc,
     OrderItemDto[] Items);
 
@@ -50,7 +53,9 @@ public record CreateOrderRequest(
     TransferBank? TransferBank,
     CreateOrderItemRequest[] Items,
     /// <summary>"en", "ka" or "ru"; anything else is stored as "en".</summary>
-    string? Language = null);
+    string? Language = null,
+    /// <summary>"USD" or "GEL"; the server applies its own rate, never one sent by the browser.</summary>
+    string? Currency = null);
 
 public record UpdateOrderStatusRequest([Required] string Status);
 

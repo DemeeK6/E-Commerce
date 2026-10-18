@@ -1,5 +1,12 @@
+/** Dollars, as products are priced. The admin panel uses this; the shop uses useCurrency(). */
 export function money(value: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+}
+
+/** "$68.00" or "176.52 ₾" - lari with the symbol after, as Georgian shops write it. */
+export function formatAmount(value: number, currency: 'USD' | 'GEL') {
+  if (currency === 'USD') return money(value);
+  return `${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} ₾`;
 }
 
 export function localizedName(

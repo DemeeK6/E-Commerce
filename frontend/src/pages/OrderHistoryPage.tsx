@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { Order } from '../types';
-import { money } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
 
 export function OrderHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useI18n();
+  const { orderPrice } = useCurrency();
 
   useEffect(() => {
     api.orders()
@@ -43,7 +44,7 @@ export function OrderHistoryPage() {
                   {t(order.status.toLowerCase() as never)}
                 </span>
                 <span>{new Date(order.createdAtUtc).toLocaleDateString()}</span>
-                <strong>{money(order.total)}</strong>
+                <strong>{orderPrice(order, order.total)}</strong>
               </header>
               <ul className="order-items">
                 {order.items.map(item => (
@@ -51,7 +52,7 @@ export function OrderHistoryPage() {
                     {item.productName} × {item.quantity}
                     {item.size && <span> · {item.size}</span>}
                     {item.color && <span> · {item.color}</span>}
-                    <span> — {money(item.unitPrice * item.quantity)}</span>
+                    <span> — {orderPrice(order, item.unitPrice * item.quantity)}</span>
                   </li>
                 ))}
               </ul>

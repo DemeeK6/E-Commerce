@@ -97,6 +97,9 @@ else
 {
     builder.Services.AddScoped<IOrderNotifier, LoggingOrderNotifier>();
 }
+builder.Services.AddHttpClient(nameof(ExchangeRateService));
+// One shared cache of the National Bank's daily rate.
+builder.Services.AddSingleton<ExchangeRateService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<DataSeeder>();
 

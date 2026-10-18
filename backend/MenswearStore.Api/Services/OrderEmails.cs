@@ -16,7 +16,22 @@ public static class OrderEmails
     // where ":C" prints a generic currency sign rather than "$".
     private static readonly CultureInfo Money = CultureInfo.GetCultureInfo("en-US");
 
+    // "176.52 ₾": dot decimals with the symbol after, as Georgian shops write it.
+    private static readonly CultureInfo Lari = CultureInfo.InvariantCulture;
+
     private static string Format(decimal amount) => amount.ToString("C", Money);
+
+    /// <summary>A dollar amount shown in the order's currency, at the rate fixed on the order.</summary>
+    private static string Format(Order order, decimal usdAmount) =>
+        order.Currency == "GEL"
+            ? decimal.Round(usdAmount * order.ExchangeRate, 2).ToString("N2", Lari) + " ₾"
+            : Format(usdAmount);
+
+    /// <summary>"176,52 ₾ (= $68.00 at 2.5982)" for a lari order, plain dollars otherwise.</summary>
+    private static string OwnerAmount(Order order) =>
+        order.Currency == "GEL"
+            ? $"{Format(order, order.Total)} (= {Format(order.Total)} at {order.ExchangeRate.ToString(CultureInfo.InvariantCulture)})"
+            : Format(order.Total);
 
     // ---- To the shop owner ----
 
@@ -26,7 +41,7 @@ public static class OrderEmails
         $"""
         A new cash-on-delivery order has been placed.
 
-          Amount    {Format(order.Total)}
+          Amount    {OwnerAmount(order)}
 
         {OwnerCustomerBlock(order)}
 
@@ -45,7 +60,7 @@ public static class OrderEmails
 
             The customer says they have sent a {bank} transfer.
 
-              Amount    {Format(order.Total)}
+              Amount    {OwnerAmount(order)}
               Reference {order.OrderNumber}  (they were asked to put this in the transfer description)
 
             {OwnerCustomerBlock(order)}
@@ -65,7 +80,7 @@ public static class OrderEmails
           {order.ShippingAddress}
 
         Items
-        {string.Join("\n", order.Items.Select(i => $"  {i.Quantity} x {i.ProductName}{Options(i)} - {Format(i.UnitPrice * i.Quantity)}"))}
+        {string.Join("\n", order.Items.Select(i => $"  {i.Quantity} x {i.ProductName}{Options(i)} - {Format(order, i.UnitPrice * i.Quantity)}"))}
         """;
 
     // ---- To the customer (null when the order has no email address) ----
@@ -109,7 +124,7 @@ public static class OrderEmails
             ? $"""
 
 
-                  {text.Total} {Format(order.Total)}
+                  {text.Total} {Format(order, order.Total)}
 
                 {text.Items}
                 {string.Join("\n", order.Items.Select(i => $"  {i.Quantity} x {i.ProductName}{Options(i)}"))}

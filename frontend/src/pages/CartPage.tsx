@@ -2,11 +2,12 @@ import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useI18n } from '../context/I18nContext';
-import { money } from '../utils/format';
+import { useCurrency } from '../context/CurrencyContext';
 
 export function CartPage() {
   const { lines, total, updateQuantity, remove } = useCart();
   const { t } = useI18n();
+  const { price } = useCurrency();
 
   return (
     <section className="section cart-page">
@@ -25,7 +26,7 @@ export function CartPage() {
                 <div>
                   <h3>{line.productName}</h3>
                   <p>{line.size} / {line.color}</p>
-                  <strong>{money(line.price)}</strong>
+                  <strong>{price(line.price)}</strong>
                 </div>
                 <div className="quantity-control compact">
                   <button onClick={() => updateQuantity(line.localId, line.quantity - 1)}><Minus size={15} /></button>
@@ -38,8 +39,8 @@ export function CartPage() {
           </div>
           <aside className="summary-panel">
             <h2>{t('summary')}</h2>
-            <div><span>{t('subtotal')}</span><strong>{money(total)}</strong></div>
-            <div><span>{t('total')}</span><strong>{money(total)}</strong></div>
+            <div><span>{t('subtotal')}</span><strong>{price(total)}</strong></div>
+            <div><span>{t('total')}</span><strong>{price(total)}</strong></div>
             <Link className="btn btn-dark btn-full" to="/checkout">{t('checkout')}</Link>
           </aside>
         </div>
