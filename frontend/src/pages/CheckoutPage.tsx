@@ -187,7 +187,7 @@ export function CheckoutPage() {
       {placedOrder && placedOrder.transferBank !== null && (
         <BankTransferModal
           account={bankAccounts.find(a => a.bank === placedOrder.transferBank)!}
-          orderId={placedOrder.id}
+          orderNumber={placedOrder.orderNumber}
           total={placedOrder.total}
           shopPhone={shopPhone}
           busy={deciding}

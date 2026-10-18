@@ -72,7 +72,7 @@
   "orders": "Заказы",
   "myOrders": "Мои заказы",
   "orderHistory": "История заказов",
-  "orderId": "Заказ #",
+  "orderId": "Заказ",
   "orderDate": "Дата",
   "orderStatus": "Статус",
   "orderTotal": "Итого",

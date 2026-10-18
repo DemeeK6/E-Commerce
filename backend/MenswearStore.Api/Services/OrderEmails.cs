@@ -22,7 +22,7 @@ public static class OrderEmails
 
     public static OrderEmail OwnerNewCashOrder(Order order, string ownerAddress) => new(
         ownerAddress,
-        $"New order #{order.Id} - cash on delivery",
+        $"New order {order.OrderNumber} - cash on delivery",
         $"""
         A new cash-on-delivery order has been placed.
 
@@ -39,14 +39,14 @@ public static class OrderEmails
         var bank = order.TransferBank == TransferBank.BankOfGeorgia ? "Bank of Georgia" : "TBC Bank";
         return new(
             ownerAddress,
-            $"Order #{order.Id} - payment sent, please check",
+            $"Order {order.OrderNumber} - payment sent, please check",
             $"""
-            Order #{order.Id} is waiting for you to check the balance.
+            Order {order.OrderNumber} is waiting for you to check the balance.
 
             The customer says they have sent a {bank} transfer.
 
               Amount    {Format(order.Total)}
-              Reference #{order.Id}  (they were asked to put this in the transfer description)
+              Reference {order.OrderNumber}  (they were asked to put this in the transfer description)
 
             {OwnerCustomerBlock(order)}
 
@@ -77,14 +77,14 @@ public static class OrderEmails
         var intro = order.PaymentMethod == PaymentMethod.BankTransfer
             ? text.ReceivedTransfer(order)
             : text.ReceivedCash(order);
-        return Customer(order, text.ReceivedSubject(order.Id), intro, withSummary: true);
+        return Customer(order, text.ReceivedSubject(order.OrderNumber), intro, withSummary: true);
     }
 
     /// <summary>Bank transfers only - for cash the money arrives with the delivery.</summary>
     public static OrderEmail? CustomerPaymentConfirmed(Order order)
     {
         var text = Texts(order);
-        return Customer(order, text.ConfirmedSubject(order.Id), text.Confirmed(order), withSummary: true);
+        return Customer(order, text.ConfirmedSubject(order.OrderNumber), text.Confirmed(order), withSummary: true);
     }
 
     /// <summary>Shipped, Delivered and Cancelled; null for any other status.</summary>
@@ -93,9 +93,9 @@ public static class OrderEmails
         var text = Texts(order);
         return order.Status switch
         {
-            "Shipped" => Customer(order, text.ShippedSubject(order.Id), text.Shipped(order), withSummary: false),
-            "Delivered" => Customer(order, text.DeliveredSubject(order.Id), text.Delivered(order), withSummary: false),
-            "Cancelled" => Customer(order, text.CancelledSubject(order.Id), text.Cancelled(order), withSummary: false),
+            "Shipped" => Customer(order, text.ShippedSubject(order.OrderNumber), text.Shipped(order), withSummary: false),
+            "Delivered" => Customer(order, text.DeliveredSubject(order.OrderNumber), text.Delivered(order), withSummary: false),
+            "Cancelled" => Customer(order, text.CancelledSubject(order.OrderNumber), text.Cancelled(order), withSummary: false),
             _ => null
         };
     }
@@ -151,16 +151,16 @@ public static class OrderEmails
         string Total,
         string Items,
         string DeliveringTo,
-        Func<int, string> ReceivedSubject,
+        Func<string, string> ReceivedSubject,
         Func<Order, string> ReceivedCash,
         Func<Order, string> ReceivedTransfer,
-        Func<int, string> ConfirmedSubject,
+        Func<string, string> ConfirmedSubject,
         Func<Order, string> Confirmed,
-        Func<int, string> ShippedSubject,
+        Func<string, string> ShippedSubject,
         Func<Order, string> Shipped,
-        Func<int, string> DeliveredSubject,
+        Func<string, string> DeliveredSubject,
         Func<Order, string> Delivered,
-        Func<int, string> CancelledSubject,
+        Func<string, string> CancelledSubject,
         Func<Order, string> Cancelled);
 
     private static readonly CustomerTexts English = new(
@@ -169,17 +169,17 @@ public static class OrderEmails
         Total: "Total",
         Items: "Items",
         DeliveringTo: "Delivering to",
-        ReceivedSubject: id => $"We received your order #{id}",
-        ReceivedCash: o => $"Thank you for your order #{o.Id}. We will call you on {o.CustomerPhone} to arrange delivery. You pay in cash when it arrives.",
-        ReceivedTransfer: o => $"Thank you for your order #{o.Id}. We will check the bank transfer and email you as soon as the payment arrives.",
-        ConfirmedSubject: id => $"Order #{id} confirmed",
-        Confirmed: o => $"We have received your payment for order #{o.Id}. Your order is confirmed and we will be in touch about delivery.",
-        ShippedSubject: id => $"Your order #{id} is on its way",
-        Shipped: o => $"Good news - your order #{o.Id} has been sent. We will call you on {o.CustomerPhone} if the courier needs anything.",
-        DeliveredSubject: id => $"Your order #{id} has been delivered",
-        Delivered: o => $"Your order #{o.Id} has been delivered. Thank you for shopping with SOFIO!",
-        CancelledSubject: id => $"Your order #{id} was cancelled",
-        Cancelled: o => $"Your order #{o.Id} has been cancelled. If you think this is a mistake, or you have already paid, please reply to this email.");
+        ReceivedSubject: id => $"We received your order {id}",
+        ReceivedCash: o => $"Thank you for your order {o.OrderNumber}. We will call you on {o.CustomerPhone} to arrange delivery. You pay in cash when it arrives.",
+        ReceivedTransfer: o => $"Thank you for your order {o.OrderNumber}. We will check the bank transfer and email you as soon as the payment arrives.",
+        ConfirmedSubject: id => $"Order {id} confirmed",
+        Confirmed: o => $"We have received your payment for order {o.OrderNumber}. Your order is confirmed and we will be in touch about delivery.",
+        ShippedSubject: id => $"Your order {id} is on its way",
+        Shipped: o => $"Good news - your order {o.OrderNumber} has been sent. We will call you on {o.CustomerPhone} if the courier needs anything.",
+        DeliveredSubject: id => $"Your order {id} has been delivered",
+        Delivered: o => $"Your order {o.OrderNumber} has been delivered. Thank you for shopping with SOFIO!",
+        CancelledSubject: id => $"Your order {id} was cancelled",
+        Cancelled: o => $"Your order {o.OrderNumber} has been cancelled. If you think this is a mistake, or you have already paid, please reply to this email.");
 
     private static readonly CustomerTexts Georgian = new(
         Hello: name => $"გამარჯობა, {name}!",
@@ -187,17 +187,17 @@ public static class OrderEmails
         Total: "ჯამი",
         Items: "პროდუქტები",
         DeliveringTo: "მიწოდების მისამართი",
-        ReceivedSubject: id => $"თქვენი შეკვეთა #{id} მიღებულია",
-        ReceivedCash: o => $"გმადლობთ შეკვეთისთვის #{o.Id}. მიწოდების შესათანხმებლად დაგირეკავთ ნომერზე {o.CustomerPhone}. გადახდა ხდება ნაღდი ფულით, მიტანისას.",
-        ReceivedTransfer: o => $"გმადლობთ შეკვეთისთვის #{o.Id}. გადავამოწმებთ საბანკო გადარიცხვას და მოგწერთ, როგორც კი თანხა ჩაირიცხება.",
-        ConfirmedSubject: id => $"შეკვეთა #{id} დადასტურებულია",
-        Confirmed: o => $"თქვენი გადახდა შეკვეთისთვის #{o.Id} მიღებულია. შეკვეთა დადასტურებულია და მალე დაგიკავშირდებით მიწოდებასთან დაკავშირებით.",
-        ShippedSubject: id => $"თქვენი შეკვეთა #{id} გზაშია",
-        Shipped: o => $"თქვენი შეკვეთა #{o.Id} გამოგზავნილია. საჭიროების შემთხვევაში დაგირეკავთ ნომერზე {o.CustomerPhone}.",
-        DeliveredSubject: id => $"თქვენი შეკვეთა #{id} მიტანილია",
-        Delivered: o => $"თქვენი შეკვეთა #{o.Id} მიტანილია. გმადლობთ, რომ SOFIO აირჩიეთ!",
-        CancelledSubject: id => $"თქვენი შეკვეთა #{id} გაუქმდა",
-        Cancelled: o => $"თქვენი შეკვეთა #{o.Id} გაუქმებულია. თუ ეს შეცდომაა, ან უკვე გადაიხადეთ, გთხოვთ, უპასუხოთ ამ წერილს.");
+        ReceivedSubject: id => $"თქვენი შეკვეთა {id} მიღებულია",
+        ReceivedCash: o => $"გმადლობთ შეკვეთისთვის {o.OrderNumber}. მიწოდების შესათანხმებლად დაგირეკავთ ნომერზე {o.CustomerPhone}. გადახდა ხდება ნაღდი ფულით, მიტანისას.",
+        ReceivedTransfer: o => $"გმადლობთ შეკვეთისთვის {o.OrderNumber}. გადავამოწმებთ საბანკო გადარიცხვას და მოგწერთ, როგორც კი თანხა ჩაირიცხება.",
+        ConfirmedSubject: id => $"შეკვეთა {id} დადასტურებულია",
+        Confirmed: o => $"თქვენი გადახდა შეკვეთისთვის {o.OrderNumber} მიღებულია. შეკვეთა დადასტურებულია და მალე დაგიკავშირდებით მიწოდებასთან დაკავშირებით.",
+        ShippedSubject: id => $"თქვენი შეკვეთა {id} გზაშია",
+        Shipped: o => $"თქვენი შეკვეთა {o.OrderNumber} გამოგზავნილია. საჭიროების შემთხვევაში დაგირეკავთ ნომერზე {o.CustomerPhone}.",
+        DeliveredSubject: id => $"თქვენი შეკვეთა {id} მიტანილია",
+        Delivered: o => $"თქვენი შეკვეთა {o.OrderNumber} მიტანილია. გმადლობთ, რომ SOFIO აირჩიეთ!",
+        CancelledSubject: id => $"თქვენი შეკვეთა {id} გაუქმდა",
+        Cancelled: o => $"თქვენი შეკვეთა {o.OrderNumber} გაუქმებულია. თუ ეს შეცდომაა, ან უკვე გადაიხადეთ, გთხოვთ, უპასუხოთ ამ წერილს.");
 
     private static readonly CustomerTexts Russian = new(
         Hello: name => $"Здравствуйте, {name}!",
@@ -205,15 +205,15 @@ public static class OrderEmails
         Total: "Итого",
         Items: "Товары",
         DeliveringTo: "Адрес доставки",
-        ReceivedSubject: id => $"Ваш заказ #{id} получен",
-        ReceivedCash: o => $"Спасибо за заказ #{o.Id}. Мы позвоним вам по номеру {o.CustomerPhone}, чтобы договориться о доставке. Оплата наличными при получении.",
-        ReceivedTransfer: o => $"Спасибо за заказ #{o.Id}. Мы проверим банковский перевод и напишем вам, как только оплата поступит.",
-        ConfirmedSubject: id => $"Заказ #{id} подтверждён",
-        Confirmed: o => $"Мы получили оплату за заказ #{o.Id}. Заказ подтверждён, скоро мы свяжемся с вами по поводу доставки.",
-        ShippedSubject: id => $"Ваш заказ #{id} в пути",
-        Shipped: o => $"Ваш заказ #{o.Id} отправлен. Если курьеру что-то понадобится, мы позвоним вам по номеру {o.CustomerPhone}.",
-        DeliveredSubject: id => $"Ваш заказ #{id} доставлен",
-        Delivered: o => $"Ваш заказ #{o.Id} доставлен. Спасибо, что выбрали SOFIO!",
-        CancelledSubject: id => $"Ваш заказ #{id} отменён",
-        Cancelled: o => $"Ваш заказ #{o.Id} отменён. Если это ошибка или вы уже оплатили заказ, пожалуйста, ответьте на это письмо.");
+        ReceivedSubject: id => $"Ваш заказ {id} получен",
+        ReceivedCash: o => $"Спасибо за заказ {o.OrderNumber}. Мы позвоним вам по номеру {o.CustomerPhone}, чтобы договориться о доставке. Оплата наличными при получении.",
+        ReceivedTransfer: o => $"Спасибо за заказ {o.OrderNumber}. Мы проверим банковский перевод и напишем вам, как только оплата поступит.",
+        ConfirmedSubject: id => $"Заказ {id} подтверждён",
+        Confirmed: o => $"Мы получили оплату за заказ {o.OrderNumber}. Заказ подтверждён, скоро мы свяжемся с вами по поводу доставки.",
+        ShippedSubject: id => $"Ваш заказ {id} в пути",
+        Shipped: o => $"Ваш заказ {o.OrderNumber} отправлен. Если курьеру что-то понадобится, мы позвоним вам по номеру {o.CustomerPhone}.",
+        DeliveredSubject: id => $"Ваш заказ {id} доставлен",
+        Delivered: o => $"Ваш заказ {o.OrderNumber} доставлен. Спасибо, что выбрали SOFIO!",
+        CancelledSubject: id => $"Ваш заказ {id} отменён",
+        Cancelled: o => $"Ваш заказ {o.OrderNumber} отменён. Если это ошибка или вы уже оплатили заказ, пожалуйста, ответьте на это письмо.");
 }

@@ -1087,12 +1087,35 @@ textarea {
 .status-cancelled { background: #fee2e2; color: #991b1b; }
 .empty-state { text-align: center; padding: 4rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 1.5rem; color: var(--muted); }
 
-/* Admin Orders */
-.admin-order-row { flex-direction: column; gap: .75rem; align-items: flex-start; }
-.admin-order-info { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; width: 100%; }
-.admin-order-info strong:first-child { flex: 1; }
-.admin-order-status { display: flex; align-items: center; gap: 1rem; }
-.admin-order-status select { padding: .35rem .6rem; border: 1px solid var(--line); border-radius: 4px; font-size: .875rem; }
+/* Admin Orders. .admin-row is the products grid (64px thumbnail track first) and
+   `.admin-row div` forces display: grid, so this row sets its own tracks and every
+   inner block is prefixed with .admin-row to win. Details left, actions right. */
+.admin-order-row { grid-template-columns: minmax(0, 1fr) minmax(180px, 220px); align-items: start; gap: 18px; padding: 16px 18px; }
+.admin-row .admin-order-info { gap: 8px; min-width: 0; }
+.admin-row .admin-order-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.admin-order-id { font-size: 1.05rem; }
+.admin-order-total { margin-left: auto; font-size: 1.05rem; }
+.admin-row .admin-order-details { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 18px; }
+.admin-row .admin-order-details span { overflow-wrap: anywhere; }
+.admin-row .admin-order-name { color: var(--ink); font-weight: 700; }
+.admin-row .admin-order-status { gap: 8px; }
+.admin-order-status .order-status { justify-self: start; }
+.admin-order-status select { width: 100%; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 4px; font-size: .875rem; }
+.admin-order-status .btn { width: 100%; }
+
+@media (max-width: 720px) {
+  .admin-order-row { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* `.admin-row span` (0,1,1) greys every span in a row, which washed out these
+   badges' own text colours. Restate them at the same specificity. */
+.admin-row .order-tag-guest,
+.admin-row .order-tag-awaiting { color: #fff; }
+.admin-row .status-pending { color: #92400e; }
+.admin-row .status-processing { color: #1e40af; }
+.admin-row .status-shipped { color: #5b21b6; }
+.admin-row .status-delivered { color: #065f46; }
+.admin-row .status-cancelled { color: #991b1b; }
 
 /* Product search */
 .search-label { display: flex; align-items: center; gap: .5rem; border: 1px solid var(--line); border-radius: 6px; padding: .4rem .75rem; background: #fff; }

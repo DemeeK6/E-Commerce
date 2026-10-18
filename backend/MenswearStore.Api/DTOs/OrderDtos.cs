@@ -14,6 +14,7 @@ public record OrderItemDto(
 
 public record OrderDto(
     int Id,
+    string OrderNumber,
     string UserEmail,
     bool IsGuest,
     string CustomerFirstName,

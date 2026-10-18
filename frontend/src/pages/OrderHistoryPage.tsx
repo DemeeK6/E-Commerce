@@ -38,7 +38,7 @@ export function OrderHistoryPage() {
           {orders.map(order => (
             <article className="order-card" key={order.id}>
               <header className="order-card-header">
-                <strong>{t('orderId')}{order.id}</strong>
+                <strong>{t('orderId')} {order.orderNumber}</strong>
                 <span className={`order-status status-${order.status.toLowerCase()}`}>
                   {t(order.status.toLowerCase() as never)}
                 </span>

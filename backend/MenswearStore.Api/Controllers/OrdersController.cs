@@ -7,6 +7,7 @@ using MenswearStore.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace MenswearStore.Api.Controllers;
 
@@ -79,6 +80,7 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
 
         var order = new Order
         {
+            OrderNumber = await OrderNumberGenerator.NextAsync(db),
             UserId = userId,
             CustomerFirstName = request.FirstName.Trim(),
             CustomerLastName = request.LastName.Trim(),
@@ -98,7 +100,7 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         };
 
         db.Orders.Add(order);
-        await db.SaveChangesAsync();
+        await SaveWithFreeOrderNumberAsync(order);
 
         var created = await LoadOrderAsync(order.Id);
 
@@ -240,6 +242,34 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier) 
         }
 
         return order.ToDto();
+    }
+
+    /// <summary>
+    /// The generator checks a number is free before using it, but two orders placed in
+    /// the same instant could still pick the same one. The unique index then rejects
+    /// the second save; instead of showing the customer an error, take a new number
+    /// and save again.
+    /// </summary>
+    private async Task SaveWithFreeOrderNumberAsync(Order order)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await db.SaveChangesAsync();
+                return;
+            }
+            catch (DbUpdateException exception) when (
+                attempt < 5 &&
+                exception.InnerException is PostgresException
+                {
+                    SqlState: PostgresErrorCodes.UniqueViolation,
+                    ConstraintName: "IX_Orders_OrderNumber"
+                })
+            {
+                order.OrderNumber = await OrderNumberGenerator.NextAsync(db);
+            }
+        }
     }
 
     private Task<Order?> LoadOrderAsync(int id) =>

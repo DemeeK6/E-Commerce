@@ -72,7 +72,7 @@
   "orders": "Orders",
   "myOrders": "My orders",
   "orderHistory": "Order history",
-  "orderId": "Order #",
+  "orderId": "Order",
   "orderDate": "Date",
   "orderStatus": "Status",
   "orderTotal": "Total",

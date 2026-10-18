@@ -13,7 +13,7 @@ const BANK_LABEL = { 0: 'bankTbc', 1: 'bankBog' } as const;
  */
 export function BankTransferModal({
   account,
-  orderId,
+  orderNumber,
   total,
   shopPhone,
   onConfirm,
@@ -22,7 +22,7 @@ export function BankTransferModal({
   error,
 }: {
   account: BankAccount;
-  orderId: number;
+  orderNumber: string;
   total: number;
   shopPhone: string;
   onConfirm: () => void;
@@ -80,7 +80,7 @@ export function BankTransferModal({
     }
   };
 
-  const reference = `#${orderId}`;
+  const reference = orderNumber;
 
   return (
     // No backdrop dismissal, for the same reason Escape does nothing.

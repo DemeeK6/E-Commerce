@@ -60,8 +60,8 @@ export function AdminOrdersPage() {
               key={order.id}
             >
               <div className="admin-order-info">
-                <strong>
-                  {t('orderId')}{order.id}
+                <div className="admin-order-head">
+                  <strong className="admin-order-id">{t('orderId')} {order.orderNumber}</strong>
                   {/* Three distinct states, so an abandoned order is never mistaken for
                       one waiting on her to check the balance. */}
                   {order.paymentMethod === 1 && order.paymentStatus !== 1 && order.status !== 'Cancelled' && (
@@ -72,16 +72,8 @@ export function AdminOrdersPage() {
                   <span className={order.isGuest ? 'order-tag order-tag-guest' : 'order-tag'}>
                     {order.isGuest ? t('guest') : t('customer')}
                   </span>
-                </strong>
-                <span>{order.customerFirstName} {order.customerLastName}</span>
-                <span>{order.customerPhone}</span>
-                <span>{order.customerEmail || order.userEmail}</span>
-                <span className="admin-order-address">{order.shippingAddress}</span>
-                <span>{new Date(order.createdAtUtc).toLocaleDateString()}</span>
-                <span>{order.items.length} {t('orderItems')}</span>
-                <strong>{money(order.total)}</strong>
-              </div>
-              <div className="admin-order-status">
+                  <strong className="admin-order-total">{money(order.total)}</strong>
+                </div>
                 <span className="order-payment">
                   {order.paymentMethod === 0
                     ? t('payCash')
@@ -91,22 +83,32 @@ export function AdminOrdersPage() {
                     {order.paymentStatus === 1 ? t('paid') : t('unpaid')}
                   </strong>
                 </span>
-                {order.paymentStatus !== 1 && (
-                  <button className="btn btn-outline btn-sm" onClick={() => markPaid(order.id)}>
-                    {t('markPaid')}
-                  </button>
-                )}
+                <div className="admin-order-details">
+                  <span className="admin-order-name">{order.customerFirstName} {order.customerLastName}</span>
+                  <span>{order.customerPhone}</span>
+                  <span>{order.customerEmail || order.userEmail}</span>
+                  <span className="admin-order-address">{order.shippingAddress}</span>
+                  <span>{new Date(order.createdAtUtc).toLocaleDateString()} · {order.items.length} {t('orderItems')}</span>
+                </div>
+              </div>
+              <div className="admin-order-status">
                 <span className={`order-status status-${order.status.toLowerCase()}`}>
                   {t(order.status.toLowerCase() as never)}
                 </span>
                 <select
                   value={order.status}
                   onChange={e => changeStatus(order.id, e.target.value as OrderStatus)}
+                  aria-label={t('orderStatus')}
                 >
                   {STATUSES.map(s => (
                     <option key={s} value={s}>{t(s.toLowerCase() as never)}</option>
                   ))}
                 </select>
+                {order.paymentStatus !== 1 && (
+                  <button className="btn btn-outline btn-sm" onClick={() => markPaid(order.id)}>
+                    {t('markPaid')}
+                  </button>
+                )}
               </div>
             </article>
           ))}

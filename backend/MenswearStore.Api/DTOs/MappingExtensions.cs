@@ -76,6 +76,7 @@ public static class MappingExtensions
     public static OrderDto ToDto(this Order order) =>
         new(
             order.Id,
+            order.OrderNumber,
             // Falls back to the address typed at checkout so a guest order still shows a
             // contact in every list that used to print the account email.
             order.User?.Email ?? (string.IsNullOrWhiteSpace(order.CustomerEmail) ? "-" : order.CustomerEmail),

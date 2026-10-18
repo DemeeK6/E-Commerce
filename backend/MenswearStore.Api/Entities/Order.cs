@@ -4,6 +4,13 @@ public class Order
 {
     public int Id { get; set; }
 
+    /// <summary>
+    /// What customers and the shop owner see, e.g. OD-261018-4827: "OD" (order) prefix, order
+    /// date in Tbilisi (yyMMdd), then four random digits. Unlike Id it does not reveal
+    /// how many orders the shop has had, and it is the bank transfer reference.
+    /// </summary>
+    public string OrderNumber { get; set; } = string.Empty;
+
     /// <summary>Null for guest orders placed without an account.</summary>
     public string? UserId { get; set; }
     public ApplicationUser? User { get; set; }

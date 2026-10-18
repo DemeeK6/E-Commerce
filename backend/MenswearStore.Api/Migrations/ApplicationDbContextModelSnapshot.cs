@@ -476,6 +476,11 @@ namespace MenswearStore.Api.Migrations
                         .HasColumnType("character varying(2)")
                         .HasDefaultValue("en");
 
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("integer");
 
@@ -508,6 +513,9 @@ namespace MenswearStore.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 

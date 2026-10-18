@@ -60,6 +60,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Property(order => order.Total)
             .HasPrecision(10, 2);
 
+        builder.Entity<Order>()
+            .Property(order => order.OrderNumber)
+            .HasMaxLength(20);
+
+        // The generator retries on a clash; this index is the guarantee.
+        builder.Entity<Order>()
+            .HasIndex(order => order.OrderNumber)
+            .IsUnique();
+
         // Orders placed before languages were recorded get English emails.
         builder.Entity<Order>()
             .Property(order => order.Language)
