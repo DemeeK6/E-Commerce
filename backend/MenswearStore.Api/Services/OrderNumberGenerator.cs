@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace MenswearStore.Api.Services;
 
 /// <summary>
-/// Makes order numbers like OD-261018-4827: "OD" (order) prefix, the order date in Tbilisi
+/// Makes order numbers like ON-261018-4827: "ON" (order number) prefix, the order date in Tbilisi
 /// (yyMMdd), then four random digits. Digits only after the prefix, so a customer can
 /// type it into a bank app without mixing up letters.
 /// </summary>
@@ -25,7 +25,7 @@ public static class OrderNumberGenerator
         {
             var digits = attempt < 10 ? 4 : 5;
             var random = RandomNumberGenerator.GetInt32(0, (int)Math.Pow(10, digits)).ToString($"D{digits}");
-            var candidate = $"OD-{date}-{random}";
+            var candidate = $"ON-{date}-{random}";
             if (!await db.Orders.AnyAsync(order => order.OrderNumber == candidate, cancellationToken))
             {
                 return candidate;

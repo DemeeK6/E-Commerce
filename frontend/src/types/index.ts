@@ -104,7 +104,7 @@ export type PaymentStatus = 0 | 1 | 2 | 3;  // 0 = Pending, 1 = Paid, 2 = Failed
 
 export interface Order {
   id: number;
-  /** What people see, e.g. OD-261018-4827. `id` is internal only. */
+  /** What people see, e.g. ON-261018-4827. `id` is internal only. */
   orderNumber: string;
   userEmail: string;
   isGuest: boolean;

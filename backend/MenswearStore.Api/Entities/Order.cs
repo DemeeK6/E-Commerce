@@ -5,7 +5,7 @@ public class Order
     public int Id { get; set; }
 
     /// <summary>
-    /// What customers and the shop owner see, e.g. OD-261018-4827: "OD" (order) prefix, order
+    /// What customers and the shop owner see, e.g. ON-261018-4827: "ON" (order number) prefix, order
     /// date in Tbilisi (yyMMdd), then four random digits. Unlike Id it does not reveal
     /// how many orders the shop has had, and it is the bank transfer reference.
     /// </summary>
