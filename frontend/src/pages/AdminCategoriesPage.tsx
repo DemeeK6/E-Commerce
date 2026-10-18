@@ -1,43 +1,85 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-import type { Category } from '../types';
+import type { Category, GenderTarget } from '../types';
+
+const GENDER_OPTIONS: { value: GenderTarget; labelKey: 'men' | 'women' | 'kids' }[] = [
+  { value: 0, labelKey: 'men' },
+  { value: 1, labelKey: 'women' },
+  { value: 2, labelKey: 'kids' },
+];
+
+// Mirrors the seeder's convention (DataSeeder.GetOrSeedCategoriesAsync): Men
+// keeps the bare slug, Women/Kids get a gender prefix so e.g. "Shirts" under
+// each gender doesn't collide on the UNIQUE Categories.Slug index.
+const GENDER_SLUG_PREFIX: Record<GenderTarget, string> = { 0: '', 1: 'women-', 2: 'kids-' };
 
 export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [name, setName] = useState('');
+  const [nameEn, setNameEn] = useState('');
+  const [nameKa, setNameKa] = useState('');
+  const [nameRu, setNameRu] = useState('');
+  const [genderTarget, setGenderTarget] = useState<GenderTarget>(0);
   const [editing, setEditing] = useState<Category | null>(null);
+  const [error, setError] = useState('');
   const { t } = useI18n();
 
-  const load = () => { api.categories('').then(setCategories).catch(() => setCategories([])); };
+  // `api.categories('')` hits GET /api/categories with no `gender` query param.
+  // The backend's `gender` parameter defaults to Men when absent (it's a C#
+  // default parameter value, not a true "all genders" option), so that call
+  // silently returns only Men categories. Fetch each gender explicitly and
+  // merge so the admin can see and manage every category, not just Men.
+  const load = () => {
+    Promise.all(GENDER_OPTIONS.map(option => api.categories(option.value, true)))
+      .then(results => setCategories(results.flat()))
+      .catch(() => setCategories([]));
+  };
   useEffect(load, []);
+
+  const resetForm = () => {
+    setNameEn('');
+    setNameKa('');
+    setNameRu('');
+    setGenderTarget(0);
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (editing) {
-      await api.saveCategory({ ...editing, name });
-      setEditing(null);
-    } else {
-      await api.saveCategory({
-        name,
-        slug: name.toLowerCase().replaceAll(' ', '-'),
-        genderTarget: 0,
-        isEnabled: true,
-        displayOrder: categories.length + 1,
-      });
+    setError('');
+    try {
+      if (editing) {
+        await api.saveCategory({ ...editing, nameEn, nameKa, nameRu, genderTarget });
+        setEditing(null);
+      } else {
+        await api.saveCategory({
+          nameEn,
+          nameKa,
+          nameRu,
+          slug: `${GENDER_SLUG_PREFIX[genderTarget]}${nameEn.toLowerCase().replaceAll(' ', '-')}`,
+          genderTarget,
+          isEnabled: true,
+          displayOrder: categories.filter(c => c.genderTarget === genderTarget).length + 1,
+        });
+      }
+      resetForm();
+      load();
+    } catch (exception) {
+      setError((exception as Error).message);
     }
-    setName('');
-    load();
   };
 
   const startEdit = (category: Category) => {
     setEditing(category);
-    setName(category.name);
+    setNameEn(category.nameEn);
+    setNameKa(category.nameKa);
+    setNameRu(category.nameRu);
+    setGenderTarget(category.genderTarget);
   };
 
   const cancelEdit = () => {
     setEditing(null);
-    setName('');
+    setError('');
+    resetForm();
   };
 
   const remove = async (id: number) => {
@@ -59,11 +101,29 @@ export function AdminCategoriesPage() {
       </div>
       <form className="inline-form" onSubmit={submit}>
         <input
-          value={name}
-          onChange={event => setName(event.target.value)}
-          placeholder={editing ? t('editCategory') : t('newCategoryPlaceholder')}
+          value={nameEn}
+          onChange={event => setNameEn(event.target.value)}
+          placeholder={t('nameEn')}
           required
         />
+        <input
+          value={nameKa}
+          onChange={event => setNameKa(event.target.value)}
+          placeholder={t('nameKa')}
+        />
+        <input
+          value={nameRu}
+          onChange={event => setNameRu(event.target.value)}
+          placeholder={t('nameRu')}
+        />
+        <select
+          value={genderTarget}
+          onChange={event => setGenderTarget(Number(event.target.value) as GenderTarget)}
+        >
+          {GENDER_OPTIONS.map(option => (
+            <option key={option.value} value={option.value}>{t(option.labelKey)}</option>
+          ))}
+        </select>
         <button className="btn btn-dark" type="submit">
           {editing ? t('saveProduct') : t('addCategory')}
         </button>
@@ -71,10 +131,15 @@ export function AdminCategoriesPage() {
           <button className="btn btn-outline" type="button" onClick={cancelEdit}>✕</button>
         )}
       </form>
+      {error && <p className="form-error">{error}</p>}
       <div className="admin-table">
         {categories.map(category => (
-          <article className="admin-row" key={category.id}>
-            <div><strong>{category.name}</strong><span>{category.slug}</span></div>
+          <article className="admin-row admin-row-text" key={category.id}>
+            <div>
+              <strong>{category.nameEn}</strong>
+              <span>{category.nameKa || '—'} · {category.nameRu || '—'}</span>
+              <span>{category.slug} · {t(GENDER_OPTIONS[category.genderTarget].labelKey)}</span>
+            </div>
             <div className="admin-row-actions">
               <button
                 className={category.isEnabled ? 'status active' : 'status'}

@@ -5,7 +5,7 @@ Initial full-stack e-commerce application for a men-focused clothing store, prep
 ## Stack
 
 - Backend: .NET 10, ASP.NET Core Web API, ASP.NET Core Identity, JWT auth
-- Database: SQLite with Entity Framework Core migrations
+- Database: PostgreSQL 17 with Entity Framework Core migrations
 - Frontend: React, TypeScript, React Router, Vite
 - Authorization: Admin and Customer roles
 - UI: responsive fashion storefront, admin dashboard, auth screens, cart, checkout placeholder
@@ -22,16 +22,35 @@ frontend
 
 ## Seeded Accounts
 
+Development only. In production the admin comes from `.env` and no test customer is created - see [docs/DEPLOY.md](docs/DEPLOY.md).
+
 - Admin: `admin@menswear.local` / `Admin123!`
 - Customer: `customer@menswear.local` / `Customer123!`
+
+## Run the Database
+
+PostgreSQL runs in Docker. From the repository root:
+
+```powershell
+docker compose up -d
+```
+
+It listens on `localhost:5433`, not the default 5432, to avoid clashing with a
+directly installed PostgreSQL. Data lives in the `menswear-pgdata` volume and
+survives restarts and `docker compose down`.
+
+To wipe the database and let the seeder rebuild it from scratch:
+
+```powershell
+docker compose down -v
+docker compose up -d
+```
 
 ## Run Backend
 
 ```powershell
 dotnet restore backend/MenswearStore.Api/MenswearStore.Api.csproj
-dotnet tool restore
-dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj
-dotnet run --project backend/MenswearStore.Api/MenswearStore.Api.csproj
+dotnet run --project backend/MenswearStore.Api/MenswearStore.Api.csproj --launch-profile https
 ```
 
 The API runs from the launch profile at:
@@ -44,6 +63,52 @@ OpenAPI JSON is available in development at:
 - `https://localhost:7060/openapi/v1.json`
 
 The backend also applies migrations and seeds data on startup.
+
+## Email
+
+Two emails are sent over Gmail SMTP:
+
+- when a customer confirms they have sent a bank transfer, the shop owner is told to
+  check the balance
+- when the shop owner marks that order paid, the customer gets a confirmation
+
+Gmail rejects normal account passwords for SMTP, so this needs a 16-character **App
+Password**, which in turn needs 2-Step Verification on the account:
+
+1. Enable 2-Step Verification at <https://myaccount.google.com/security>
+2. Create an App Password at <https://myaccount.google.com/apppasswords>
+
+Put the address in `appsettings.Development.json`:
+
+```json
+"Email": {
+  "Host": "smtp.gmail.com",
+  "Port": 587,
+  "FromAddress": "yourshop@gmail.com",
+  "FromName": "SOFIO",
+  "AdminAddress": ""
+}
+```
+
+`AdminAddress` is where order notifications go; leave it blank to use `FromAddress`.
+
+The password must **not** go in that file - it is committed. Store it locally instead:
+
+```powershell
+cd backend/MenswearStore.Api
+dotnet user-secrets init
+dotnet user-secrets set "Email:AppPassword" "your-16-char-app-password"
+```
+
+In production, supply it as the environment variable `Email__AppPassword`.
+
+Until both `FromAddress` and the password are set, the application starts normally and
+logs what it would have sent instead of sending it. A mail server that is down or
+misconfigured is logged and never fails an order.
+
+Gmail allows roughly 500 messages a day, and mail from a gmail.com address reaches
+customer inboxes less reliably than a dedicated transactional service. Both are fine to
+start with; neither is permanent.
 
 ## Run Frontend
 
@@ -69,7 +134,7 @@ Vite proxies `/api` to `https://localhost:7060`.
 - JWT authentication against ASP.NET Core Identity
 - Role-based admin protection
 - Admin dashboard, products, product create/edit, categories, feature toggles
-- SQLite entities for users, roles, products, categories, images, cart, orders, settings
+- PostgreSQL entities for users, roles, products, categories, images, cart, orders, settings
 - Georgian, Russian, and English i18n files
 
 ## Feature Toggles
@@ -89,6 +154,7 @@ Admins can edit these from `/admin/settings`.
 ## Add a Migration
 
 ```powershell
+dotnet tool restore
 dotnet tool run dotnet-ef migrations add MigrationName --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj --output-dir Migrations
 dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/MenswearStore.Api.csproj --startup-project backend/MenswearStore.Api/MenswearStore.Api.csproj
 ```
@@ -99,12 +165,12 @@ dotnet tool run dotnet-ef database update --project backend/MenswearStore.Api/Me
 2. Publish the backend with `dotnet publish -c Release`.
 3. Run the API behind Nginx as a `systemd` service.
 4. Set production configuration with environment variables:
-   - `ConnectionStrings__DefaultConnection=Data Source=/var/www/menswear/menswear.db`
+   - `ConnectionStrings__DefaultConnection=Host=<db-host>;Port=5432;Database=menswear;Username=<user>;Password=<password>`
    - `Jwt__Key=<long-random-secret>`
    - `Jwt__Issuer=MenswearStore.Api`
    - `Jwt__Audience=MenswearStore.Client`
 5. Use HTTPS through Certbot/Let’s Encrypt.
-6. Keep SQLite backups simple at first: stop the app or use SQLite online backup, then copy the `.db` file to object storage or another server.
+6. Back up with `pg_dump` on a schedule, and copy the dump to object storage or another server.
 
 ## Next Steps
 

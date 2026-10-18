@@ -1,10 +1,13 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { Star } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
-import type { Category, Product } from '../types';
+import type { Category, Color, Product, ProductColor, ProductImage } from '../types';
+import { localizedName } from '../utils/format';
 
 const COMMON_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
+const GENDER_LABEL_KEYS = { 0: 'men', 1: 'women', 2: 'kids' } as const;
 
 const blank = {
   name: '',
@@ -14,38 +17,45 @@ const blank = {
   categoryId: 0,
   genderTarget: 0 as const,
   sizes: ['S', 'M', 'L', 'XL'],
-  colors: [{ id: 0, name: 'Black', hexCode: '#111111' }],
-  images: [{ id: 0, url: '', altText: '', isPrimary: true, sortOrder: 0 }],
-  stockQuantity: 0,
+  colors: [] as ProductColor[],
+  images: [] as ProductImage[],
   isActive: true,
 };
 
 export function AdminProductFormPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [colorsList, setColorsList] = useState<Color[]>([]);
+  const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
   const [form, setForm] = useState<Partial<Product> & { categoryId: number }>(blank);
   const [sizeInput, setSizeInput] = useState('');
-  const [colorsText, setColorsText] = useState('Black:#111111');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    api.categories('').then(items => {
+    api.categories('', true).then(items => {
       setCategories(items);
       setForm(current => ({ ...current, categoryId: current.categoryId || items[0]?.id || 0 }));
     });
   }, []);
 
   useEffect(() => {
+    api.colors().then(setColorsList).catch(() => setColorsList([]));
+  }, []);
+
+  useEffect(() => {
     if (!id) return;
     api.product(id).then(product => {
       setForm({ ...product, categoryId: product.category?.id || 0 });
-      setColorsText(product.colors.map(c => `${c.name}:${c.hexCode}`).join(', '));
+      setSelectedColorIds(product.colors.map(c => c.colorId));
     });
   }, [id]);
+
+  const enabledColors = colorsList.filter(c => c.isEnabled);
 
   const addSize = (size: string) => {
     const trimmed = size.trim().toUpperCase();
@@ -64,12 +74,30 @@ export function AdminProductFormPage() {
     if (e.key === 'Enter') { e.preventDefault(); addSize(sizeInput); }
   };
 
+  const toggleColor = (colorId: number) => {
+    setSelectedColorIds(current =>
+      current.includes(colorId) ? current.filter(cid => cid !== colorId) : [...current, colorId]);
+  };
+
   const handleImageFile = async (file: File) => {
     setUploading(true);
     setUploadError('');
     try {
       const url = await api.uploadImage(file);
-      setForm(f => ({ ...f, images: [{ id: 0, url, altText: f.name ?? '', isPrimary: true, sortOrder: 0 }] }));
+      setForm(f => {
+        const images = f.images ?? [];
+        return {
+          ...f,
+          images: [...images, {
+            id: 0,
+            url,
+            altText: f.name ?? '',
+            isPrimary: images.length === 0,
+            sortOrder: images.length,
+            colorId: null,
+          }],
+        };
+      });
     } catch (err) {
       setUploadError((err as Error).message);
     } finally {
@@ -77,22 +105,62 @@ export function AdminProductFormPage() {
     }
   };
 
+  const handleFilesSelected = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const selected = Array.from(files);
+    for (const file of selected) {
+      await handleImageFile(file);
+    }
+  };
+
+  const setPrimaryImage = (index: number) => {
+    setForm(f => ({
+      ...f,
+      images: (f.images ?? []).map((image, i) => ({ ...image, isPrimary: i === index })),
+    }));
+  };
+
+  const setImageColor = (index: number, colorId: number | null) => {
+    setForm(f => ({
+      ...f,
+      images: (f.images ?? []).map((image, i) => (i === index ? { ...image, colorId } : image)),
+    }));
+  };
+
+  const removeImage = (index: number) => {
+    setForm(f => {
+      const current = f.images ?? [];
+      const wasPrimary = current[index]?.isPrimary ?? false;
+      const remaining = current.filter((_, i) => i !== index);
+      if (wasPrimary && remaining.length > 0 && !remaining.some(image => image.isPrimary)) {
+        remaining[0] = { ...remaining[0], isPrimary: true };
+      }
+      return { ...f, images: remaining };
+    });
+  };
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    const colors = colorsText.split(',').map(item => {
-      const [name, hexCode = '#111111'] = item.trim().split(':');
-      return { id: 0, name: name.trim(), hexCode };
-    }).filter(c => c.name);
-    await api.saveProduct({
-      ...form,
-      sizes: form.sizes ?? [],
-      colors,
-      images: form.images?.[0]?.url ? form.images : [],
-    });
-    navigate('/admin/products');
+    setSubmitError('');
+    const colors: ProductColor[] = selectedColorIds
+      .map(colorId => colorsList.find(c => c.id === colorId))
+      .filter((c): c is Color => Boolean(c))
+      .map(c => ({ id: 0, colorId: c.id, nameEn: c.nameEn, nameKa: c.nameKa, nameRu: c.nameRu, hexCode: c.hexCode }));
+    try {
+      await api.saveProduct({
+        ...form,
+        sizes: form.sizes ?? [],
+        colors,
+        images: (form.images ?? []).filter(image => image.url.trim() !== ''),
+      });
+      navigate('/admin/products');
+    } catch (err) {
+      setSubmitError((err as Error).message);
+    }
   };
 
   const sizes = form.sizes ?? [];
+  const images = form.images ?? [];
 
   return (
     <form className="admin-form" onSubmit={submit}>
@@ -109,14 +177,15 @@ export function AdminProductFormPage() {
         <label>{t('discountPrice')}<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
       </div>
 
-      <div className="two-fields">
-        <label>{t('category')}
-          <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: Number(e.target.value) })}>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </label>
-        <label>{t('stock')}<input type="number" value={form.stockQuantity} onChange={e => setForm({ ...form, stockQuantity: Number(e.target.value) })} /></label>
-      </div>
+      <label>{t('category')}
+        <select value={form.categoryId} onChange={e => setForm({ ...form, categoryId: Number(e.target.value) })}>
+          {categories.map(c => (
+            <option key={c.id} value={c.id}>
+              {localizedName(c, language)} · {t(GENDER_LABEL_KEYS[c.genderTarget])}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="form-field">
         <span className="field-label">{t('sizes')}</span>
@@ -154,36 +223,77 @@ export function AdminProductFormPage() {
         )}
       </div>
 
-      <label>{t('colors')}<input value={colorsText} onChange={e => setColorsText(e.target.value)} /></label>
+      <div className="form-field">
+        <span className="field-label">{t('colors')}</span>
+        <div className="color-quick-picks">
+          {enabledColors.map(color => (
+            <button
+              key={color.id}
+              type="button"
+              className={`color-chip ${selectedColorIds.includes(color.id) ? 'color-chip-active' : ''}`}
+              onClick={() => toggleColor(color.id)}
+            >
+              <i style={{ background: color.hexCode }} />
+              {localizedName(color, language)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="form-field">
-        <span className="field-label">{t('primaryImageUrl')}</span>
-        <div className="image-upload-area" onClick={() => fileInputRef.current?.click()}>
-          {form.images?.[0]?.url ? (
-            <img src={form.images[0].url} alt="preview" className="image-preview" />
-          ) : (
+        <span className="field-label">{t('addImage')}</span>
+        <div className="image-thumbs">
+          {images.map((image, index) => (
+            <div key={index} className={`image-thumb ${image.isPrimary ? 'image-thumb-primary' : ''}`}>
+              <img src={image.url} alt={image.altText || ''} className="image-thumb-img" />
+              <label className="image-color-label">
+                {t('assignColor')}
+                <select
+                  value={image.colorId ?? ''}
+                  onChange={e => setImageColor(index, e.target.value ? Number(e.target.value) : null)}
+                >
+                  <option value="">{t('noColor')}</option>
+                  {enabledColors.map(color => (
+                    <option key={color.id} value={color.id}>{localizedName(color, language)}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="image-thumb-actions">
+                <button
+                  type="button"
+                  className={`btn btn-sm ${image.isPrimary ? 'btn-dark' : 'btn-outline'}`}
+                  onClick={() => setPrimaryImage(index)}
+                  disabled={image.isPrimary}
+                  title="Primary image"
+                >
+                  <Star size={14} fill={image.isPrimary ? 'currentColor' : 'none'} />
+                </button>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeImage(index)}>
+                  {t('removeImage')}
+                </button>
+              </div>
+            </div>
+          ))}
+          <div className="image-upload-area image-upload-add" onClick={() => fileInputRef.current?.click()}>
             <div className="image-placeholder">
-              <span>Click to upload image</span>
+              <span>{t('addImage')}</span>
               <span style={{ fontSize: '.8rem', color: 'var(--muted)' }}>JPG, PNG, WebP · max 5 MB</span>
             </div>
-          )}
-          {uploading && <div className="image-uploading">Uploading…</div>}
+            {uploading && <div className="image-uploading">Uploading…</div>}
+          </div>
         </div>
         <input
           ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
+          multiple
           style={{ display: 'none' }}
-          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }}
+          onChange={e => { const files = e.target.files; handleFilesSelected(files); e.target.value = ''; }}
         />
         {uploadError && <p className="form-error">{uploadError}</p>}
-        {form.images?.[0]?.url && (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setForm(f => ({ ...f, images: [] }))}>
-            Remove image
-          </button>
-        )}
       </div>
       <label className="check-line"><input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /> {t('active')}</label>
+      {submitError && <p className="form-error">{submitError}</p>}
       <button className="btn btn-dark" type="submit">{t('saveProduct')}</button>
     </form>
   );

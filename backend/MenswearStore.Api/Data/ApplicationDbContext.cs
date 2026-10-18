@@ -12,11 +12,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProductImage> ProductImages => Set<ProductImage>();
     public DbSet<ProductSize> ProductSizes => Set<ProductSize>();
     public DbSet<ProductColor> ProductColors => Set<ProductColor>();
+    public DbSet<Color> Colors => Set<Color>();
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+    public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<InfoSection> InfoSections => Set<InfoSection>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -28,6 +31,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<AppSetting>()
             .HasIndex(setting => setting.Key)
+            .IsUnique();
+
+        // One account per bank: the checkout picker shows exactly one option per bank.
+        builder.Entity<BankAccount>()
+            .HasIndex(account => account.Bank)
+            .IsUnique();
+
+        builder.Entity<InfoSection>()
+            .HasIndex(section => section.Key)
             .IsUnique();
 
         builder.Entity<Product>()
@@ -49,5 +61,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<OrderItem>()
             .Property(item => item.UnitPrice)
             .HasPrecision(10, 2);
+
+        builder.Entity<ProductImage>()
+            .HasOne(image => image.Color)
+            .WithMany(color => color.Images)
+            .HasForeignKey(image => image.ColorId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

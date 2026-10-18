@@ -19,9 +19,10 @@ public class AdminController(ApplicationDbContext db) : ControllerBase
         var categoryCount = await db.Categories.CountAsync();
         var carts = await db.Carts.CountAsync();
         var orderCount = await db.Orders.CountAsync();
+        var pendingOrders = await db.Orders.CountAsync(order => order.Status == "Pending");
         var togglesEnabled = await db.AppSettings.CountAsync(setting => setting.IsEnabled);
 
-        return Ok(new { productCount, activeProducts, categoryCount, carts, orderCount, togglesEnabled });
+        return Ok(new { productCount, activeProducts, categoryCount, carts, orderCount, pendingOrders, togglesEnabled });
     }
 
     [HttpGet("orders")]

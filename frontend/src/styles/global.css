@@ -119,6 +119,12 @@ select {
   padding: 0 12px;
   border-radius: 4px;
   color: var(--ink);
+  /* A form field carries an intrinsic width of roughly twenty characters (~238px
+     at this font). Inside a grid or flex track that has an automatic minimum, the
+     track grows to honour it and the field overflows its container instead of
+     shrinking. This has caused three separate layout bugs - the size chart, the
+     benefit strip and the checkout form - so it is capped once, here. */
+  min-width: 0;
 }
 
 textarea {
@@ -248,7 +254,11 @@ textarea {
 
 .benefit-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Tracks follow however many cells are present. A fixed repeat(3, 1fr) left an
+     empty third column showing the strip's own grey background once the third
+     item was removed. */
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: 1px;
   background: var(--line);
 }
@@ -269,6 +279,14 @@ textarea {
   width: min(1180px, calc(100% - 36px));
   margin: 0 auto;
   padding: clamp(44px, 7vw, 86px) 0;
+}
+
+/* Every admin page heading gets the same breathing room. The spacing used to
+   live only on `.admin-heading.row`, which needs both classes, so the six pages
+   using a plain `.admin-heading` had their heading flush against the content
+   below it. Only the Products page carries `.row`. */
+.admin-heading {
+  margin-bottom: 28px;
 }
 
 .section-heading,
@@ -378,7 +396,7 @@ textarea {
 
 .detail-page {
   display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: clamp(28px, 6vw, 70px);
   align-items: start;
 }
@@ -581,7 +599,10 @@ textarea {
 
 .two-fields {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* minmax(0, ...) rather than 1fr: a bare 1fr track has an automatic minimum of
+     the item's min-content, and an <input> carries an intrinsic width of about
+     twenty characters, so the pair pushed itself wider than its container. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -710,8 +731,8 @@ textarea {
 }
 
 .check-line {
+  /* display is forced to flex, so a grid-template-columns here was never applied. */
   display: flex !important;
-  grid-template-columns: auto 1fr;
   align-items: center;
 }
 
@@ -721,6 +742,8 @@ textarea {
 
 .inline-form {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -847,7 +870,7 @@ textarea {
   .cart-layout,
   .admin-shell,
   .catalog-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .catalog-layout .product-grid {
@@ -927,7 +950,9 @@ textarea {
   }
 
   .benefit-strip {
-    grid-template-columns: 1fr;
+    /* Undo the auto column flow so the cells stack on a phone. */
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .section-heading,
@@ -947,7 +972,7 @@ textarea {
 
   .two-fields,
   .stat-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .cart-line {
@@ -1244,4 +1269,733 @@ textarea {
   .site-footer div:last-child {
     flex-wrap: wrap;
   }
+}
+
+/* ---------- catalog sidebar back button ---------- */
+.back-link {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: .875rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.back-link:hover {
+  color: var(--ink);
+}
+
+/* ---------- admin colors ---------- */
+/* Two classes deliberately: `.inline-form input { width: 100% }` is (0,1,1) and
+   outranks a lone `.color-input` (0,1,0), which stretched the swatch to the full
+   row and pushed the submit button off the right edge of the screen. */
+.inline-form .color-input,
+.color-input {
+  width: 46px;
+  height: 42px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  flex: none;
+}
+
+/* Text fields in an admin inline form share the row instead of each demanding
+   100% and forcing the row wider than the page. */
+.inline-form input[type="text"],
+.inline-form input:not([type]) {
+  flex: 1 1 160px;
+  width: auto;
+  min-width: 0;
+}
+
+.admin-row .swatch {
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-row .swatch i {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+}
+
+.admin-row .swatch div {
+  display: grid;
+  gap: 4px;
+}
+
+/* Text-only admin rows (categories, colors) have no leading thumbnail image,
+   unlike the products row this grid was designed for. Without this override,
+   the image-oriented 5-column .admin-row grid (64px … 42px 42px) squeezes
+   their only two children — content and actions — into its first two
+   tracks, cramming all the name/slug/gender text into a 64px-wide column. */
+.admin-row-text {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+/* `.admin-row div { display: grid; gap: 5px }` is a descendant selector
+   (specificity 0,1,1) that beats `.admin-row-actions`'s own `display: flex`
+   (specificity 0,1,0), stacking the status/edit/delete buttons in a column
+   instead of a row. Re-assert flex with matching specificity. */
+.admin-row .admin-row-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---------- admin product form: colour picks ---------- */
+.color-quick-picks { display: flex; flex-wrap: wrap; gap: .4rem; }
+.color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .3rem .7rem .3rem .5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: background .15s, border-color .15s;
+}
+.color-chip:hover { border-color: var(--ink); }
+.color-chip-active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.color-chip i {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex: none;
+  border: 1px solid rgba(0, 0, 0, .15);
+}
+
+/* ---------- admin product form: multi-image upload ---------- */
+.image-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+.image-thumb {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+}
+.image-thumb-primary { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.image-thumb-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; display: block; }
+.image-color-label { display: grid; gap: 4px; font-size: .75rem; color: var(--muted); font-weight: 500; }
+.image-thumb-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.image-upload-add { min-height: auto; height: 100%; }
+
+/* ---------- product detail gallery ---------- */
+.gallery {
+  aspect-ratio: unset;
+  background: none;
+  display: grid;
+  gap: 12px;
+}
+.gallery-main {
+  aspect-ratio: 4 / 5;
+  background: #e9e4d9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.gallery-empty {
+  width: 100%;
+  height: 100%;
+}
+.gallery-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.gallery-thumb {
+  width: 72px;
+  height: 90px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #e9e4d9;
+  flex: none;
+}
+.gallery-thumb-active {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* ---------- admin nav: pending orders badge ---------- */
+.nav-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.72rem;
+}
+
+/* ---------- guest checkout ---------- */
+/* `.checkout-box` is centred and padded, which suited the original "total plus a
+   button" panel. It is now a delivery form, and centring left every label at its
+   own horizontal position with the inputs at different widths. A form reads as a
+   single column, so the form variant is left-aligned and width-capped like the
+   auth card; the empty-cart variant is still a div and stays centred. */
+form.checkout-box {
+  display: grid;
+  /* The single column must be stated. Left implicit it is an `auto` track, whose
+     automatic minimum is the widest child's min-content - the inputs and the
+     two-column name row - so the fields rendered wider than the panel and spilled
+     past its right border. minmax(0, 1fr) lets them shrink to the padding box. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  width: min(520px, 100%);
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* Stacks the caption above its field. The payment and bank pickers are reached by
+   neither selector - their labels are inside a fieldset and must stay flex rows. */
+form.checkout-box > label,
+form.checkout-box .two-fields > label {
+  display: grid;
+  /* Same reason as the form and the name row: an <input> has an intrinsic width of
+     roughly twenty characters (238px here), which an implicit `auto` track honours
+     even inside a 205px label. Capping the track lets the field shrink to fit. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  color: #353430;
+  font-weight: 760;
+}
+
+/* The fields themselves must be allowed to go below their intrinsic width. Radios
+   are excluded deliberately: they sit in the flex payment rows and a full-width
+   radio would be absurd. */
+form.checkout-box input:not([type="radio"]),
+form.checkout-box textarea {
+  min-width: 0;
+  width: 100%;
+}
+
+form.checkout-box > h1 {
+  margin: 0;
+}
+
+/* The amount is the one number on the page that must not be missed. */
+.checkout-total {
+  margin: 0;
+  padding-bottom: 4px;
+  font-size: 1.05rem;
+}
+
+.checkout-total strong {
+  font-size: 1.5rem;
+  font-weight: 850;
+  color: var(--ink);
+}
+
+form.checkout-box textarea {
+  resize: vertical;
+}
+
+/* Keeps the submit button clear of the fields above it. */
+form.checkout-box .btn-full {
+  margin-top: 6px;
+}
+
+form.checkout-box > a {
+  justify-self: center;
+  color: var(--muted);
+  font-weight: 650;
+}
+
+.checkout-guest-note {
+  margin: 0;
+  padding: 12px 14px;
+  background: #f2f1ec;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.payment-methods {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.payment-methods legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-weight: 850;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.payment-option.selected {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+.payment-option input {
+  min-height: 0;
+  width: auto;
+  margin: 0;
+}
+
+.bank-details-placeholder {
+  margin: 0;
+  padding: 12px 14px;
+  background: #fbfbf9;
+  border: 1px dashed var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.order-tag {
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ece9df;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.order-tag-guest {
+  background: var(--accent);
+  color: #fff;
+}
+
+.order-payment {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.payment-paid {
+  color: var(--pine);
+}
+
+.payment-unpaid {
+  color: var(--accent);
+}
+
+.admin-order-address {
+  white-space: pre-wrap;
+}
+
+/* ---------- gallery arrows ---------- */
+.gallery-main {
+  position: relative;
+}
+
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.gallery-arrow:hover {
+  background: #fff;
+}
+
+.gallery-arrow-prev {
+  left: 12px;
+}
+
+.gallery-arrow-next {
+  right: 12px;
+}
+
+.gallery-counter {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(24, 24, 24, 0.66);
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .gallery-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .gallery-arrow-prev {
+    left: 8px;
+  }
+
+  .gallery-arrow-next {
+    right: 8px;
+  }
+}
+
+/* Dashboard stats that lead somewhere read as cards, not links: no underline,
+   inherited colour, and a hover lift so it is clear they are clickable. */
+.stat-card-link {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.stat-card-link:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+.stat-card-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- bank transfer ---------- */
+.bank-picker legend {
+  font-weight: 850;
+}
+
+.transfer-card {
+  width: min(560px, 100%);
+}
+
+.transfer-steps {
+  display: grid;
+  gap: 18px;
+  margin: 22px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.transfer-steps li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.transfer-step-number {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.transfer-step-label {
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+
+.transfer-holder {
+  margin: 0 0 6px;
+  color: var(--muted);
+}
+
+/* The IBAN and the reference are the two things a customer must get exactly right,
+   so both are one-tap copyable rather than retyped from the screen. */
+.copy-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #f2f1ec;
+  cursor: pointer;
+}
+
+.copy-field code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  word-break: break-all;
+  text-align: left;
+}
+
+.copy-field:hover {
+  border-color: var(--ink);
+}
+
+.transfer-amount {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 850;
+}
+
+.transfer-hint {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.transfer-confirm-note {
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  background: #f2f1ec;
+  border-left: 3px solid var(--pine);
+  border-radius: 4px;
+}
+
+.transfer-contact {
+  margin: 0 0 18px;
+  color: var(--muted);
+}
+
+.transfer-contact a {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.bank-setup-warning {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  background: #fdf2f3;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.bank-account-row {
+  align-items: flex-start;
+}
+
+.bank-account-fields {
+  display: grid;
+  gap: 10px;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+
+.bank-account-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.order-awaiting {
+  border-left: 3px solid var(--accent);
+}
+
+.order-tag-awaiting {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- shop contact (footer) ---------- */
+.shop-contact {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.shop-contact-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+}
+
+.shop-contact-line a {
+  color: #343330;
+  font-weight: 650;
+}
+
+.shop-contact-line a:hover {
+  color: var(--accent);
+}
+
+.shop-contact-apps {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 4px;
+}
+
+/* Brand colours so the two messaging apps are recognisable at a glance - the
+   whole point of putting them next to the number. */
+.contact-app {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.contact-app-whatsapp {
+  background: #25d366;
+}
+
+.contact-app-viber {
+  background: #7360f2;
+}
+
+.contact-app:hover {
+  filter: brightness(1.08);
+}
+
+/* ---------- admin contact settings ---------- */
+.admin-subheading {
+  margin: 34px 0 10px;
+  font-size: 1.1rem;
+  font-weight: 850;
+}
+
+.admin-subheading:first-of-type {
+  margin-top: 0;
+}
+
+.contact-settings {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.contact-setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.contact-setting-row label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  .contact-setting-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- info page ---------- */
+.info-sections {
+  display: grid;
+  gap: 26px;
+  max-width: 760px;
+}
+
+.info-section {
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.info-section h2 {
+  margin: 0 0 12px;
+  font-size: 1.3rem;
+}
+
+/* The body is plain text; preserving its line breaks is what turns it into
+   paragraphs without interpreting any markup. */
+.info-section p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.8;
+  color: #4b4a46;
+}
+
+.info-editor-row {
+  align-items: flex-start;
+}
+
+.info-editor-fields {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.info-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.info-editor-fields label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.info-editor-fields textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+/* The two outcomes of the transfer screen. There is no third, so they are given
+   equal prominence rather than one being a quiet dismissal. */
+.transfer-decide-note {
+  margin: 18px 0 10px;
+  font-weight: 800;
+}
+
+.transfer-actions {
+  display: grid;
+  gap: 10px;
+}
+
+/* An order the customer never confirmed is noise, not work: muted, not accented. */
+.order-tag-unconfirmed {
+  background: #ece9df;
+  color: var(--muted);
 }

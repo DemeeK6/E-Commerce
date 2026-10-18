@@ -1,0 +1,24 @@
+# Keep the Docker build context small: only source goes in, never local builds,
+# databases, uploads or secrets.
+.git
+.github
+.vs
+.claude
+.superpowers
+.dotnet
+.nuget
+.templateengine
+.tmp
+docs
+**/bin
+**/obj
+**/node_modules
+**/dist
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/uploads
+**/DataProtectionKeys
+**/*.user
+.env
+.env.*

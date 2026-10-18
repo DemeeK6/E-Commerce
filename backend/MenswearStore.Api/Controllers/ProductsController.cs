@@ -13,12 +13,17 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(
-        GenderTarget gender = GenderTarget.Men,
+        GenderTarget? gender = null,
         int? categoryId = null,
         bool includeInactive = false,
         string? search = null)
     {
-        var query = ProductQuery().Where(product => product.GenderTarget == gender);
+        var query = ProductQuery();
+
+        if (gender.HasValue)
+        {
+            query = query.Where(product => product.GenderTarget == gender);
+        }
 
         if (!User.IsInRole("Admin") || !includeInactive)
         {
@@ -58,8 +63,20 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ProductDto>> Create(UpsertProductRequest request)
     {
+        var colorError = await ValidateColorIdsAsync(request);
+        if (colorError is not null)
+        {
+            return BadRequest(new { message = colorError });
+        }
+
+        var category = await db.Categories.FindAsync(request.CategoryId);
+        if (category is null)
+        {
+            return BadRequest(new { message = $"Unknown CategoryId: {request.CategoryId}." });
+        }
+
         var product = new Product();
-        Apply(product, request);
+        Apply(product, request, category);
         db.Products.Add(product);
         await db.SaveChangesAsync();
 
@@ -71,6 +88,18 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<ActionResult<ProductDto>> Update(int id, UpsertProductRequest request)
     {
+        var colorError = await ValidateColorIdsAsync(request);
+        if (colorError is not null)
+        {
+            return BadRequest(new { message = colorError });
+        }
+
+        var category = await db.Categories.FindAsync(request.CategoryId);
+        if (category is null)
+        {
+            return BadRequest(new { message = $"Unknown CategoryId: {request.CategoryId}." });
+        }
+
         var product = await ProductQuery().FirstOrDefaultAsync(product => product.Id == id);
         if (product is null)
         {
@@ -80,7 +109,7 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
         db.ProductImages.RemoveRange(product.Images);
         db.ProductSizes.RemoveRange(product.Sizes);
         db.ProductColors.RemoveRange(product.Colors);
-        Apply(product, request);
+        Apply(product, request, category);
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
         return product.ToDto();
@@ -130,27 +159,66 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             .Include(product => product.Category)
             .Include(product => product.Images)
             .Include(product => product.Sizes)
-            .Include(product => product.Colors);
+            .Include(product => product.Colors).ThenInclude(color => color.Color);
 
-    private static void Apply(Product product, UpsertProductRequest request)
+    private static void Apply(Product product, UpsertProductRequest request, Category category)
     {
         product.Name = request.Name.Trim();
         product.Description = request.Description.Trim();
         product.Price = request.Price;
         product.DiscountPrice = request.DiscountPrice;
-        product.CategoryId = request.CategoryId;
-        product.GenderTarget = request.GenderTarget;
-        product.StockQuantity = request.StockQuantity;
+        product.CategoryId = category.Id;
+        product.GenderTarget = category.GenderTarget;
         product.IsActive = request.IsActive;
         product.Sizes = request.Sizes.Where(size => !string.IsNullOrWhiteSpace(size))
             .Select(size => new ProductSize { Name = size.Trim() }).ToList();
-        product.Colors = request.Colors.Select(color => new ProductColor { Name = color.Name.Trim(), HexCode = color.HexCode }).ToList();
+
+        // A colour attached to an image is, by definition, a colour this product comes in.
+        // Union the two so the shop owner cannot tag a photo "Black" yet leave Black
+        // unselectable on the storefront - the product form offers them as separate
+        // controls, and keeping them in step by hand is a trap.
+        var colorIds = request.Colors.Select(colorInput => colorInput.ColorId)
+            .Concat(request.Images.Where(image => image.ColorId.HasValue).Select(image => image.ColorId!.Value))
+            .Distinct()
+            .ToArray();
+
+        product.Colors = colorIds
+            .Select(colorId => new ProductColor { ColorId = colorId })
+            .ToList();
+
         product.Images = request.Images.Select(image => new ProductImage
         {
             Url = image.Url.Trim(),
             AltText = image.AltText.Trim(),
             IsPrimary = image.IsPrimary,
-            SortOrder = image.SortOrder
+            SortOrder = image.SortOrder,
+            ColorId = image.ColorId
         }).ToList();
+    }
+
+    private async Task<string?> ValidateColorIdsAsync(UpsertProductRequest request)
+    {
+        var requestedIds = request.Colors.Select(color => color.ColorId)
+            .Concat(request.Images.Where(image => image.ColorId.HasValue).Select(image => image.ColorId!.Value))
+            .Distinct()
+            .ToArray();
+
+        if (requestedIds.Length == 0)
+        {
+            return null;
+        }
+
+        var existingIds = await db.Colors
+            .Where(color => requestedIds.Contains(color.Id))
+            .Select(color => color.Id)
+            .ToListAsync();
+
+        var missing = requestedIds.Except(existingIds).ToArray();
+        if (missing.Length > 0)
+        {
+            return $"Unknown ColorId(s): {string.Join(", ", missing)}.";
+        }
+
+        return null;
     }
 }

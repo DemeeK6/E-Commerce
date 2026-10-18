@@ -12,7 +12,7 @@ namespace MenswearStore.Api.Controllers;
 public class CategoriesController(ApplicationDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = GenderTarget.Men)
+    public async Task<ActionResult<IReadOnlyList<CategoryDto>>> Get(GenderTarget? gender = null, bool includeDisabled = false)
     {
         var query = db.Categories.AsQueryable();
         if (gender.HasValue)
@@ -20,7 +20,7 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
             query = query.Where(category => category.GenderTarget == gender);
         }
 
-        if (!User.IsInRole("Admin"))
+        if (!User.IsInRole("Admin") || !includeDisabled)
         {
             query = query.Where(category => category.IsEnabled);
         }
@@ -36,7 +36,15 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
         var category = new Category();
         Apply(category, request);
         db.Categories.Add(category);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { message = $"A category with slug \"{category.Slug}\" already exists." });
+        }
+
         return CreatedAtAction(nameof(Get), new { id = category.Id }, category.ToDto());
     }
 
@@ -51,7 +59,15 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
         }
 
         Apply(category, request);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return BadRequest(new { message = $"A category with slug \"{category.Slug}\" already exists." });
+        }
+
         return category.ToDto();
     }
 
@@ -72,7 +88,9 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
 
     private static void Apply(Category category, UpsertCategoryRequest request)
     {
-        category.Name = request.Name.Trim();
+        category.NameEn = request.NameEn.Trim();
+        category.NameKa = request.NameKa.Trim();
+        category.NameRu = request.NameRu.Trim();
         category.Slug = request.Slug.Trim().ToLowerInvariant();
         category.GenderTarget = request.GenderTarget;
         category.IsEnabled = request.IsEnabled;

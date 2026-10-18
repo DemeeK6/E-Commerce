@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailsPage } from './pages/ProductDetailsPage';
 import { SizesPage } from './pages/SizesPage';
+import { InfoPage } from './pages/InfoPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { LoginPage } from './pages/LoginPage';
@@ -17,7 +18,10 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminProductFormPage } from './pages/AdminProductFormPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
+import { AdminColorsPage } from './pages/AdminColorsPage';
 import { AdminSettingsPage } from './pages/AdminSettingsPage';
+import { AdminBankAccountsPage } from './pages/AdminBankAccountsPage';
+import { AdminInfoPage } from './pages/AdminInfoPage';
 import { AdminOrdersPage } from './pages/AdminOrdersPage';
 
 export function App() {
@@ -28,6 +32,7 @@ export function App() {
         <Route path="products" element={<ProductsPage />} />
         <Route path="products/:id" element={<ProductDetailsPage />} />
         <Route path="sizes" element={<SizesPage />} />
+        <Route path="info" element={<InfoPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="login" element={<LoginPage />} />
@@ -42,7 +47,10 @@ export function App() {
         <Route path="products/new" element={<AdminProductFormPage />} />
         <Route path="products/:id" element={<AdminProductFormPage />} />
         <Route path="categories" element={<AdminCategoriesPage />} />
+        <Route path="colors" element={<AdminColorsPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="bank-accounts" element={<AdminBankAccountsPage />} />
+        <Route path="info" element={<AdminInfoPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

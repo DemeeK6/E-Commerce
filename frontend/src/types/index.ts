@@ -2,11 +2,23 @@ export type GenderTarget = 0 | 1 | 2;
 
 export interface Category {
   id: number;
-  name: string;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
   slug: string;
   genderTarget: GenderTarget;
   isEnabled: boolean;
   displayOrder: number;
+}
+
+export interface Color {
+  id: number;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
+  hexCode: string;
+  displayOrder: number;
+  isEnabled: boolean;
 }
 
 export interface ProductImage {
@@ -15,11 +27,15 @@ export interface ProductImage {
   altText: string;
   isPrimary: boolean;
   sortOrder: number;
+  colorId: number | null;
 }
 
 export interface ProductColor {
   id: number;
-  name: string;
+  colorId: number;
+  nameEn: string;
+  nameKa: string;
+  nameRu: string;
   hexCode: string;
 }
 
@@ -34,7 +50,6 @@ export interface Product {
   sizes: string[];
   colors: ProductColor[];
   images: ProductImage[];
-  stockQuantity: number;
   isActive: boolean;
 }
 
@@ -43,6 +58,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  phone: string;
   roles: string[];
 }
 
@@ -56,6 +72,8 @@ export interface AppSetting {
   key: string;
   name: string;
   isEnabled: boolean;
+  value: string;
+  kind: 0 | 1;   // 0 = feature toggle, 1 = free text
 }
 
 export interface CartLine {
@@ -81,11 +99,61 @@ export interface OrderItem {
   color: string;
 }
 
+export type PaymentMethod = 0 | 1;   // 0 = Cash, 1 = BankTransfer
+export type PaymentStatus = 0 | 1 | 2 | 3;  // 0 = Pending, 1 = Paid, 2 = Failed, 3 = Refunded
+
 export interface Order {
   id: number;
   userEmail: string;
+  isGuest: boolean;
+  customerFirstName: string;
+  customerLastName: string;
+  customerPhone: string;
+  customerEmail: string;
+  shippingAddress: string;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  transferBank: TransferBank | null;
+  customerConfirmedPaymentAtUtc: string | null;
+  publicToken: string;
   status: OrderStatus;
   total: number;
   createdAtUtc: string;
   items: OrderItem[];
+}
+
+export interface InfoSection {
+  id: number;
+  key: string;
+  titleEn: string;
+  titleKa: string;
+  titleRu: string;
+  bodyEn: string;
+  bodyKa: string;
+  bodyRu: string;
+  isEnabled: boolean;
+  displayOrder: number;
+}
+
+export type TransferBank = 0 | 1;  // 0 = TBC, 1 = Bank of Georgia
+
+export interface BankAccount {
+  id: number;
+  bank: TransferBank;
+  accountHolder: string;
+  iban: string;
+  currencies: string;
+  isEnabled: boolean;
+  displayOrder: number;
+}
+
+export interface PlaceOrderPayload {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  email: string;
+  paymentMethod: PaymentMethod;
+  transferBank: TransferBank | null;
+  items: { productId: number; quantity: number; size: string; color: string }[];
 }
