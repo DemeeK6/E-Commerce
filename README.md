@@ -22,6 +22,8 @@ frontend
 
 ## Seeded Accounts
 
+Development only. In production the admin comes from `.env` and no test customer is created - see [docs/DEPLOY.md](docs/DEPLOY.md).
+
 - Admin: `admin@menswear.local` / `Admin123!`
 - Customer: `customer@menswear.local` / `Customer123!`
 

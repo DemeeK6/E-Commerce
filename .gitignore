@@ -17,3 +17,6 @@ backend/**/DataProtectionKeys/
 *.suo
 .env
 .env.*
+
+# Server backups made by docker-compose.prod.yml
+backups/

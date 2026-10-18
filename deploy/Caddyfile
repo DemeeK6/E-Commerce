@@ -1,0 +1,22 @@
+# DOMAIN comes from .env, e.g. shop.example.com. Caddy fetches and renews the
+# HTTPS certificate for it automatically.
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle /uploads/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		root * /srv
+		# Vite puts a content hash in every asset file name, so they can be cached forever.
+		header /assets/* Cache-Control "public, max-age=31536000, immutable"
+		# Any other path is a React Router page: serve index.html and let the app route it.
+		try_files {path} /index.html
+		file_server
+	}
+}

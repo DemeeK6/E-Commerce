@@ -1,0 +1,93 @@
+# Production stack for one server. Run from the repository root:
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Every secret comes from .env next to this file (copy deploy/env.example).
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: menswear
+      POSTGRES_USER: menswear
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    # No ports: the database is reachable only by the other containers.
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U menswear -d menswear"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/api.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # Caddy terminates HTTPS. This makes the API trust its X-Forwarded-* headers,
+      # so it knows the original request was HTTPS and does not try to redirect.
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=menswear;Username=menswear;Password=${POSTGRES_PASSWORD}
+      Jwt__Key: ${JWT_KEY:?set JWT_KEY in .env}
+      Seed__AdminEmail: ${ADMIN_EMAIL:?set ADMIN_EMAIL in .env}
+      Seed__AdminPassword: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env}
+      Email__FromAddress: ${EMAIL_FROM:-}
+      Email__AppPassword: ${EMAIL_APP_PASSWORD:-}
+      Email__AdminAddress: ${EMAIL_ADMIN:-}
+    volumes:
+      - uploads:/app/uploads
+      - dpkeys:/app/DataProtectionKeys
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
+  # Once a day: dump the database and archive the uploaded images into
+  # ./backups on the server, keeping the last 14 days.
+  backup:
+    image: postgres:17
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+      - uploads:/uploads:ro
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          stamp=$$(date +%Y-%m-%d_%H%M)
+          pg_dump -h db -U menswear -d menswear -Fc -f /backups/db_$$stamp.dump \
+            && tar -czf /backups/uploads_$$stamp.tar.gz -C /uploads . \
+            && echo "backup $$stamp done"
+          find /backups -type f -mtime +14 -delete
+          sleep 86400
+        done
+
+volumes:
+  pgdata: {}
+  uploads: {}
+  dpkeys: {}
+  caddy_data: {}
+  caddy_config: {}

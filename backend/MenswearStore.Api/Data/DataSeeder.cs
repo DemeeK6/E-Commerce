@@ -7,7 +7,9 @@ namespace MenswearStore.Api.Data;
 public class DataSeeder(
     ApplicationDbContext db,
     UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager)
+    RoleManager<IdentityRole> roleManager,
+    IConfiguration configuration,
+    IHostEnvironment environment)
 {
     public async Task SeedAsync()
     {
@@ -30,8 +32,24 @@ public class DataSeeder(
 
     private async Task SeedUsersAsync()
     {
-        await CreateUserAsync("admin@menswear.local", "Admin123!", "Store", "Admin", "Admin");
-        await CreateUserAsync("customer@menswear.local", "Customer123!", "Test", "Customer", "Customer");
+        if (environment.IsDevelopment())
+        {
+            await CreateUserAsync("admin@menswear.local", "Admin123!", "Store", "Admin", "Admin");
+            await CreateUserAsync("customer@menswear.local", "Customer123!", "Test", "Customer", "Customer");
+            return;
+        }
+
+        // On a public server the development passwords above are known to anyone who
+        // has read this file, so the admin comes from configuration instead and the
+        // test customer is never created.
+        var email = configuration["Seed:AdminEmail"];
+        var password = configuration["Seed:AdminPassword"];
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            throw new InvalidOperationException("Seed:AdminEmail and Seed:AdminPassword must be set outside Development.");
+        }
+
+        await CreateUserAsync(email, password, "Store", "Admin", "Admin");
     }
 
     private async Task CreateUserAsync(string email, string password, string firstName, string lastName, string role)
