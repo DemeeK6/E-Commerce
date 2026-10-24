@@ -6,7 +6,8 @@ import { SizeChart } from './SizeChart';
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-export function SizeGuideModal({ onClose }: { onClose: () => void }) {
+/** `gender` picks the chart for the product being viewed. */
+export function SizeGuideModal({ gender, onClose }: { gender: 'women' | 'men'; onClose: () => void }) {
   const { t } = useI18n();
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
@@ -84,7 +85,7 @@ export function SizeGuideModal({ onClose }: { onClose: () => void }) {
           <h2>{t('sizeGuide')}</h2>
           <p className="size-chart-note">{t('sizeChartIntro')}</p>
         </div>
-        <SizeChart />
+        <SizeChart gender={gender} />
       </div>
     </div>
   );

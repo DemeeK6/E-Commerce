@@ -2355,3 +2355,9 @@ form.checkout-box > a {
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+
+/* "Women" / "Men" above each chart on the Sizes page. */
+.size-chart-section-title {
+  margin: 36px 0 14px;
+  font-size: 1.5rem;
+}

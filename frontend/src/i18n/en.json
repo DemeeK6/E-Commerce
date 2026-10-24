@@ -94,13 +94,9 @@
   "delivered": "Delivered",
   "cancelled": "Cancelled",
   "sizeGuide": "Size guide",
-  "sizeChartIntro": "All measurements are in centimetres and may vary by 1-2 cm.",
+  "sizeChartIntro": "These are measurements of the clothes, not of your body. Lay a piece that fits you well flat, measure it and compare. All measurements are in centimetres and may vary by 1-2 cm.",
   "measurement": "Measurement",
-  "asianSize": "Asian size",
-  "shoulder": "Shoulder",
-  "bust": "Bust",
   "sleeve": "Sleeve",
-  "length": "Length",
   "cm": "cm",
   "close": "Close",
   "men": "Men",
@@ -206,5 +202,9 @@
   "previewPhone": "Phone",
   "productPhotoTips": "Best: a portrait photo, 4:5, at least 1200 × 1500 px. Other shapes are cropped to 4:5 from the centre, as in the previews below.",
   "photoTooSmall": "too small, may look blurry",
-  "heroFocusTip": "Click on the photo to choose what must always stay visible, for example a face. The previews show the result."
+  "heroFocusTip": "Click on the photo to choose what must always stay visible, for example a face. The previews show the result.",
+  "chest": "Chest",
+  "waist": "Waist",
+  "hips": "Hips",
+  "shoulders": "Shoulders"
 }

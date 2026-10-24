@@ -150,7 +150,10 @@ export function ProductDetailsPage() {
           {t('addToCart')}
         </button>
       </div>
-      {guideOpen && <SizeGuideModal onClose={() => setGuideOpen(false)} />}
+      {/* Women's products get the women's chart; men's and kids' use the men's one. */}
+      {guideOpen && (
+        <SizeGuideModal gender={product.genderTarget === 1 ? 'women' : 'men'} onClose={() => setGuideOpen(false)} />
+      )}
     </section>
   );
 }
