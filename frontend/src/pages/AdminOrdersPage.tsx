@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { Order, OrderStatus } from '../types';
-import { formatAmount, money } from '../utils/format';
+import { formatAmount, lari } from '../utils/format';
 
 const STATUSES: OrderStatus[] = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
@@ -73,9 +73,9 @@ export function AdminOrdersPage() {
                     {order.isGuest ? t('guest') : t('customer')}
                   </span>
                   <strong className="admin-order-total">
-                    {/* The amount the customer was asked to pay; dollars beside it for a lari order. */}
+                    {/* The amount the customer was asked to pay; lari beside it for a dollar order. */}
                     {formatAmount(order.totalInCurrency, order.currency)}
-                    {order.currency === 'GEL' && <span className="admin-order-usd"> ({money(order.total)})</span>}
+                    {order.currency === 'USD' && <span className="admin-order-usd"> ({lari(order.total)})</span>}
                   </strong>
                 </div>
                 <span className="order-payment">

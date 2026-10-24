@@ -1,12 +1,11 @@
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import en from '../i18n/en.json';
 import ka from '../i18n/ka.json';
-import ru from '../i18n/ru.json';
 
-type Language = 'en' | 'ka' | 'ru';
+export type Language = 'en' | 'ka';
 type Dictionary = typeof en;
 
-const dictionaries: Record<Language, Dictionary> = { en, ka, ru };
+const dictionaries: Record<Language, Dictionary> = { en, ka };
 
 const I18nContext = createContext<{
   language: Language;
@@ -15,7 +14,8 @@ const I18nContext = createContext<{
 } | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => (localStorage.getItem('language') as Language) || 'en');
+  // Georgian or English. Anything else stored earlier (Russian was removed) falls back to English.
+  const [language, setLanguageState] = useState<Language>(() => (localStorage.getItem('language') === 'ka' ? 'ka' : 'en'));
   const setLanguage = (next: Language) => {
     localStorage.setItem('language', next);
     setLanguageState(next);

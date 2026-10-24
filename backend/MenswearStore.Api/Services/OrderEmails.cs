@@ -7,31 +7,30 @@ public record OrderEmail(string To, string Subject, string Body);
 
 /// <summary>
 /// Builds every order email. Emails to the shop owner are in English; emails to the
-/// customer are in the language they shopped in (Order.Language). Kept apart from
-/// sending so the SMTP and logging notifiers produce exactly the same messages.
+/// customer are in the language they shopped in (Order.Language: Georgian, otherwise
+/// English). Kept apart from sending so the SMTP and logging notifiers produce exactly
+/// the same messages.
 /// </summary>
 public static class OrderEmails
 {
-    // The shop prices in dollars, and the server runs under the invariant culture
-    // where ":C" prints a generic currency sign rather than "$".
-    private static readonly CultureInfo Money = CultureInfo.GetCultureInfo("en-US");
+    // The server runs under the invariant culture, where ":C" prints a generic currency
+    // sign, so dollars are formatted against en-US explicitly.
+    private static readonly CultureInfo Dollars = CultureInfo.GetCultureInfo("en-US");
 
-    // "176.52 ₾": dot decimals with the symbol after, as Georgian shops write it.
-    private static readonly CultureInfo Lari = CultureInfo.InvariantCulture;
+    /// <summary>"176.52 ₾": dot decimals with the symbol after, as Georgian shops write it.</summary>
+    private static string Lari(decimal amount) => amount.ToString("N2", CultureInfo.InvariantCulture) + " ₾";
 
-    private static string Format(decimal amount) => amount.ToString("C", Money);
+    /// <summary>A lari amount (as prices are stored) in the order's currency, at the order's rate.</summary>
+    private static string Format(Order order, decimal lari) =>
+        order.Currency == "USD"
+            ? order.InCurrency(lari).ToString("C", Dollars)
+            : Lari(lari);
 
-    /// <summary>A dollar amount shown in the order's currency, at the rate fixed on the order.</summary>
-    private static string Format(Order order, decimal usdAmount) =>
-        order.Currency == "GEL"
-            ? decimal.Round(usdAmount * order.ExchangeRate, 2).ToString("N2", Lari) + " ₾"
-            : Format(usdAmount);
-
-    /// <summary>"176,52 ₾ (= $68.00 at 2.5982)" for a lari order, plain dollars otherwise.</summary>
+    /// <summary>"$68.00 (= 176.52 ₾ at 2.5982)" for a dollar order, plain lari otherwise.</summary>
     private static string OwnerAmount(Order order) =>
-        order.Currency == "GEL"
-            ? $"{Format(order, order.Total)} (= {Format(order.Total)} at {order.ExchangeRate.ToString(CultureInfo.InvariantCulture)})"
-            : Format(order.Total);
+        order.Currency == "USD"
+            ? $"{Format(order, order.Total)} (= {Lari(order.Total)} at {order.ExchangeRate.ToString(CultureInfo.InvariantCulture)})"
+            : Lari(order.Total);
 
     // ---- To the shop owner ----
 
@@ -156,7 +155,6 @@ public static class OrderEmails
     private static CustomerTexts Texts(Order order) => order.Language switch
     {
         "ka" => Georgian,
-        "ru" => Russian,
         _ => English
     };
 
@@ -213,22 +211,4 @@ public static class OrderEmails
         Delivered: o => $"თქვენი შეკვეთა {o.OrderNumber} მიტანილია. გმადლობთ, რომ SOFIO აირჩიეთ!",
         CancelledSubject: id => $"თქვენი შეკვეთა {id} გაუქმდა",
         Cancelled: o => $"თქვენი შეკვეთა {o.OrderNumber} გაუქმებულია. თუ ეს შეცდომაა, ან უკვე გადაიხადეთ, გთხოვთ, უპასუხოთ ამ წერილს.");
-
-    private static readonly CustomerTexts Russian = new(
-        Hello: name => $"Здравствуйте, {name}!",
-        SignOff: "С уважением,",
-        Total: "Итого",
-        Items: "Товары",
-        DeliveringTo: "Адрес доставки",
-        ReceivedSubject: id => $"Ваш заказ {id} получен",
-        ReceivedCash: o => $"Спасибо за заказ {o.OrderNumber}. Мы позвоним вам по номеру {o.CustomerPhone}, чтобы договориться о доставке. Оплата наличными при получении.",
-        ReceivedTransfer: o => $"Спасибо за заказ {o.OrderNumber}. Мы проверим банковский перевод и напишем вам, как только оплата поступит.",
-        ConfirmedSubject: id => $"Заказ {id} подтверждён",
-        Confirmed: o => $"Мы получили оплату за заказ {o.OrderNumber}. Заказ подтверждён, скоро мы свяжемся с вами по поводу доставки.",
-        ShippedSubject: id => $"Ваш заказ {id} в пути",
-        Shipped: o => $"Ваш заказ {o.OrderNumber} отправлен. Если курьеру что-то понадобится, мы позвоним вам по номеру {o.CustomerPhone}.",
-        DeliveredSubject: id => $"Ваш заказ {id} доставлен",
-        Delivered: o => $"Ваш заказ {o.OrderNumber} доставлен. Спасибо, что выбрали SOFIO!",
-        CancelledSubject: id => $"Ваш заказ {id} отменён",
-        Cancelled: o => $"Ваш заказ {o.OrderNumber} отменён. Если это ошибка или вы уже оплатили заказ, пожалуйста, ответьте на это письмо.");
 }

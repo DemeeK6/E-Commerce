@@ -37,15 +37,17 @@ export function HomeHeroBanner() {
   }, [isSlideshow, slides.length, intervalMs, current]);
 
   const eyebrow = localizedOverride(
-    { en: hero?.eyebrowEn ?? '', ka: hero?.eyebrowKa ?? '', ru: hero?.eyebrowRu ?? '' },
+    { en: hero?.eyebrowEn ?? '', ka: hero?.eyebrowKa ?? '' },
     language,
     t('heroEyebrow'),
   );
   const title = localizedOverride(
-    { en: hero?.titleEn ?? '', ka: hero?.titleKa ?? '', ru: hero?.titleRu ?? '' },
+    { en: hero?.titleEn ?? '', ka: hero?.titleKa ?? '' },
     language,
     t('heroTitle'),
   );
+  // No built-in text: the line under the title appears only once the shop owner writes one.
+  const subtitle = localizedOverride({ en: hero?.subtitleEn ?? '', ka: hero?.subtitleKa ?? '' }, language, '');
 
   return (
     // Until the banner is loaded the default photo stays off, so it does not flash
@@ -64,6 +66,7 @@ export function HomeHeroBanner() {
       <div className={loaded ? 'hero__content' : 'hero__content is-loading'}>
         <p className="eyebrow">{eyebrow}</p>
         <h1>{title}</h1>
+        {subtitle && <p className="eyebrow hero__subtitle">{subtitle}</p>}
         <Link className="btn btn-light" to="/products">
           {t('shopNow')}
           <ArrowRight size={18} />

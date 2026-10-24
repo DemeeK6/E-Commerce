@@ -372,6 +372,14 @@ namespace MenswearStore.Api.Migrations
                     b.Property<int>("SlideIntervalSeconds")
                         .HasColumnType("integer");
 
+                    b.Property<string>("SubtitleEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubtitleKa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("TitleEn")
                         .IsRequired()
                         .HasColumnType("text");
@@ -461,7 +469,7 @@ namespace MenswearStore.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)")
-                        .HasDefaultValue("USD");
+                        .HasDefaultValue("GEL");
 
                     b.Property<DateTime?>("CustomerConfirmedPaymentAtUtc")
                         .HasColumnType("timestamp with time zone");

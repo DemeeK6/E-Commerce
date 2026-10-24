@@ -133,7 +133,7 @@ export function CheckoutPage() {
         <p className="eyebrow">{t('secureCheckout')}</p>
         <h1>{t('checkout')}</h1>
         <p className="checkout-total">{t('totalDue')}: <strong>{price(total)}</strong></p>
-        {currency === 'GEL' && rate && (
+        {currency === 'USD' && rate && (
           <p className="size-chart-note">
             {t('exchangeRateNote')}: 1 USD = {rate.usdToGel} GEL ({new Date(rate.validFrom).toLocaleDateString()})
           </p>

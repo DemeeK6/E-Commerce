@@ -80,7 +80,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<Order>()
             .Property(order => order.Currency)
             .HasMaxLength(3)
-            .HasDefaultValue("USD");
+            .HasDefaultValue("GEL");
 
         // Older orders were all in dollars; the migration fills their rate with 1.
         builder.Entity<Order>()

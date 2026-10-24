@@ -90,7 +90,8 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
     {
         category.NameEn = request.NameEn.Trim();
         category.NameKa = request.NameKa.Trim();
-        category.NameRu = request.NameRu.Trim();
+        // Russian is no longer edited in the admin; keep any stored text unless one is sent.
+        if (request.NameRu is not null) category.NameRu = request.NameRu.Trim();
         category.Slug = request.Slug.Trim().ToLowerInvariant();
         category.GenderTarget = request.GenderTarget;
         category.IsEnabled = request.IsEnabled;

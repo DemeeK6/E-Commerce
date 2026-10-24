@@ -43,10 +43,13 @@ public class HomeHeroController(ApplicationDbContext db) : ControllerBase
         var hero = await LoadAsync();
         hero.EyebrowEn = request.EyebrowEn?.Trim() ?? string.Empty;
         hero.EyebrowKa = request.EyebrowKa?.Trim() ?? string.Empty;
-        hero.EyebrowRu = request.EyebrowRu?.Trim() ?? string.Empty;
+        // Russian is no longer edited in the admin; keep any stored text unless one is sent.
+        if (request.EyebrowRu is not null) hero.EyebrowRu = request.EyebrowRu.Trim();
         hero.TitleEn = request.TitleEn?.Trim() ?? string.Empty;
         hero.TitleKa = request.TitleKa?.Trim() ?? string.Empty;
-        hero.TitleRu = request.TitleRu?.Trim() ?? string.Empty;
+        if (request.TitleRu is not null) hero.TitleRu = request.TitleRu.Trim();
+        hero.SubtitleEn = request.SubtitleEn?.Trim() ?? string.Empty;
+        hero.SubtitleKa = request.SubtitleKa?.Trim() ?? string.Empty;
         hero.SlideIntervalSeconds = Math.Clamp(request.SlideIntervalSeconds, 2, 30);
 
         // The admin edits the list as a whole (add, remove, reorder), so replacing it

@@ -129,7 +129,7 @@ export interface Order {
   publicToken: string;
   status: OrderStatus;
   total: number;
-  /** The customer's currency and the rate fixed at checkout (1 for USD). `total` stays in dollars. */
+  /** The customer's currency and the rate fixed at checkout (lari per dollar). `total` is in lari. */
   currency: Currency;
   exchangeRate: number;
   totalInCurrency: number;
@@ -168,6 +168,9 @@ export interface HomeHero {
   titleEn: string;
   titleKa: string;
   titleRu: string;
+  /** The small line under the big title; hidden when empty in every language. */
+  subtitleEn: string;
+  subtitleKa: string;
   slideIntervalSeconds: number;
   slides: HeroSlide[];
 }
@@ -193,6 +196,6 @@ export interface PlaceOrderPayload {
   paymentMethod: PaymentMethod;
   transferBank: TransferBank | null;
   items: { productId: number; quantity: number; size: string; color: string }[];
-  language: 'en' | 'ka' | 'ru';
+  language: 'en' | 'ka';
   currency: Currency;
 }

@@ -18,6 +18,10 @@ public class HomeHero
     public string TitleKa { get; set; } = string.Empty;
     public string TitleRu { get; set; } = string.Empty;
 
+    /// <summary>The small line under the big title. Shown only when filled in.</summary>
+    public string SubtitleEn { get; set; } = string.Empty;
+    public string SubtitleKa { get; set; } = string.Empty;
+
     /// <summary>How long each photo stays before the next one, when there are several.</summary>
     public int SlideIntervalSeconds { get; set; } = 6;
 

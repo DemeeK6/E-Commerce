@@ -2256,7 +2256,7 @@ form.checkout-box > a {
 }
 
 .admin-row .hero-editor-texts {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 16px;
 }
 
@@ -2396,5 +2396,14 @@ form.checkout-box > a {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 18px;
+}
+
+/* The small line under the big title: same style as the line above it. */
+.hero .hero__subtitle {
+  margin: 12px 0 0;
+}
+
+.hero .hero__subtitle + .btn {
   margin-top: 18px;
 }

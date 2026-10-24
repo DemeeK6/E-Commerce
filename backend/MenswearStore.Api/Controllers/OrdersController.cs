@@ -78,16 +78,12 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier, 
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Lari orders are priced at today's National Bank rate, fixed on the order. If
-        // the rate is unavailable the order falls back to dollars, which is what the
-        // shop showed the customer in that case.
-        var currency = "USD";
-        var exchangeRate = 1m;
-        if (request.Currency == "GEL" && await rates.GetUsdToGelAsync() is { } gel)
-        {
-            currency = "GEL";
-            exchangeRate = gel.UsdToGel;
-        }
+        // Prices are in lari. A dollar order is priced at today's National Bank rate,
+        // fixed on the order. Without a rate the shop showed lari only, so the order is
+        // in lari too. The rate is recorded for lari orders as well, for reference.
+        var rate = await rates.GetUsdToGelAsync();
+        var currency = request.Currency == "USD" && rate is not null ? "USD" : "GEL";
+        var exchangeRate = rate?.UsdToGel ?? 1m;
 
         var order = new Order
         {
@@ -98,7 +94,7 @@ public class OrdersController(ApplicationDbContext db, IOrderNotifier notifier, 
             CustomerPhone = request.Phone.Trim(),
             CustomerEmail = request.Email?.Trim() ?? string.Empty,
             ShippingAddress = request.Address.Trim(),
-            Language = request.Language is "ka" or "ru" ? request.Language : "en",
+            Language = request.Language == "ka" ? "ka" : "en",
             PaymentMethod = request.PaymentMethod,
             // Only meaningful for transfers; a cash order must not carry a stale bank.
             TransferBank = request.PaymentMethod == PaymentMethod.BankTransfer ? request.TransferBank : null,

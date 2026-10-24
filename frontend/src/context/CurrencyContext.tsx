@@ -4,26 +4,26 @@ import type { Currency, ExchangeRate, Order } from '../types';
 import { formatAmount } from '../utils/format';
 
 type CurrencyContextValue = {
-  /** What prices are shown in. GEL only once a rate is known, otherwise USD. */
+  /** What prices are shown in. USD only once a rate is known, otherwise GEL. */
   currency: Currency;
-  /** What the shopper picked, even while GEL is unavailable. */
+  /** What the shopper picked, even while USD is unavailable. */
   chosen: Currency;
   setCurrency: (currency: Currency) => void;
   /** Today's National Bank rate, or null when it could not be loaded. */
   rate: ExchangeRate | null;
-  /** A dollar price (as stored on every product) shown in the chosen currency. */
-  price: (usd: number) => string;
+  /** A lari price (as stored on every product) shown in the chosen currency. */
+  price: (lari: number) => string;
   /** An order amount in the currency and at the rate fixed on that order. */
-  orderPrice: (order: Pick<Order, 'currency' | 'exchangeRate'>, usd: number) => string;
+  orderPrice: (order: Pick<Order, 'currency' | 'exchangeRate'>, lari: number) => string;
 };
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
 function stored(): Currency {
   try {
-    return localStorage.getItem('currency') === 'GEL' ? 'GEL' : 'USD';
+    return localStorage.getItem('currency') === 'USD' ? 'USD' : 'GEL';
   } catch {
-    return 'USD';
+    return 'GEL';
   }
 }
 
@@ -36,8 +36,8 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<CurrencyContextValue>(() => {
-    // Never invent a lari price: without a rate everything stays in dollars.
-    const currency: Currency = chosen === 'GEL' && rate ? 'GEL' : 'USD';
+    // Never invent a dollar price: without a rate everything stays in lari.
+    const currency: Currency = chosen === 'USD' && rate ? 'USD' : 'GEL';
     return {
       currency,
       chosen,
@@ -46,8 +46,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         try { localStorage.setItem('currency', next); } catch { /* private mode */ }
       },
       rate,
-      price: usd => formatAmount(currency === 'GEL' && rate ? usd * rate.usdToGel : usd, currency),
-      orderPrice: (order, usd) => formatAmount(usd * order.exchangeRate, order.currency),
+      price: gel => formatAmount(currency === 'USD' && rate ? gel / rate.usdToGel : gel, currency),
+      orderPrice: (order, gel) =>
+        formatAmount(order.currency === 'USD' && order.exchangeRate > 0 ? gel / order.exchangeRate : gel, order.currency),
     };
   }, [chosen, rate]);
 

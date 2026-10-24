@@ -52,19 +52,23 @@ public class Order
     /// </summary>
     public Guid PublicToken { get; set; } = Guid.NewGuid();
 
-    /// <summary>Always in US dollars - the currency every product price is entered in.</summary>
+    /// <summary>Always in lari - the currency every product price is entered in.</summary>
     public decimal Total { get; set; }
 
     /// <summary>
-    /// The currency the customer shopped in ("USD" or "GEL") and the National Bank rate
-    /// at checkout (lari per dollar; 1 for USD). Kept so a lari transfer can be matched
-    /// to exactly the amount the customer was shown, whatever the rate is later.
+    /// The currency the customer shopped in ("GEL" or "USD") and the National Bank rate
+    /// at checkout (lari per dollar). Kept so a dollar transfer can be matched to exactly
+    /// the amount the customer was shown, whatever the rate is later.
     /// </summary>
-    public string Currency { get; set; } = "USD";
+    public string Currency { get; set; } = "GEL";
     public decimal ExchangeRate { get; set; } = 1m;
 
     /// <summary>What the customer was asked to pay, in their currency.</summary>
-    public decimal TotalInCurrency => decimal.Round(Total * ExchangeRate, 2);
+    public decimal TotalInCurrency => InCurrency(Total);
+
+    /// <summary>A lari amount from this order, in the customer's currency at the order's rate.</summary>
+    public decimal InCurrency(decimal lari) =>
+        Currency == "USD" && ExchangeRate > 0 ? decimal.Round(lari / ExchangeRate, 2) : lari;
     public string Status { get; set; } = "Pending";
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();

@@ -78,18 +78,12 @@ export function AdminInfoPage() {
                 <label>{t('nameKa')}
                   <input value={draft.titleKa} onChange={e => edit(section.id, { titleKa: e.target.value })} />
                 </label>
-                <label>{t('nameRu')}
-                  <input value={draft.titleRu} onChange={e => edit(section.id, { titleRu: e.target.value })} />
-                </label>
 
                 <label>{t('textEn')}
                   <textarea rows={5} value={draft.bodyEn} onChange={e => edit(section.id, { bodyEn: e.target.value })} />
                 </label>
                 <label>{t('textKa')}
                   <textarea rows={5} value={draft.bodyKa} onChange={e => edit(section.id, { bodyKa: e.target.value })} />
-                </label>
-                <label>{t('textRu')}
-                  <textarea rows={5} value={draft.bodyRu} onChange={e => edit(section.id, { bodyRu: e.target.value })} />
                 </label>
 
                 <button

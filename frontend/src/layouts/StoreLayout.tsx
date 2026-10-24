@@ -53,20 +53,19 @@ export function StoreLayout() {
         </Link>
         <nav className="desktop-nav">{nav}</nav>
         <div className="header-actions">
-          {/* Lari is offered only once today's rate is known, so no price is ever a guess. */}
+          {/* Prices are in lari; dollars are offered only once today's rate is known, so no price is ever a guess. */}
           <select
-            value={rate ? chosen : 'USD'}
+            value={rate ? chosen : 'GEL'}
             onChange={event => setCurrency(event.target.value as 'USD' | 'GEL')}
             aria-label={t('currency')}
             title={rate ? `1 USD = ${rate.usdToGel} GEL` : t('currencyUnavailable')}
           >
-            <option value="USD">USD $</option>
-            <option value="GEL" disabled={!rate}>GEL ₾</option>
+            <option value="GEL">GEL ₾</option>
+            <option value="USD" disabled={!rate}>USD $</option>
           </select>
-          <select value={language} onChange={(event) => setLanguage(event.target.value as 'en' | 'ka' | 'ru')} aria-label="Language">
+          <select value={language} onChange={(event) => setLanguage(event.target.value as 'en' | 'ka')} aria-label="Language">
             <option value="en">EN</option>
             <option value="ka">KA</option>
-            <option value="ru">RU</option>
           </select>
           <Link className="icon-link" to="/cart" aria-label={t('cart')}>
             <ShoppingBag size={20} />

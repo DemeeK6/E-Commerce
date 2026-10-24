@@ -1,6 +1,11 @@
-/** Dollars, as products are priced. The admin panel uses this; the shop uses useCurrency(). */
+/** Dollars: "$34.00". */
 export function money(value: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+}
+
+/** Lari, as products are priced: "88.00 ₾". The admin panel uses this; the shop uses useCurrency(). */
+export function lari(value: number) {
+  return formatAmount(value, 'GEL');
 }
 
 /** "$68.00" or "176.52 ₾" - lari with the symbol after, as Georgian shops write it. */
@@ -10,13 +15,12 @@ export function formatAmount(value: number, currency: 'USD' | 'GEL') {
 }
 
 export function localizedName(
-  item: { nameEn: string; nameKa: string; nameRu: string },
-  language: 'en' | 'ka' | 'ru',
+  item: { nameEn: string; nameKa: string },
+  language: 'en' | 'ka',
 ): string {
-  const byLanguage: Record<'en' | 'ka' | 'ru', string> = {
+  const byLanguage: Record<'en' | 'ka', string> = {
     en: item.nameEn,
     ka: item.nameKa,
-    ru: item.nameRu,
   };
 
   const localized = byLanguage[language];
@@ -33,17 +37,17 @@ export function localizedName(
  * showing a blank heading over translated text.
  */
 export function localizedInfo(
-  section: { titleEn: string; titleKa: string; titleRu: string; bodyEn: string; bodyKa: string; bodyRu: string },
-  language: 'en' | 'ka' | 'ru',
+  section: { titleEn: string; titleKa: string; bodyEn: string; bodyKa: string },
+  language: 'en' | 'ka',
 ): { title: string; body: string } {
-  const pick = (ka: string, ru: string, en: string) => {
-    const localized = language === 'ka' ? ka : language === 'ru' ? ru : en;
+  const pick = (ka: string, en: string) => {
+    const localized = language === 'ka' ? ka : en;
     return localized && localized.trim() !== '' ? localized : en;
   };
 
   return {
-    title: pick(section.titleKa, section.titleRu, section.titleEn),
-    body: pick(section.bodyKa, section.bodyRu, section.bodyEn),
+    title: pick(section.titleKa, section.titleEn),
+    body: pick(section.bodyKa, section.bodyEn),
   };
 }
 
@@ -53,8 +57,8 @@ export function localizedInfo(
  * language still shows something sensible.
  */
 export function localizedOverride(
-  values: { en: string; ka: string; ru: string },
-  language: 'en' | 'ka' | 'ru',
+  values: { en: string; ka: string },
+  language: 'en' | 'ka',
   builtIn: string,
 ): string {
   const localized = values[language]?.trim();

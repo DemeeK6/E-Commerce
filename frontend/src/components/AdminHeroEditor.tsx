@@ -178,10 +178,10 @@ export function AdminHeroEditor() {
         <div className="hero-editor-texts">
           {textField('eyebrowEn', 'smallLineEn', 'Spring edit 2026')}
           {textField('eyebrowKa', 'smallLineKa', 'გაზაფხულის კოლექცია 2026')}
-          {textField('eyebrowRu', 'smallLineRu', 'Весенняя коллекция 2026')}
           {textField('titleEn', 'bigTitleEn', 'SOFIO')}
           {textField('titleKa', 'bigTitleKa', 'SOFIO')}
-          {textField('titleRu', 'bigTitleRu', 'SOFIO')}
+          {textField('subtitleEn', 'lineUnderEn', '')}
+          {textField('subtitleKa', 'lineUnderKa', '')}
         </div>
 
         <button className="btn btn-dark" onClick={save} disabled={saving || uploading}>

@@ -54,7 +54,7 @@ public record CreateOrderRequest(
     CreateOrderItemRequest[] Items,
     /// <summary>"en", "ka" or "ru"; anything else is stored as "en".</summary>
     string? Language = null,
-    /// <summary>"USD" or "GEL"; the server applies its own rate, never one sent by the browser.</summary>
+    /// <summary>"GEL" or "USD"; the server applies its own rate, never one sent by the browser.</summary>
     string? Currency = null);
 
 public record UpdateOrderStatusRequest([Required] string Status);

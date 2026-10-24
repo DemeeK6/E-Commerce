@@ -5,6 +5,7 @@ public record HeroSlideDto(int Id, string ImageUrl, bool IsEnabled, int DisplayO
 public record HomeHeroDto(
     string EyebrowEn, string EyebrowKa, string EyebrowRu,
     string TitleEn, string TitleKa, string TitleRu,
+    string SubtitleEn, string SubtitleKa,
     int SlideIntervalSeconds,
     IReadOnlyList<HeroSlideDto> Slides);
 
@@ -16,4 +17,5 @@ public record UpdateHomeHeroRequest(
     string? EyebrowEn, string? EyebrowKa, string? EyebrowRu,
     string? TitleEn, string? TitleKa, string? TitleRu,
     int SlideIntervalSeconds,
-    IReadOnlyList<HeroSlideRequest>? Slides);
+    IReadOnlyList<HeroSlideRequest>? Slides,
+    string? SubtitleEn = null, string? SubtitleKa = null);

@@ -63,6 +63,7 @@ public static class MappingExtensions
     public static HomeHeroDto ToDto(this HomeHero hero, bool includeDisabled) =>
         new(hero.EyebrowEn, hero.EyebrowKa, hero.EyebrowRu,
             hero.TitleEn, hero.TitleKa, hero.TitleRu,
+            hero.SubtitleEn, hero.SubtitleKa,
             hero.SlideIntervalSeconds,
             hero.Slides
                 .Where(slide => includeDisabled || slide.IsEnabled)

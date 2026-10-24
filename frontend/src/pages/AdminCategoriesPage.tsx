@@ -18,7 +18,6 @@ export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [nameEn, setNameEn] = useState('');
   const [nameKa, setNameKa] = useState('');
-  const [nameRu, setNameRu] = useState('');
   const [genderTarget, setGenderTarget] = useState<GenderTarget>(0);
   const [editing, setEditing] = useState<Category | null>(null);
   const [error, setError] = useState('');
@@ -39,7 +38,6 @@ export function AdminCategoriesPage() {
   const resetForm = () => {
     setNameEn('');
     setNameKa('');
-    setNameRu('');
     setGenderTarget(0);
   };
 
@@ -48,13 +46,12 @@ export function AdminCategoriesPage() {
     setError('');
     try {
       if (editing) {
-        await api.saveCategory({ ...editing, nameEn, nameKa, nameRu, genderTarget });
+        await api.saveCategory({ ...editing, nameEn, nameKa, genderTarget });
         setEditing(null);
       } else {
         await api.saveCategory({
           nameEn,
           nameKa,
-          nameRu,
           slug: `${GENDER_SLUG_PREFIX[genderTarget]}${nameEn.toLowerCase().replaceAll(' ', '-')}`,
           genderTarget,
           isEnabled: true,
@@ -72,7 +69,6 @@ export function AdminCategoriesPage() {
     setEditing(category);
     setNameEn(category.nameEn);
     setNameKa(category.nameKa);
-    setNameRu(category.nameRu);
     setGenderTarget(category.genderTarget);
   };
 
@@ -111,11 +107,6 @@ export function AdminCategoriesPage() {
           onChange={event => setNameKa(event.target.value)}
           placeholder={t('nameKa')}
         />
-        <input
-          value={nameRu}
-          onChange={event => setNameRu(event.target.value)}
-          placeholder={t('nameRu')}
-        />
         <select
           value={genderTarget}
           onChange={event => setGenderTarget(Number(event.target.value) as GenderTarget)}
@@ -137,7 +128,7 @@ export function AdminCategoriesPage() {
           <article className="admin-row admin-row-text" key={category.id}>
             <div>
               <strong>{category.nameEn}</strong>
-              <span>{category.nameKa || '—'} · {category.nameRu || '—'}</span>
+              <span>{category.nameKa || '—'}</span>
               <span>{category.slug} · {t(GENDER_OPTIONS[category.genderTarget].labelKey)}</span>
             </div>
             <div className="admin-row-actions">

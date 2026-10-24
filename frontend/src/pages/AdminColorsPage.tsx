@@ -7,7 +7,6 @@ export function AdminColorsPage() {
   const [colors, setColors] = useState<Color[]>([]);
   const [nameEn, setNameEn] = useState('');
   const [nameKa, setNameKa] = useState('');
-  const [nameRu, setNameRu] = useState('');
   const [hexCode, setHexCode] = useState('#000000');
   const [editing, setEditing] = useState<Color | null>(null);
   const [error, setError] = useState('');
@@ -19,7 +18,6 @@ export function AdminColorsPage() {
   const resetForm = () => {
     setNameEn('');
     setNameKa('');
-    setNameRu('');
     setHexCode('#000000');
   };
 
@@ -28,13 +26,12 @@ export function AdminColorsPage() {
     setError('');
     try {
       if (editing) {
-        await api.saveColor({ ...editing, nameEn, nameKa, nameRu, hexCode });
+        await api.saveColor({ ...editing, nameEn, nameKa, hexCode });
         setEditing(null);
       } else {
         await api.saveColor({
           nameEn,
           nameKa,
-          nameRu,
           hexCode,
           isEnabled: true,
           displayOrder: colors.length + 1,
@@ -52,7 +49,6 @@ export function AdminColorsPage() {
     setError('');
     setNameEn(color.nameEn);
     setNameKa(color.nameKa);
-    setNameRu(color.nameRu);
     setHexCode(color.hexCode);
   };
 
@@ -92,11 +88,6 @@ export function AdminColorsPage() {
           placeholder={t('nameKa')}
         />
         <input
-          value={nameRu}
-          onChange={event => setNameRu(event.target.value)}
-          placeholder={t('nameRu')}
-        />
-        <input
           type="color"
           value={hexCode}
           onChange={event => setHexCode(event.target.value)}
@@ -118,7 +109,7 @@ export function AdminColorsPage() {
               <i style={{ background: color.hexCode }} />
               <div>
                 <strong>{color.nameEn}</strong>
-                <span>{color.nameKa || '—'} · {color.nameRu || '—'}</span>
+                <span>{color.nameKa || '—'}</span>
                 <span>{color.hexCode}</span>
               </div>
             </div>

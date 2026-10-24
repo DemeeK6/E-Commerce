@@ -43,10 +43,11 @@ public class InfoSectionsController(ApplicationDbContext db) : ControllerBase
 
         section.TitleEn = request.TitleEn.Trim();
         section.TitleKa = request.TitleKa?.Trim() ?? string.Empty;
-        section.TitleRu = request.TitleRu?.Trim() ?? string.Empty;
+        // Russian is no longer edited in the admin; keep any stored text unless one is sent.
+        if (request.TitleRu is not null) section.TitleRu = request.TitleRu.Trim();
         section.BodyEn = request.BodyEn.Trim();
         section.BodyKa = request.BodyKa?.Trim() ?? string.Empty;
-        section.BodyRu = request.BodyRu?.Trim() ?? string.Empty;
+        if (request.BodyRu is not null) section.BodyRu = request.BodyRu.Trim();
         section.IsEnabled = request.IsEnabled;
         section.DisplayOrder = request.DisplayOrder;
         section.UpdatedAtUtc = DateTime.UtcNow;

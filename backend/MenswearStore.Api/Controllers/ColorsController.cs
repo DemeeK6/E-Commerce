@@ -107,7 +107,8 @@ public class ColorsController(ApplicationDbContext db) : ControllerBase
     {
         color.NameEn = request.NameEn.Trim();
         color.NameKa = request.NameKa.Trim();
-        color.NameRu = request.NameRu.Trim();
+        // Russian is no longer edited in the admin; keep any stored text unless one is sent.
+        if (request.NameRu is not null) color.NameRu = request.NameRu.Trim();
         color.HexCode = request.HexCode.Trim();
         color.DisplayOrder = request.DisplayOrder;
         color.IsEnabled = request.IsEnabled;

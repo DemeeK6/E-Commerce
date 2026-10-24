@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { Product } from '../types';
-import { localizedName, money } from '../utils/format';
+import { lari, localizedName } from '../utils/format';
 
 export function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -144,8 +144,8 @@ export function AdminProductsPage() {
               <span>
                 {product.category ? localizedName(product.category, language) : ''} ·{' '}
                 {product.discountPrice != null ? (
-                  <><s style={{ color: 'var(--muted)' }}>{money(product.price)}</s> {money(product.discountPrice)}</>
-                ) : money(product.price)}
+                  <><s style={{ color: 'var(--muted)' }}>{lari(product.price)}</s> {lari(product.discountPrice)}</>
+                ) : lari(product.price)}
               </span>
             </div>
             {discountMode ? (
