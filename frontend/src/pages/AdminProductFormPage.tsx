@@ -174,8 +174,8 @@ export function AdminProductFormPage() {
       <label>{t('description')}<textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={4} /></label>
 
       <div className="two-fields">
-        <label>{t('price')} (USD)<input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} required /></label>
-        <label>{t('discountPrice')} (USD)<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
+        <label>{t('price')} (₾ GEL)<input type="number" value={form.price} onChange={e => setForm({ ...form, price: Number(e.target.value) })} required /></label>
+        <label>{t('discountPrice')} (₾ GEL)<input type="number" value={form.discountPrice ?? ''} onChange={e => setForm({ ...form, discountPrice: e.target.value ? Number(e.target.value) : null })} /></label>
       </div>
 
       <label>{t('category')}
@@ -281,7 +281,7 @@ export function AdminProductFormPage() {
           <div className="image-upload-area image-upload-add" onClick={() => fileInputRef.current?.click()}>
             <div className="image-placeholder">
               <span>{t('addImage')}</span>
-              <span style={{ fontSize: '.8rem', color: 'var(--muted)' }}>JPG, PNG, WebP · max 5 MB</span>
+              <span style={{ fontSize: '.8rem', color: 'var(--muted)' }}>JPG, PNG, WebP · max 25 MB</span>
             </div>
             {uploading && <div className="image-uploading">Uploading…</div>}
           </div>
