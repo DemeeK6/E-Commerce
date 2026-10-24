@@ -93,7 +93,9 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify({
         ...hero,
-        slides: hero.slides.map(slide => ({ imageUrl: slide.imageUrl, isEnabled: slide.isEnabled })),
+        slides: hero.slides.map(slide => ({
+          imageUrl: slide.imageUrl, isEnabled: slide.isEnabled, focusX: slide.focusX, focusY: slide.focusY,
+        })),
       }),
     }),
   settings: () => request<AppSetting[]>('/api/settings'),

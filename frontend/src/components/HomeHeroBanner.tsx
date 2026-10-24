@@ -55,7 +55,8 @@ export function HomeHeroBanner() {
         <div
           key={slide.id}
           className={index === current % slides.length ? 'hero__slide is-active' : 'hero__slide'}
-          style={{ backgroundImage: `url("${slide.imageUrl}")` }}
+          // The chosen focus point stays visible however the screen crops the photo.
+          style={{ backgroundImage: `url("${slide.imageUrl}")`, backgroundPosition: `${slide.focusX}% ${slide.focusY}%` }}
           aria-hidden="true"
         />
       ))}

@@ -1,5 +1,6 @@
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { Star } from 'lucide-react';
+import { PhotoSize } from '../components/PhotoSize';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
@@ -242,10 +243,13 @@ export function AdminProductFormPage() {
 
       <div className="form-field">
         <span className="field-label">{t('addImage')}</span>
+        <p className="size-chart-note">{t('productPhotoTips')}</p>
         <div className="image-thumbs">
           {images.map((image, index) => (
             <div key={index} className={`image-thumb ${image.isPrimary ? 'image-thumb-primary' : ''}`}>
+              {/* 4:5 and cropped from the centre - exactly how the shop shows it. */}
               <img src={image.url} alt={image.altText || ''} className="image-thumb-img" />
+              <PhotoSize url={image.url} minWidth={1000} />
               <label className="image-color-label">
                 {t('assignColor')}
                 <select

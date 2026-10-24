@@ -154,6 +154,9 @@ export interface HeroSlide {
   imageUrl: string;
   isEnabled: boolean;
   displayOrder: number;
+  /** The spot to keep in view, in % from the left and top of the photo. */
+  focusX: number;
+  focusY: number;
 }
 
 /** The home page welcome banner. Blank texts fall back to the built-in translations. */

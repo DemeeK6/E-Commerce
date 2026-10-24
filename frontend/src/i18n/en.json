@@ -200,5 +200,11 @@
   "showSlide": "Show photo",
   "currency": "Currency",
   "currencyUnavailable": "Lari prices are unavailable right now",
-  "exchangeRateNote": "Prices in lari at the National Bank of Georgia rate"
+  "exchangeRateNote": "Prices in lari at the National Bank of Georgia rate",
+  "heroPhotoTips": "Best: a wide photo, at least 2400 × 1200 px (2:1). Computers show almost all of it; phones show only a narrow strip from the middle, so keep the person or product in the centre. The text sits bottom-left.",
+  "previewComputer": "Computer",
+  "previewPhone": "Phone",
+  "productPhotoTips": "Best: a portrait photo, 4:5, at least 1200 × 1500 px. Other shapes are cropped to 4:5 from the centre, as in the previews below.",
+  "photoTooSmall": "too small, may look blurry",
+  "heroFocusTip": "Click on the photo to choose what must always stay visible, for example a face. The previews show the result."
 }

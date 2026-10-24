@@ -57,7 +57,9 @@ public class HomeHeroController(ApplicationDbContext db) : ControllerBase
             {
                 ImageUrl = slide.ImageUrl.Trim(),
                 IsEnabled = slide.IsEnabled,
-                DisplayOrder = index
+                DisplayOrder = index,
+                FocusX = Math.Clamp(slide.FocusX, 0, 100),
+                FocusY = Math.Clamp(slide.FocusY, 0, 100)
             })
             .ToList();
         hero.UpdatedAtUtc = DateTime.UtcNow;

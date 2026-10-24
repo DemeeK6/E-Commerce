@@ -16,4 +16,12 @@ public class HeroSlide
     /// <summary>Hidden photos stay in the list so the admin can bring them back.</summary>
     public bool IsEnabled { get; set; } = true;
     public int DisplayOrder { get; set; }
+
+    /// <summary>
+    /// The point of the photo to keep in view, as percentages from the left and top
+    /// (0-100). The banner crops differently on computers and phones; it always keeps
+    /// this spot visible. Defaults to the centre, slightly high, as before.
+    /// </summary>
+    public int FocusX { get; set; } = 50;
+    public int FocusY { get; set; } = 35;
 }

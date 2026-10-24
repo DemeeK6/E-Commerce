@@ -1487,7 +1487,8 @@ textarea {
   background: #fff;
 }
 .image-thumb-primary { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.image-thumb-img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; display: block; }
+/* Same 4:5 crop as the product card and product page, so the preview is honest. */
+.image-thumb-img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 4px; display: block; }
 .image-color-label { display: grid; gap: 4px; font-size: .75rem; color: var(--muted); font-weight: 500; }
 .image-thumb-actions { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .image-upload-add { min-height: auto; height: 100%; }
@@ -2267,4 +2268,90 @@ form.checkout-box > a {
   .admin-row .hero-editor-texts {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* ---- Photo previews in the admin ---- */
+.hero-editor-slides {
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+}
+
+/* Computer and phone frames side by side at the same height: the computer frame is
+   2.3:1 and the phone frame 0.64:1, so their widths are in the ratio 2.3 : 0.64. */
+.admin-row .hero-preview {
+  grid-template-columns: 2.3fr 0.64fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.hero-preview figure {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.hero-preview figcaption {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.hero-preview-frame {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #1d1b19;
+  background-size: cover;
+}
+
+.hero-preview-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0.16));
+}
+
+.hero-preview-computer { aspect-ratio: 2.3 / 1; }
+.hero-preview-phone { aspect-ratio: 0.64 / 1; }
+
+.hero-editor-slides li.is-hidden .hero-preview {
+  opacity: 0.35;
+}
+
+.photo-size {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.admin-row .photo-size-warning,
+.photo-size-warning {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* The whole photo with a dot on the chosen focus point; clicking moves the dot. */
+.hero-focus {
+  position: relative;
+  justify-self: center;
+  line-height: 0;
+}
+
+.admin-row .hero-focus img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 220px;
+  aspect-ratio: auto;
+  border-radius: 4px;
+  cursor: crosshair;
+}
+
+.hero-focus-dot {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }

@@ -1,8 +1,9 @@
 import { ArrowDown, ArrowUp, ImagePlus, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { type MouseEvent, useEffect, useRef, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
 import type { HeroSlide, HomeHero } from '../types';
+import { PhotoSize } from './PhotoSize';
 
 const MAX_SLIDES = 10;
 
@@ -25,6 +26,14 @@ export function AdminHeroEditor() {
   const edit = (patch: Partial<HomeHero>) => setDraft(current => (current ? { ...current, ...patch } : current));
   const setSlides = (slides: HeroSlide[]) => edit({ slides });
 
+  /** Clicking the full photo sets the spot the banner must keep in view. */
+  const setFocus = (index: number, event: MouseEvent<HTMLImageElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const focusX = Math.round(Math.min(100, Math.max(0, ((event.clientX - box.left) / box.width) * 100)));
+    const focusY = Math.round(Math.min(100, Math.max(0, ((event.clientY - box.top) / box.height) * 100)));
+    setSlides(draft.slides.map((s, i) => (i === index ? { ...s, focusX, focusY } : s)));
+  };
+
   const move = (index: number, by: -1 | 1) => {
     const slides = [...draft.slides];
     [slides[index], slides[index + by]] = [slides[index + by], slides[index]];
@@ -41,7 +50,7 @@ export function AdminHeroEditor() {
       for (const file of Array.from(files).slice(0, room)) {
         const imageUrl = await api.uploadImage(file);
         // A negative id is a placeholder until save; the server assigns real ones.
-        added.push({ id: -Date.now() - added.length, imageUrl, isEnabled: true, displayOrder: 0 });
+        added.push({ id: -Date.now() - added.length, imageUrl, isEnabled: true, displayOrder: 0, focusX: 50, focusY: 35 });
       }
       setDraft(current => (current ? { ...current, slides: [...current.slides, ...added] } : current));
     } catch (err) {
@@ -84,12 +93,31 @@ export function AdminHeroEditor() {
         {error && <p className="form-error">{error}</p>}
 
         <h3>{t('heroPhotos')}</h3>
+        <p className="size-chart-note">{t('heroPhotoTips')}</p>
+        <p className="size-chart-note">{t('heroFocusTip')}</p>
         {draft.slides.length === 0 && <p className="size-chart-note">{t('noHeroPhotos')}</p>}
 
         <ol className="hero-editor-slides">
           {draft.slides.map((slide, index) => (
             <li key={slide.id} className={slide.isEnabled ? '' : 'is-hidden'}>
-              <img src={slide.imageUrl} alt="" />
+              {/* The whole photo, uncropped. A click marks what must stay visible. */}
+              <div className="hero-focus">
+                <img src={slide.imageUrl} alt="" onClick={event => setFocus(index, event)} />
+                <span className="hero-focus-dot" style={{ left: `${slide.focusX}%`, top: `${slide.focusY}%` }} />
+              </div>
+              {/* The same crop, focus point and shade as the home page banner, at the
+                  shapes it really has: ~2.3:1 on a computer, ~0.64:1 on a phone. */}
+              <div className="hero-preview">
+                <figure>
+                  <div className="hero-preview-frame hero-preview-computer" style={{ backgroundImage: `url("${slide.imageUrl}")`, backgroundPosition: `${slide.focusX}% ${slide.focusY}%` }} />
+                  <figcaption>{t('previewComputer')}</figcaption>
+                </figure>
+                <figure>
+                  <div className="hero-preview-frame hero-preview-phone" style={{ backgroundImage: `url("${slide.imageUrl}")`, backgroundPosition: `${slide.focusX}% ${slide.focusY}%` }} />
+                  <figcaption>{t('previewPhone')}</figcaption>
+                </figure>
+              </div>
+              <PhotoSize url={slide.imageUrl} minWidth={1920} />
               <span className="hero-editor-number">{index + 1}</span>
               <div className="hero-editor-slide-actions">
                 <button

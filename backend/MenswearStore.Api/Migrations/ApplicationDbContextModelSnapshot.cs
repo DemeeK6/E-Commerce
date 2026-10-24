@@ -326,6 +326,12 @@ namespace MenswearStore.Api.Migrations
                     b.Property<int>("DisplayOrder")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FocusX")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FocusY")
+                        .HasColumnType("integer");
+
                     b.Property<int>("HomeHeroId")
                         .HasColumnType("integer");
 

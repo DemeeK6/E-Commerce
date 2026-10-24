@@ -67,7 +67,7 @@ public static class MappingExtensions
             hero.Slides
                 .Where(slide => includeDisabled || slide.IsEnabled)
                 .OrderBy(slide => slide.DisplayOrder)
-                .Select(slide => new HeroSlideDto(slide.Id, slide.ImageUrl, slide.IsEnabled, slide.DisplayOrder))
+                .Select(slide => new HeroSlideDto(slide.Id, slide.ImageUrl, slide.IsEnabled, slide.DisplayOrder, slide.FocusX, slide.FocusY))
                 .ToArray());
 
     public static AppSettingDto ToDto(this AppSetting setting) =>
