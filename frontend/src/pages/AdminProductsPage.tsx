@@ -1,4 +1,5 @@
 import { Edit3, Plus, Tag, Trash2, X } from 'lucide-react';
+import { ConfirmDeleteDialog } from '../components/ConfirmDeleteDialog';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
@@ -12,6 +13,10 @@ export function AdminProductsPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [percentage, setPercentage] = useState('');
   const [saving, setSaving] = useState(false);
+  // The product waiting for the delete confirmation, if any.
+  const [toDelete, setToDelete] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const { t, language } = useI18n();
 
   const load = () => { api.products(undefined, true).then(setProducts).catch(() => setProducts([])); };
@@ -54,9 +59,25 @@ export function AdminProductsPage() {
     }
   };
 
-  const deactivate = async (id: number) => {
-    await api.deleteProduct(id);
-    load();
+  /** Shows or hides the product in the shop; nothing is deleted. */
+  const toggleActive = async (product: Product) => {
+    const updated = await api.setProductActive(product.id, !product.isActive);
+    setProducts(current => current.map(item => (item.id === updated.id ? updated : item)));
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await api.deleteProduct(toDelete.id);
+      setProducts(current => current.filter(item => item.id !== toDelete.id));
+      setToDelete(null);
+    } catch (err) {
+      setDeleteError((err as Error).message);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -127,18 +148,47 @@ export function AdminProductsPage() {
                 ) : money(product.price)}
               </span>
             </div>
-            <span className={product.isActive ? 'status active' : 'status'}>
-              {product.isActive ? t('active') : t('inactive')}
-            </span>
+            {discountMode ? (
+              <span className={product.isActive ? 'status active' : 'status'}>
+                {product.isActive ? t('active') : t('inactive')}
+              </span>
+            ) : (
+              // One click turns the product on or off in the shop.
+              <button
+                type="button"
+                className={product.isActive ? 'status active status-toggle' : 'status status-toggle'}
+                onClick={() => toggleActive(product)}
+                title={product.isActive ? t('deactivate') : t('activate')}
+              >
+                {product.isActive ? t('active') : t('inactive')}
+              </button>
+            )}
             {!discountMode && (
               <>
-                <Link className="icon-link" to={`/admin/products/${product.id}`} onClick={e => e.stopPropagation()}><Edit3 size={18} /></Link>
-                <button className="icon-danger" onClick={() => deactivate(product.id)}><Trash2 size={18} /></button>
+                <Link className="icon-link" to={`/admin/products/${product.id}`} onClick={e => e.stopPropagation()} title={t('edit')}><Edit3 size={18} /></Link>
+                <button
+                  className="icon-danger"
+                  onClick={() => { setDeleteError(''); setToDelete(product); }}
+                  title={t('delete')}
+                  aria-label={`${t('delete')} ${product.name}`}
+                >
+                  <Trash2 size={18} />
+                </button>
               </>
             )}
           </article>
         ))}
       </div>
+
+      {toDelete && (
+        <ConfirmDeleteDialog
+          name={toDelete.name}
+          busy={deleting}
+          error={deleteError}
+          onConfirm={confirmDelete}
+          onCancel={() => setToDelete(null)}
+        />
+      )}
     </div>
   );
 }

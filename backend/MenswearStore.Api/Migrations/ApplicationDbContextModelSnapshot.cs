@@ -554,7 +554,7 @@ namespace MenswearStore.Api.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("integer");
 
                     b.Property<string>("ProductName")
@@ -903,8 +903,7 @@ namespace MenswearStore.Api.Migrations
                     b.HasOne("MenswearStore.Api.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Order");
 

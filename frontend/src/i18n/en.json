@@ -206,5 +206,12 @@
   "chest": "Chest",
   "waist": "Waist",
   "hips": "Hips",
-  "shoulders": "Shoulders"
+  "shoulders": "Shoulders",
+  "activate": "Click to show in the shop",
+  "deactivate": "Click to hide from the shop",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "edit": "Edit",
+  "deleteProductTitle": "Delete this product?",
+  "deleteProductText": "It is removed for good, with its photos, and taken out of shoppers' carts. Past orders keep their details. To hide it for a while instead, switch it to Inactive."
 }

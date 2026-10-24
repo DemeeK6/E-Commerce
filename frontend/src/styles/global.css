@@ -2361,3 +2361,40 @@ form.checkout-box > a {
   margin: 36px 0 14px;
   font-size: 1.5rem;
 }
+
+/* Admin product list: the Active/Inactive pill is a button that flips it. */
+.status-toggle {
+  border: 0;
+  cursor: pointer;
+}
+
+.status-toggle:hover {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.btn-danger {
+  border: 1px solid #9f2434;
+  background: #9f2434;
+  color: #fff;
+}
+
+.confirm-card {
+  width: min(440px, 100%);
+}
+
+.confirm-card h2 {
+  margin: 0 0 8px;
+}
+
+.confirm-name {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}

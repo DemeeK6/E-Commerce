@@ -60,6 +60,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .Property(order => order.Total)
             .HasPrecision(10, 2);
 
+        // Deleting a product must never remove lines from past orders; it only
+        // unlinks them. (Cart lines still go with the product.)
+        builder.Entity<OrderItem>()
+            .HasOne(item => item.Product)
+            .WithMany()
+            .HasForeignKey(item => item.ProductId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         builder.Entity<Order>()
             .Property(order => order.OrderNumber)
             .HasMaxLength(20);

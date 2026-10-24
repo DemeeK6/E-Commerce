@@ -55,7 +55,10 @@ export const api = {
       ? request<Product>(`/api/products/${product.id}`, { method: 'PUT', body: JSON.stringify(payload) })
       : request<Product>('/api/products', { method: 'POST', body: JSON.stringify(payload) });
   },
+  /** Deletes the product for good. Past orders keep their own copy of its details. */
   deleteProduct: (id: number) => request<void>(`/api/products/${id}`, { method: 'DELETE' }),
+  setProductActive: (id: number, isActive: boolean) =>
+    request<Product>(`/api/products/${id}/active`, { method: 'PUT', body: JSON.stringify({ isActive }) }),
   bulkDiscount: (productIds: number[], percentage: number) =>
     request<{ updated: number }>('/api/products/bulk-discount', { method: 'POST', body: JSON.stringify({ productIds, percentage }) }),
   categories: (gender?: GenderTarget | '', includeDisabled = false) => {

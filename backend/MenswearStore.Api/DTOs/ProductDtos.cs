@@ -35,3 +35,4 @@ public record UpsertProductRequest(
 public record ProductColorInput(int ColorId);
 public record ProductImageInput(string Url, string AltText, bool IsPrimary, int SortOrder, int? ColorId);
 public record BulkDiscountRequest(int[] ProductIds, decimal Percentage);
+public record SetProductActiveRequest(bool IsActive);

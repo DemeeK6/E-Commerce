@@ -91,7 +91,8 @@ export type OrderStatus = 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | '
 
 export interface OrderItem {
   id: number;
-  productId: number;
+  /** Null once the product has been deleted; the line keeps its own name and price. */
+  productId: number | null;
   productName: string;
   quantity: number;
   unitPrice: number;

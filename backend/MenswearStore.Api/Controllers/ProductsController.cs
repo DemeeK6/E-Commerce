@@ -9,7 +9,10 @@ namespace MenswearStore.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(ApplicationDbContext db) : ControllerBase
+public class ProductsController(
+    ApplicationDbContext db,
+    IWebHostEnvironment env,
+    ILogger<ProductsController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts(
@@ -148,10 +151,70 @@ public class ProductsController(ApplicationDbContext db) : ControllerBase
             return NotFound();
         }
 
-        product.IsActive = false;
+        // Sizes, colours, photo rows and cart lines go with the product; past order
+        // lines are only unlinked (see ApplicationDbContext).
+        var imageUrls = await db.ProductImages
+            .Where(image => image.ProductId == id)
+            .Select(image => image.Url)
+            .ToListAsync();
+
+        db.Products.Remove(product);
+        await db.SaveChangesAsync();
+
+        await DeleteUnusedUploadsAsync(imageUrls);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Turns a product on or off in the shop without deleting anything. Hidden products
+    /// stay in the admin list and keep their photos.
+    /// </summary>
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id:int}/active")]
+    public async Task<ActionResult<ProductDto>> SetActive(int id, SetProductActiveRequest request)
+    {
+        var product = await db.Products.FindAsync(id);
+        if (product is null)
+        {
+            return NotFound();
+        }
+
+        product.IsActive = request.IsActive;
         product.UpdatedAtUtc = DateTime.UtcNow;
         await db.SaveChangesAsync();
-        return NoContent();
+
+        var updated = await ProductQuery().FirstAsync(item => item.Id == id);
+        return updated.ToDto();
+    }
+
+    /// <summary>
+    /// Removes a deleted product's uploaded photo files, unless another product or the
+    /// home page banner still shows the same file. Best effort: a file that cannot be
+    /// removed only wastes disk space, so it never fails the delete.
+    /// </summary>
+    private async Task DeleteUnusedUploadsAsync(IEnumerable<string> urls)
+    {
+        var uploadsDir = Path.GetFullPath(Path.Combine(env.WebRootPath ?? env.ContentRootPath, "uploads"));
+
+        foreach (var url in urls.Where(url => url.StartsWith("/uploads/", StringComparison.Ordinal)).Distinct())
+        {
+            var stillUsed = await db.ProductImages.AnyAsync(image => image.Url == url)
+                || await db.HeroSlides.AnyAsync(slide => slide.ImageUrl == url);
+            if (stillUsed) continue;
+
+            // Only plain file names inside the uploads folder - never a path that climbs out of it.
+            var path = Path.GetFullPath(Path.Combine(uploadsDir, Path.GetFileName(url)));
+            if (!path.StartsWith(uploadsDir, StringComparison.Ordinal)) continue;
+
+            try
+            {
+                System.IO.File.Delete(path);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                logger.LogWarning(exception, "Could not delete unused upload {Path}.", path);
+            }
+        }
     }
 
     private IQueryable<Product> ProductQuery() =>

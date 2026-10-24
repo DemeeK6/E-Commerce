@@ -5,7 +5,7 @@ namespace MenswearStore.Api.DTOs;
 
 public record OrderItemDto(
     int Id,
-    int ProductId,
+    int? ProductId,
     string ProductName,
     int Quantity,
     decimal UnitPrice,
