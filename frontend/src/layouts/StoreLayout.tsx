@@ -48,8 +48,12 @@ export function StoreLayout() {
     <div className="site-shell">
       <header className="site-header">
         <Link className="logo" to="/">
-          <img src="/Sofio_Logo.jpg" alt="Sofio Logo" style={{ height: '40px', objectFit: 'contain' }} />
-          SOFIO
+          <img className="logo-img" src="/Sofio_Logo.jpg" alt="Sofio Logo" />
+          {/* Not a <span>: `.logo span` draws the old square badge. */}
+          <div className="logo-text">
+            <strong>SOFIO</strong>
+            <small>{t('georgianBrand')}</small>
+          </div>
         </Link>
         <nav className="desktop-nav">{nav}</nav>
         <div className="header-actions">

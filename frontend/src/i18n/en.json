@@ -211,5 +211,17 @@
   "deleteProductTitle": "Delete this product?",
   "deleteProductText": "It is removed for good, with its photos, and taken out of shoppers' carts. Past orders keep their details. To hide it for a while instead, switch it to Inactive.",
   "lineUnderEn": "Line under the title (English)",
-  "lineUnderKa": "Line under the title (Georgian)"
+  "lineUnderKa": "Line under the title (Georgian)",
+  "georgianBrand": "Georgian brand",
+  "searchOrders": "Order number, name, phone or email",
+  "allStatuses": "All",
+  "needsAction": "Needs action",
+  "anyPayment": "Paid and unpaid",
+  "anyMethod": "Cash and transfer",
+  "sortOrders": "Sort",
+  "newestFirst": "Newest first",
+  "oldestFirst": "Oldest first",
+  "showingOrders": "Showing {shown} of {total} orders",
+  "clearFilters": "Clear filters",
+  "noMatchingOrders": "No orders match these filters."
 }

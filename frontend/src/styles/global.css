@@ -59,12 +59,34 @@ img {
 
 .logo {
   display: inline-flex;
+  flex-shrink: 0; /* a squeezed logo let "Georgian brand" run under the menu */
   align-items: center;
   gap: 10px;
   font-family: "Archivo Black", Inter, ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.logo-img {
+  height: 40px;
+  object-fit: contain;
+}
+
+/* "SOFIO" with the smaller "Georgian brand" line under it. */
+.logo-text {
+  display: grid;
+  line-height: 1.05;
+}
+
+.logo-text small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .logo span {
@@ -994,6 +1016,20 @@ textarea {
 
   .logo {
     font-size: 0.9rem;
+  }
+
+  /* Smaller and tighter, so the Georgian "ქართული ბრენდი" fits beside the pickers. */
+  .logo {
+    gap: 7px;
+  }
+
+  .logo-img {
+    height: 32px;
+  }
+
+  .logo-text small {
+    font-size: 0.5rem;
+    letter-spacing: 0.02em;
   }
 
   .logo span {
@@ -2065,10 +2101,11 @@ form.checkout-box > a {
   padding: 18px;
 }
 
-/* English, Georgian and Russian side by side: names on one line, texts on the next. */
+/* English left, Georgian right: names on one line, texts on the next. */
 .admin-row .info-editor-fields {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 16px;
+  align-items: start;
   min-width: 0;
 }
 
@@ -2406,4 +2443,132 @@ form.checkout-box > a {
 
 .hero .hero__subtitle + .btn {
   margin-top: 18px;
+}
+
+/* The very narrowest phones have no room beside the pickers; SOFIO alone there. */
+@media (max-width: 359px) {
+  .logo-text small {
+    display: none;
+  }
+}
+
+/* Small laptops: the full menu (longest in Georgian, with the admin link) does not
+   fit beside the logo and pickers, so the menu alone switches to the ☰ button here.
+   The page layouts keep their desktop form until the 980px rule above. */
+@media (min-width: 981px) and (max-width: 1240px) {
+  .desktop-nav,
+  .auth-links,
+  .profile-menu .link-button {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: grid;
+    place-items: center;
+  }
+
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mobile-nav a {
+    padding: 12px 0;
+  }
+}
+
+/* ---- Admin orders: search, filters and status tabs ---- */
+.order-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.order-search {
+  flex: 1 1 280px;
+}
+
+.order-filters select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.875rem;
+}
+
+.order-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.order-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.order-tab.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.order-tab-count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ece9e3;
+  color: var(--ink);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.order-tab.is-active .order-tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* "Needs action" with something in it stands out even when not selected. */
+.order-tab.is-urgent:not(.is-active) .order-tab-count {
+  background: var(--accent);
+  color: #fff;
+}
+
+.order-results {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.order-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.order-empty {
+  padding: 28px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  text-align: center;
 }
