@@ -22,8 +22,10 @@ public record ProductColorDto(int Id, int ColorId, string NameEn, string NameKa,
 public record UpsertProductRequest(
     string Name,
     string Description,
-    [property: Range(0, 99999999.99)] decimal Price,
-    [property: Range(0, 99999999.99)] decimal? DiscountPrice,
+    // On the parameter, not `property:` - ASP.NET refuses (500) a record whose
+    // validation attributes sit on the generated properties.
+    [Range(0, 99999999.99)] decimal Price,
+    [Range(0, 99999999.99)] decimal? DiscountPrice,
     int CategoryId,
     string[] Sizes,
     ProductColorInput[] Colors,
