@@ -9,6 +9,8 @@ export interface Category {
   genderTarget: GenderTarget;
   isEnabled: boolean;
   displayOrder: number;
+  /** How many products sit in this category. Only the categories listing fills it in. */
+  productCount: number;
 }
 
 export interface Color {

@@ -16,6 +16,11 @@ export function AdminCategoriesPage() {
   const [genderTarget, setGenderTarget] = useState<GenderTarget>(0);
   const [editing, setEditing] = useState<Category | null>(null);
   const [error, setError] = useState('');
+  // The category whose products need rehoming before it can go, plus the chosen
+  // destination. Null means no deletion is being decided.
+  const [movingFrom, setMovingFrom] = useState<Category | null>(null);
+  const [moveTo, setMoveTo] = useState<number | ''>('');
+  const [deleting, setDeleting] = useState(false);
   const { t } = useI18n();
 
   // Omitting the gender returns every gender; passing includeDisabled also returns
@@ -71,18 +76,32 @@ export function AdminCategoriesPage() {
     resetForm();
   };
 
-  const remove = async (id: number) => {
+  // An empty category goes straight away. One holding products opens the picker,
+  // because deleting it would otherwise take the products with it.
+  const remove = (category: Category) => {
+    setError('');
+    if (category.productCount > 0) {
+      setMovingFrom(category);
+      setMoveTo('');
+      return;
+    }
     if (!window.confirm(t('confirmDelete'))) return;
+    void destroy(category.id);
+  };
+
+  const destroy = async (id: number, moveProductsTo?: number) => {
+    setDeleting(true);
     setError('');
     try {
-      await api.deleteCategory(id);
+      await api.deleteCategory(id, moveProductsTo);
       // Editing the row that was just deleted would post to a missing id.
       if (editing?.id === id) cancelEdit();
+      setMovingFrom(null);
       load();
     } catch (exception) {
-      // The API refuses to delete a category that still holds products, and says
-      // how many. Swallowing that left the button looking broken.
       setError((exception as Error).message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -136,7 +155,10 @@ export function AdminCategoriesPage() {
             <div>
               <strong>{category.nameEn}</strong>
               <span>{category.nameKa || '—'}</span>
-              <span>{category.slug} · {t(GENDER_OPTIONS[category.genderTarget].labelKey)}</span>
+              <span>
+                {category.slug} · {t(GENDER_OPTIONS[category.genderTarget].labelKey)}
+                {category.productCount > 0 && ` · ${category.productCount} ${t('products').toLowerCase()}`}
+              </span>
             </div>
             <div className="admin-row-actions">
               <button
@@ -149,13 +171,66 @@ export function AdminCategoriesPage() {
               <button className="btn btn-outline btn-sm" onClick={() => startEdit(category)}>
                 {t('editCategory')}
               </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => remove(category.id)}>
+              <button className="btn btn-ghost btn-sm" onClick={() => remove(category)}>
                 {t('deleteCategory')}
               </button>
             </div>
           </article>
         ))}
       </div>
+
+      {movingFrom && (
+        <div className="modal-backdrop" onClick={() => !deleting && setMovingFrom(null)}>
+          <div
+            className="modal-card move-products-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('moveProductsTitle')}
+            onClick={event => event.stopPropagation()}
+          >
+            <h2>{t('moveProductsTitle')}</h2>
+            <p className="size-chart-note">
+              {t('moveProductsIntro')
+                .replace('{count}', String(movingFrom.productCount))
+                .replace('{name}', movingFrom.nameEn)}
+            </p>
+
+            <label>{t('moveProductsTo')}
+              <select value={moveTo} onChange={event => setMoveTo(Number(event.target.value))}>
+                <option value="">{t('chooseCategory')}</option>
+                {categories
+                  .filter(candidate => candidate.id !== movingFrom.id)
+                  .map(candidate => (
+                    <option key={candidate.id} value={candidate.id}>
+                      {candidate.nameEn} · {t(GENDER_OPTIONS[candidate.genderTarget].labelKey)}
+                    </option>
+                  ))}
+              </select>
+            </label>
+
+            {/* Moving across genders is allowed, but the products take on the new
+                category's gender, so say so rather than letting it surprise her. */}
+            {moveTo !== '' && categories.find(c => c.id === moveTo)?.genderTarget !== movingFrom.genderTarget && (
+              <p className="move-products-warning">{t('moveProductsGenderWarning')}</p>
+            )}
+
+            {error && <p className="form-error">{error}</p>}
+
+            <div className="transfer-actions">
+              <button
+                className="btn btn-dark btn-full"
+                disabled={moveTo === '' || deleting}
+                onClick={() => destroy(movingFrom.id, Number(moveTo))}
+              >
+                {deleting ? '...' : t('moveAndDelete')}
+              </button>
+              <button className="btn btn-outline btn-full" disabled={deleting} onClick={() => setMovingFrom(null)}>
+                {t('cancel')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

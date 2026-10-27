@@ -223,5 +223,11 @@
   "oldestFirst": "ჯერ ძველი",
   "showingOrders": "ნაჩვენებია {shown} / {total} შეკვეთა",
   "clearFilters": "ფილტრების გასუფთავება",
-  "noMatchingOrders": "ამ ფილტრებით შეკვეთა ვერ მოიძებნა."
+  "noMatchingOrders": "ამ ფილტრებით შეკვეთა ვერ მოიძებნა.",
+  "moveProductsTitle": "ჯერ გადაიტანეთ პროდუქტები",
+  "moveProductsIntro": "„{name}“ შეიცავს {count} პროდუქტს. წაშლა მათაც წაშლიდა, ამიტომ აირჩიეთ სად გადავიტანოთ.",
+  "moveProductsTo": "გადაიტანეთ პროდუქტები",
+  "chooseCategory": "აირჩიეთ კატეგორია",
+  "moveAndDelete": "გადატანა და წაშლა",
+  "moveProductsGenderWarning": "ეს კატეგორია სხვა ჯგუფისაა, ამიტომ პროდუქტებიც იქ გადავა."
 }

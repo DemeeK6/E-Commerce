@@ -2572,3 +2572,32 @@ form.checkout-box > a {
   color: var(--muted);
   text-align: center;
 }
+
+/* ---------- move products before deleting a category ---------- */
+.move-products-card {
+  display: grid;
+  gap: 14px;
+  width: min(460px, 100%);
+}
+
+.move-products-card h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.move-products-card label {
+  display: grid;
+  gap: 6px;
+  font-weight: 800;
+}
+
+/* Crossing genders is allowed but changes the products, so it is called out. */
+.move-products-warning {
+  margin: 0;
+  padding: 10px 12px;
+  background: #fdf2f3;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  color: var(--accent);
+  font-size: 0.9rem;
+}

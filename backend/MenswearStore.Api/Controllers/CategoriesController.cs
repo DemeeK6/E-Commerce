@@ -25,8 +25,14 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
             query = query.Where(category => category.IsEnabled);
         }
 
-        var categories = await query.OrderBy(category => category.DisplayOrder).ToListAsync();
-        return categories.Select(category => category.ToDto()).ToArray();
+        var categories = await query
+            .OrderBy(category => category.DisplayOrder)
+            .Select(category => new { Category = category, ProductCount = category.Products.Count() })
+            .ToListAsync();
+
+        return categories
+            .Select(row => row.Category.ToDto() with { ProductCount = row.ProductCount })
+            .ToArray();
     }
 
     [Authorize(Roles = "Admin")]
@@ -73,7 +79,12 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult> Delete(int id)
+    /// <param name="moveProductsTo">
+    /// Where to send the products this category still holds. Required when it holds any:
+    /// Products -> Categories is declared onDelete: Cascade, so deleting without moving
+    /// them would take the products with it and never say so.
+    /// </param>
+    public async Task<ActionResult> Delete(int id, int? moveProductsTo = null)
     {
         var category = await db.Categories.FindAsync(id);
         if (category is null)
@@ -81,23 +92,42 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
             return NotFound();
         }
 
-        // Products -> Categories is declared onDelete: Cascade, so removing a category
-        // that still holds products would take the products with it without warning.
-        // Refuse and say how many, so the owner moves them first. Hiding a category
-        // without deleting it is what the enable/disable toggle is for.
-        var productCount = await db.Products.CountAsync(product => product.CategoryId == id);
-        if (productCount > 0)
+        var products = await db.Products.Where(product => product.CategoryId == id).ToListAsync();
+
+        if (products.Count > 0)
         {
-            return BadRequest(new
+            if (moveProductsTo is null)
             {
-                message = $"\"{category.NameEn}\" still has {productCount} product(s). "
-                        + "Move them to another category first, or disable this one instead of deleting it."
-            });
+                return BadRequest(new
+                {
+                    message = $"\"{category.NameEn}\" still has {products.Count} product(s). "
+                            + "Choose a category to move them to."
+                });
+            }
+
+            if (moveProductsTo == id)
+            {
+                return BadRequest(new { message = "Products cannot be moved into the category being deleted." });
+            }
+
+            var destination = await db.Categories.FindAsync(moveProductsTo.Value);
+            if (destination is null)
+            {
+                return BadRequest(new { message = "The category to move the products to no longer exists." });
+            }
+
+            foreach (var product in products)
+            {
+                product.CategoryId = destination.Id;
+                // A product's gender follows its category - see ProductsController.Apply.
+                // Leaving it behind would put a Men product in a Women category.
+                product.GenderTarget = destination.GenderTarget;
+            }
         }
 
         db.Categories.Remove(category);
         await db.SaveChangesAsync();
-        return NoContent();
+        return Ok(new { moved = products.Count });
     }
 
     /// <summary>

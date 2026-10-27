@@ -72,7 +72,11 @@ export const api = {
     category.id
       ? request<Category>(`/api/categories/${category.id}`, { method: 'PUT', body: JSON.stringify(category) })
       : request<Category>('/api/categories', { method: 'POST', body: JSON.stringify(category) }),
-  deleteCategory: (id: number) => request<void>(`/api/categories/${id}`, { method: 'DELETE' }),
+  deleteCategory: (id: number, moveProductsTo?: number) =>
+    request<{ moved: number }>(
+      `/api/categories/${id}${moveProductsTo ? `?moveProductsTo=${moveProductsTo}` : ''}`,
+      { method: 'DELETE' },
+    ),
   colors: (includeDisabled = false) =>
     request<Color[]>(`/api/colors${includeDisabled ? '?includeDisabled=true' : ''}`),
   saveColor: (color: Partial<Color>) =>

@@ -223,5 +223,11 @@
   "oldestFirst": "Oldest first",
   "showingOrders": "Showing {shown} of {total} orders",
   "clearFilters": "Clear filters",
-  "noMatchingOrders": "No orders match these filters."
+  "noMatchingOrders": "No orders match these filters.",
+  "moveProductsTitle": "Move products first",
+  "moveProductsIntro": "\"{name}\" holds {count} product(s). Deleting it would delete them too, so choose where they should go.",
+  "moveProductsTo": "Move the products to",
+  "chooseCategory": "Choose a category",
+  "moveAndDelete": "Move and delete",
+  "moveProductsGenderWarning": "That category is for a different group, so the products will move there too."
 }
