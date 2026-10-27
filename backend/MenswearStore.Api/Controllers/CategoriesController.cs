@@ -81,9 +81,51 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
             return NotFound();
         }
 
-        category.IsEnabled = false;
+        // Products -> Categories is declared onDelete: Cascade, so removing a category
+        // that still holds products would take the products with it without warning.
+        // Refuse and say how many, so the owner moves them first. Hiding a category
+        // without deleting it is what the enable/disable toggle is for.
+        var productCount = await db.Products.CountAsync(product => product.CategoryId == id);
+        if (productCount > 0)
+        {
+            return BadRequest(new
+            {
+                message = $"\"{category.NameEn}\" still has {productCount} product(s). "
+                        + "Move them to another category first, or disable this one instead of deleting it."
+            });
+        }
+
+        db.Categories.Remove(category);
         await db.SaveChangesAsync();
         return NoContent();
+    }
+
+    /// <summary>
+    /// The slug follows the English name and the gender, and is never supplied by the
+    /// caller. Editing used to leave the old slug in place, so renaming a category or
+    /// moving it to another gender left a slug describing what it no longer was - and
+    /// a Women category could end up owning the bare "shirts" slug that Men needed.
+    /// Men keeps the bare slug; Women and Kids are prefixed, matching the seeder.
+    /// </summary>
+    private static string BuildSlug(string nameEn, GenderTarget gender)
+    {
+        var prefix = gender switch
+        {
+            GenderTarget.Women => "women-",
+            GenderTarget.Kids => "kids-",
+            _ => string.Empty
+        };
+
+        var body = new string(nameEn.Trim().ToLowerInvariant()
+            .Select(character => char.IsLetterOrDigit(character) ? character : '-')
+            .ToArray());
+
+        while (body.Contains("--"))
+        {
+            body = body.Replace("--", "-");
+        }
+
+        return prefix + body.Trim('-');
     }
 
     private static void Apply(Category category, UpsertCategoryRequest request)
@@ -92,7 +134,7 @@ public class CategoriesController(ApplicationDbContext db) : ControllerBase
         category.NameKa = request.NameKa.Trim();
         // Russian is no longer edited in the admin; keep any stored text unless one is sent.
         if (request.NameRu is not null) category.NameRu = request.NameRu.Trim();
-        category.Slug = request.Slug.Trim().ToLowerInvariant();
+        category.Slug = BuildSlug(request.NameEn, request.GenderTarget);
         category.GenderTarget = request.GenderTarget;
         category.IsEnabled = request.IsEnabled;
         category.DisplayOrder = request.DisplayOrder;

@@ -9,11 +9,6 @@ const GENDER_OPTIONS: { value: GenderTarget; labelKey: 'men' | 'women' | 'kids' 
   { value: 2, labelKey: 'kids' },
 ];
 
-// Mirrors the seeder's convention (DataSeeder.GetOrSeedCategoriesAsync): Men
-// keeps the bare slug, Women/Kids get a gender prefix so e.g. "Shirts" under
-// each gender doesn't collide on the UNIQUE Categories.Slug index.
-const GENDER_SLUG_PREFIX: Record<GenderTarget, string> = { 0: '', 1: 'women-', 2: 'kids-' };
-
 export function AdminCategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [nameEn, setNameEn] = useState('');
@@ -23,14 +18,11 @@ export function AdminCategoriesPage() {
   const [error, setError] = useState('');
   const { t } = useI18n();
 
-  // `api.categories('')` hits GET /api/categories with no `gender` query param.
-  // The backend's `gender` parameter defaults to Men when absent (it's a C#
-  // default parameter value, not a true "all genders" option), so that call
-  // silently returns only Men categories. Fetch each gender explicitly and
-  // merge so the admin can see and manage every category, not just Men.
+  // Omitting the gender returns every gender; passing includeDisabled also returns
+  // the hidden ones, which only an admin receives.
   const load = () => {
-    Promise.all(GENDER_OPTIONS.map(option => api.categories(option.value, true)))
-      .then(results => setCategories(results.flat()))
+    api.categories('', true)
+      .then(setCategories)
       .catch(() => setCategories([]));
   };
   useEffect(load, []);
@@ -49,10 +41,11 @@ export function AdminCategoriesPage() {
         await api.saveCategory({ ...editing, nameEn, nameKa, genderTarget });
         setEditing(null);
       } else {
+        // No slug: the API derives it from the name and gender, so it can never
+        // disagree with them after a rename or a move between genders.
         await api.saveCategory({
           nameEn,
           nameKa,
-          slug: `${GENDER_SLUG_PREFIX[genderTarget]}${nameEn.toLowerCase().replaceAll(' ', '-')}`,
           genderTarget,
           isEnabled: true,
           displayOrder: categories.filter(c => c.genderTarget === genderTarget).length + 1,
@@ -80,13 +73,27 @@ export function AdminCategoriesPage() {
 
   const remove = async (id: number) => {
     if (!window.confirm(t('confirmDelete'))) return;
-    await api.deleteCategory(id);
-    load();
+    setError('');
+    try {
+      await api.deleteCategory(id);
+      // Editing the row that was just deleted would post to a missing id.
+      if (editing?.id === id) cancelEdit();
+      load();
+    } catch (exception) {
+      // The API refuses to delete a category that still holds products, and says
+      // how many. Swallowing that left the button looking broken.
+      setError((exception as Error).message);
+    }
   };
 
   const toggleEnabled = async (category: Category) => {
-    await api.saveCategory({ ...category, isEnabled: !category.isEnabled });
-    load();
+    setError('');
+    try {
+      await api.saveCategory({ ...category, isEnabled: !category.isEnabled });
+      load();
+    } catch (exception) {
+      setError((exception as Error).message);
+    }
   };
 
   return (
