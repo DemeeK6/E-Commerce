@@ -48,6 +48,11 @@ export const api = {
         isPrimary: image.isPrimary,
         sortOrder: image.sortOrder,
         colorId: image.colorId,
+        // Must be sent explicitly. The server defaults a missing focus point to
+        // the centre rather than rejecting it, so leaving these out silently
+        // threw away the shop's choice every time a product was saved.
+        focusX: image.focusX ?? 50,
+        focusY: image.focusY ?? 50,
       })),
       isActive: product.isActive ?? true,
     };
