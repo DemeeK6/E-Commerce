@@ -1,9 +1,10 @@
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { Star } from 'lucide-react';
+import { FormEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
+import { Expand, Star } from 'lucide-react';
 import { PhotoSize } from '../components/PhotoSize';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useI18n } from '../context/I18nContext';
 import { api } from '../services/api';
+import { ImageLightbox } from '../components/ImageLightbox';
 import type { Category, Color, Product, ProductColor, ProductImage } from '../types';
 import { localizedName } from '../utils/format';
 
@@ -32,6 +33,7 @@ export function AdminProductFormPage() {
   const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
   const [form, setForm] = useState<Partial<Product> & { categoryId: number }>(blank);
   const [sizeInput, setSizeInput] = useState('');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [submitError, setSubmitError] = useState('');
@@ -92,6 +94,9 @@ export function AdminProductFormPage() {
           images: [...images, {
             id: 0,
             url,
+            // Centre until the shop picks a focus point, matching older photos.
+            focusX: 50,
+            focusY: 50,
             altText: f.name ?? '',
             isPrimary: images.length === 0,
             sortOrder: images.length,
@@ -118,6 +123,18 @@ export function AdminProductFormPage() {
     setForm(f => ({
       ...f,
       images: (f.images ?? []).map((image, i) => ({ ...image, isPrimary: i === index })),
+    }));
+  };
+
+  // Click the photo to say which part must survive the 4:5 crop, exactly as the
+  // banner editor does. The thumbnail is already that crop, so it previews itself.
+  const setImageFocus = (index: number, event: MouseEvent<HTMLImageElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    const focusX = Math.round(Math.min(100, Math.max(0, ((event.clientX - box.left) / box.width) * 100)));
+    const focusY = Math.round(Math.min(100, Math.max(0, ((event.clientY - box.top) / box.height) * 100)));
+    setForm(f => ({
+      ...f,
+      images: (f.images ?? []).map((img, i) => (i === index ? { ...img, focusX, focusY } : img)),
     }));
   };
 
@@ -244,11 +261,24 @@ export function AdminProductFormPage() {
       <div className="form-field">
         <span className="field-label">{t('addImage')}</span>
         <p className="size-chart-note">{t('productPhotoTips')}</p>
+        <p className="size-chart-note">{t('photoFocusTip')}</p>
         <div className="image-thumbs">
           {images.map((image, index) => (
             <div key={index} className={`image-thumb ${image.isPrimary ? 'image-thumb-primary' : ''}`}>
-              {/* 4:5 and cropped from the centre - exactly how the shop shows it. */}
-              <img src={image.url} alt={image.altText || ''} className="image-thumb-img" />
+              {/* 4:5, cropped at the chosen focus point - exactly how the shop shows it. */}
+              <div className="image-thumb-focus">
+                <img
+                  src={image.url}
+                  alt={image.altText || ''}
+                  className="image-thumb-img"
+                  style={{ objectPosition: `${image.focusX ?? 50}% ${image.focusY ?? 50}%` }}
+                  onClick={event => setImageFocus(index, event)}
+                />
+                <span
+                  className="image-thumb-dot"
+                  style={{ left: `${image.focusX ?? 50}%`, top: `${image.focusY ?? 50}%` }}
+                />
+              </div>
               <PhotoSize url={image.url} minWidth={1000} />
               <label className="image-color-label">
                 {t('assignColor')}
@@ -263,6 +293,15 @@ export function AdminProductFormPage() {
                 </select>
               </label>
               <div className="image-thumb-actions">
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setPreviewUrl(image.url)}
+                  title={t('viewFullSize')}
+                  aria-label={t('viewFullSize')}
+                >
+                  <Expand size={14} />
+                </button>
                 <button
                   type="button"
                   className={`btn btn-sm ${image.isPrimary ? 'btn-dark' : 'btn-outline'}`}
@@ -299,6 +338,10 @@ export function AdminProductFormPage() {
       <label className="check-line"><input type="checkbox" checked={form.isActive} onChange={e => setForm({ ...form, isActive: e.target.checked })} /> {t('active')}</label>
       {submitError && <p className="form-error">{submitError}</p>}
       <button className="btn btn-dark" type="submit">{t('saveProduct')}</button>
+
+      {previewUrl && (
+        <ImageLightbox images={[previewUrl]} alt={form.name ?? ''} onClose={() => setPreviewUrl(null)} />
+      )}
     </form>
   );
 }

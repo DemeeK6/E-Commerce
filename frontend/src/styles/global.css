@@ -2601,3 +2601,146 @@ form.checkout-box > a {
   color: var(--accent);
   font-size: 0.9rem;
 }
+
+/* ---------- product photo focus point ---------- */
+/* Mirrors .hero-focus: the thumbnail is the real 4:5 crop, so clicking it to place
+   the point previews the result at the same time. */
+.image-thumb-focus {
+  position: relative;
+}
+
+.image-thumb-focus .image-thumb-img {
+  cursor: crosshair;
+}
+
+.image-thumb-dot {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+/* ---------- full-size photo viewer ---------- */
+.gallery-open {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.gallery-expand-hint {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.gallery-main:hover .gallery-expand-hint,
+.gallery-open:focus-visible .gallery-expand-hint {
+  opacity: 1;
+}
+
+/* Darker and tighter than the other dialogs: the photo is the content. */
+.lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(12, 12, 12, 0.92);
+}
+
+.lightbox-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(1100px, 100%);
+  max-height: 100%;
+}
+
+/* contain, not cover: the whole photo, which is the point of this view. */
+.lightbox-image {
+  max-width: 100%;
+  max-height: calc(100vh - 48px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.lightbox-close,
+.lightbox-arrow {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.lightbox-close {
+  top: -8px;
+  right: -8px;
+}
+
+.lightbox-arrow-prev {
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-arrow-next {
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.lightbox-counter {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .lightbox-backdrop {
+    padding: 12px;
+  }
+
+  .lightbox-close {
+    top: 4px;
+    right: 4px;
+  }
+
+  /* Swipe is the main way through on a phone, so the arrows step aside. */
+  .lightbox-arrow {
+    width: 38px;
+    height: 38px;
+    opacity: 0.75;
+  }
+}

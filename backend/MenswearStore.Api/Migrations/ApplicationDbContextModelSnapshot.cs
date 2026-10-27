@@ -676,6 +676,12 @@ namespace MenswearStore.Api.Migrations
                     b.Property<int?>("ColorId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("FocusX")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FocusY")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("IsPrimary")
                         .HasColumnType("boolean");
 

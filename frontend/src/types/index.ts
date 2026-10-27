@@ -30,6 +30,9 @@ export interface ProductImage {
   isPrimary: boolean;
   sortOrder: number;
   colorId: number | null;
+  /** The spot kept in view when the photo is cropped to 4:5. Percentages, 0-100. */
+  focusX: number;
+  focusY: number;
 }
 
 export interface ProductColor {

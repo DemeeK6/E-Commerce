@@ -255,7 +255,11 @@ public class ProductsController(
             AltText = image.AltText.Trim(),
             IsPrimary = image.IsPrimary,
             SortOrder = image.SortOrder,
-            ColorId = image.ColorId
+            ColorId = image.ColorId,
+            // Clamped rather than trusted: a percentage outside 0-100 would push the
+            // visible part of the photo off its own edge.
+            FocusX = Math.Clamp(image.FocusX, 0, 100),
+            FocusY = Math.Clamp(image.FocusY, 0, 100)
         }).ToList();
     }
 

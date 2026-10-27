@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Minus, Plus, Ruler, ShoppingBag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Expand, Minus, Plus, Ruler, ShoppingBag } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -8,6 +8,7 @@ import type { Product, ProductImage } from '../types';
 import { useCurrency } from '../context/CurrencyContext';
 import { localizedName } from '../utils/format';
 import { SizeGuideModal } from '../components/SizeGuideModal';
+import { ImageLightbox } from '../components/ImageLightbox';
 
 export function ProductDetailsPage() {
   const { id } = useParams();
@@ -20,6 +21,7 @@ export function ProductDetailsPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -77,7 +79,22 @@ export function ProductDetailsPage() {
       <div className="gallery">
         <div className="gallery-main">
           {activeImage ? (
-            <img src={activeImage.url} alt={activeImage.altText || product.name} />
+            <button
+              type="button"
+              className="gallery-open"
+              onClick={() => setLightboxOpen(true)}
+              aria-label={t('viewFullSize')}
+              title={t('viewFullSize')}
+            >
+              {/* Cropped to 4:5 here, so the shop's focus point decides what survives.
+                  The lightbox is where the whole photo is seen. */}
+              <img
+                src={activeImage.url}
+                alt={activeImage.altText || product.name}
+                style={{ objectPosition: `${activeImage.focusX}% ${activeImage.focusY}%` }}
+              />
+              <span className="gallery-expand-hint"><Expand size={16} /></span>
+            </button>
           ) : (
             <div className="gallery-empty" />
           )}
@@ -112,7 +129,11 @@ export function ProductDetailsPage() {
                 className={`gallery-thumb ${index === activeIndex ? 'gallery-thumb-active' : ''}`}
                 onClick={() => showImage(index)}
               >
-                <img src={image.url} alt={image.altText || product.name} />
+                <img
+                  src={image.url}
+                  alt={image.altText || product.name}
+                  style={{ objectPosition: `${image.focusX}% ${image.focusY}%` }}
+                />
               </button>
             ))}
           </div>
@@ -153,6 +174,16 @@ export function ProductDetailsPage() {
       {/* Women's products get the women's chart; men's and kids' use the men's one. */}
       {guideOpen && (
         <SizeGuideModal gender={product.genderTarget === 1 ? 'women' : 'men'} onClose={() => setGuideOpen(false)} />
+      )}
+
+      {/* Only the photos currently on show, so its arrows match the gallery's. */}
+      {lightboxOpen && galleryImages.length > 0 && (
+        <ImageLightbox
+          images={galleryImages.map(image => image.url)}
+          startIndex={activeIndex}
+          alt={product.name}
+          onClose={() => setLightboxOpen(false)}
+        />
       )}
     </section>
   );

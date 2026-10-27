@@ -231,5 +231,7 @@
   "moveAndDelete": "Move and delete",
   "moveProductsGenderWarning": "That category is for a different group, so the products will move there too.",
   "deleteCategoryTitle": "Delete this category?",
-  "deleteCategoryIntro": "\"{name}\" has no products in it. This cannot be undone."
+  "deleteCategoryIntro": "\"{name}\" has no products in it. This cannot be undone.",
+  "viewFullSize": "View full size",
+  "photoFocusTip": "Click a photo to choose the part that must stay visible when it is cropped."
 }
