@@ -16,8 +16,9 @@ export function AdminCategoriesPage() {
   const [genderTarget, setGenderTarget] = useState<GenderTarget>(0);
   const [editing, setEditing] = useState<Category | null>(null);
   const [error, setError] = useState('');
-  // The category whose products need rehoming before it can go, plus the chosen
-  // destination. Null means no deletion is being decided.
+  // The category being deleted, if any. It drives one dialog with two shapes: a
+  // plain confirmation when it is empty, a destination picker when it still holds
+  // products. Null means no deletion is being decided.
   const [movingFrom, setMovingFrom] = useState<Category | null>(null);
   const [moveTo, setMoveTo] = useState<number | ''>('');
   const [deleting, setDeleting] = useState(false);
@@ -76,17 +77,12 @@ export function AdminCategoriesPage() {
     resetForm();
   };
 
-  // An empty category goes straight away. One holding products opens the picker,
-  // because deleting it would otherwise take the products with it.
+  // Both cases open the same dialog rather than one using the browser's own
+  // confirm box, which looks nothing like the rest of the admin panel.
   const remove = (category: Category) => {
     setError('');
-    if (category.productCount > 0) {
-      setMovingFrom(category);
-      setMoveTo('');
-      return;
-    }
-    if (!window.confirm(t('confirmDelete'))) return;
-    void destroy(category.id);
+    setMoveTo('');
+    setMovingFrom(category);
   };
 
   const destroy = async (id: number, moveProductsTo?: number) => {
@@ -185,33 +181,39 @@ export function AdminCategoriesPage() {
             className="modal-card move-products-card"
             role="dialog"
             aria-modal="true"
-            aria-label={t('moveProductsTitle')}
+            aria-label={movingFrom.productCount > 0 ? t('moveProductsTitle') : t('deleteCategoryTitle')}
             onClick={event => event.stopPropagation()}
           >
-            <h2>{t('moveProductsTitle')}</h2>
+            <h2>{movingFrom.productCount > 0 ? t('moveProductsTitle') : t('deleteCategoryTitle')}</h2>
             <p className="size-chart-note">
-              {t('moveProductsIntro')
-                .replace('{count}', String(movingFrom.productCount))
-                .replace('{name}', movingFrom.nameEn)}
+              {movingFrom.productCount > 0
+                ? t('moveProductsIntro')
+                    .replace('{count}', String(movingFrom.productCount))
+                    .replace('{name}', movingFrom.nameEn)
+                : t('deleteCategoryIntro').replace('{name}', movingFrom.nameEn)}
             </p>
 
-            <label>{t('moveProductsTo')}
-              <select value={moveTo} onChange={event => setMoveTo(Number(event.target.value))}>
-                <option value="">{t('chooseCategory')}</option>
-                {categories
-                  .filter(candidate => candidate.id !== movingFrom.id)
-                  .map(candidate => (
-                    <option key={candidate.id} value={candidate.id}>
-                      {candidate.nameEn} · {t(GENDER_OPTIONS[candidate.genderTarget].labelKey)}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            {movingFrom.productCount > 0 && (
+              <>
+                <label>{t('moveProductsTo')}
+                  <select value={moveTo} onChange={event => setMoveTo(Number(event.target.value))}>
+                    <option value="">{t('chooseCategory')}</option>
+                    {categories
+                      .filter(candidate => candidate.id !== movingFrom.id)
+                      .map(candidate => (
+                        <option key={candidate.id} value={candidate.id}>
+                          {candidate.nameEn} · {t(GENDER_OPTIONS[candidate.genderTarget].labelKey)}
+                        </option>
+                      ))}
+                  </select>
+                </label>
 
-            {/* Moving across genders is allowed, but the products take on the new
-                category's gender, so say so rather than letting it surprise her. */}
-            {moveTo !== '' && categories.find(c => c.id === moveTo)?.genderTarget !== movingFrom.genderTarget && (
-              <p className="move-products-warning">{t('moveProductsGenderWarning')}</p>
+                {/* Moving across genders is allowed, but the products take on the new
+                    category's gender, so say so rather than letting it surprise her. */}
+                {moveTo !== '' && categories.find(c => c.id === moveTo)?.genderTarget !== movingFrom.genderTarget && (
+                  <p className="move-products-warning">{t('moveProductsGenderWarning')}</p>
+                )}
+              </>
             )}
 
             {error && <p className="form-error">{error}</p>}
@@ -219,10 +221,15 @@ export function AdminCategoriesPage() {
             <div className="transfer-actions">
               <button
                 className="btn btn-dark btn-full"
-                disabled={moveTo === '' || deleting}
-                onClick={() => destroy(movingFrom.id, Number(moveTo))}
+                disabled={deleting || (movingFrom.productCount > 0 && moveTo === '')}
+                onClick={() => destroy(
+                  movingFrom.id,
+                  movingFrom.productCount > 0 ? Number(moveTo) : undefined,
+                )}
               >
-                {deleting ? '...' : t('moveAndDelete')}
+                {deleting
+                  ? '...'
+                  : movingFrom.productCount > 0 ? t('moveAndDelete') : t('deleteCategory')}
               </button>
               <button className="btn btn-outline btn-full" disabled={deleting} onClick={() => setMovingFrom(null)}>
                 {t('cancel')}

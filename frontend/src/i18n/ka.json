@@ -229,5 +229,7 @@
   "moveProductsTo": "გადაიტანეთ პროდუქტები",
   "chooseCategory": "აირჩიეთ კატეგორია",
   "moveAndDelete": "გადატანა და წაშლა",
-  "moveProductsGenderWarning": "ეს კატეგორია სხვა ჯგუფისაა, ამიტომ პროდუქტებიც იქ გადავა."
+  "moveProductsGenderWarning": "ეს კატეგორია სხვა ჯგუფისაა, ამიტომ პროდუქტებიც იქ გადავა.",
+  "deleteCategoryTitle": "წავშალოთ ეს კატეგორია?",
+  "deleteCategoryIntro": "„{name}“ არ შეიცავს პროდუქტებს. მოქმედება ვერ გაუქმდება."
 }

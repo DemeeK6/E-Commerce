@@ -229,5 +229,7 @@
   "moveProductsTo": "Move the products to",
   "chooseCategory": "Choose a category",
   "moveAndDelete": "Move and delete",
-  "moveProductsGenderWarning": "That category is for a different group, so the products will move there too."
+  "moveProductsGenderWarning": "That category is for a different group, so the products will move there too.",
+  "deleteCategoryTitle": "Delete this category?",
+  "deleteCategoryIntro": "\"{name}\" has no products in it. This cannot be undone."
 }
